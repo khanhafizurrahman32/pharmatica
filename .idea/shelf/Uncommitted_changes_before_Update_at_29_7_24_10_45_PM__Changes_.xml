@@ -1,0 +1,14 @@
+<changelist name="Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]" date="1722271553568" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 29/7/24 10:45 PM [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="minio/.minio.sys/buckets/.bloomcycle.bin/xl.meta" />
+    <option name="AFTER_PATH" value="minio/.minio.sys/buckets/.bloomcycle.bin/xl.meta" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]/xl.meta" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="minio/.minio.sys/buckets/.usage.json/xl.meta" />
+    <option name="AFTER_PATH" value="minio/.minio.sys/buckets/.usage.json/xl.meta" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]/xl1.meta" />
+  </binary>
+</changelist>
