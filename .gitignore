@@ -50,3 +50,4 @@ serverless/.aws-sam
  nbdist/
  .nb-gradle/
  ssh-sit/
+ minio/
