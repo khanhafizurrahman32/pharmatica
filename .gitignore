@@ -37,7 +37,7 @@ serverless/.aws-sam
  .springBeans
 
  ### IntelliJ IDEA ###
- .idea/
+ /.idea/
  *.iws
  *.iml
  *.ipr
@@ -50,4 +50,4 @@ serverless/.aws-sam
  nbdist/
  .nb-gradle/
  ssh-sit/
- minio/
+ /.minio/

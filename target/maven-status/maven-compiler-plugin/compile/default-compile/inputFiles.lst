@@ -1,0 +1,6 @@
+/home/riad/workstation/pharamtic/PharmaticB/src/main/java/org/example/pharmaticb/Models/Request/UploadFileRequest.java
+/home/riad/workstation/pharamtic/PharmaticB/src/main/java/org/example/pharmaticb/PharmaticBApplication.java
+/home/riad/workstation/pharamtic/PharmaticB/src/main/java/org/example/pharmaticb/configuration/MinioConfig.java
+/home/riad/workstation/pharamtic/PharmaticB/src/main/java/org/example/pharmaticb/controller/FileUploadController.java
+/home/riad/workstation/pharamtic/PharmaticB/src/main/java/org/example/pharmaticb/service/minio/MinioService.java
+/home/riad/workstation/pharamtic/PharmaticB/src/main/java/org/example/pharmaticb/utilities/Exception/ServiceError.java
