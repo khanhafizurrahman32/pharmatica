@@ -51,3 +51,4 @@ serverless/.aws-sam
  .nb-gradle/
  ssh-sit/
  minio/
+ Notes/
