@@ -34,7 +34,6 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return this.accessTokenExpiration;
     }
 
-
     private String createToken(Map<String, Object> claims, String username, long expiration) {
         return JWT.create()
                 .withIssuer(TOKEN_PROVIDER)

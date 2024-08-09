@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
-import org.example.pharmaticb.repositories.auth.UserRepository;
+import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.Exception.RegistrationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +16,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequiredArgsConstructor
 public class RegistrationServiceImpl implements RegistrationService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
     private final JwtTokenService jwtTokenService;
 
 
@@ -30,12 +29,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private Mono<LoginResponse> getLoginResponseMono(LoginRequest request) {
-        User user = User
-                .builder()
-                .customerName(request.getUserName())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
-        return userRepository.save(user)
+        return userService.save(request)
                 .thenReturn(LoginResponse.builder()
                         .accessToken(jwtTokenService.generateAccessToken(request.getUserName()))
                         .expiresIn(jwtTokenService.getExpiredTime())
@@ -43,6 +37,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private Mono<User> findByCustomerName(String customerName) {
-        return userRepository.findByCustomerName(customerName);
+        return userService.findByCustomerName(customerName);
     }
 }
