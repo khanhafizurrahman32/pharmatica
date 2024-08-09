@@ -2,11 +2,12 @@ package org.example.pharmaticb.service.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import org.example.pharmaticb.Models.DB.User;
+import org.example.pharmaticb.utilities.SecurityUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 
 @Service
 public class JwtTokenServiceImpl implements JwtTokenService {
@@ -24,20 +25,39 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     @Override
-    public String generateAccessToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username, accessTokenExpiration);
+    public String generateAccessToken(User user) {
+        return createToken(user, accessTokenExpiration, getRolesArray(user));
     }
 
     @Override
-    public int getExpiredTime() {
+    public String generateRefreshToken(User user) {
+        return createToken(user, refreshTokenExpiration, getRolesArray(user));
+    }
+
+    @Override
+    public int getAccessExpiredTime() {
         return this.accessTokenExpiration;
     }
 
-    private String createToken(Map<String, Object> claims, String username, long expiration) {
+    @Override
+    public int getRefreshExpiredTime() {
+        return this.refreshTokenExpiration;
+    }
+
+    private String createToken(User user, long expiration, String [] rolesArray) {
+
         return JWT.create()
                 .withIssuer(TOKEN_PROVIDER)
-                .withAudience(username)
+                .withAudience(user.getCustomerName())
+                .withArrayClaim(SecurityUtil.TOKEN_ROLE, rolesArray)
+                .withIssuedAt(new Date(System.currentTimeMillis()))
+                .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
                 .sign(algorithm);
+    }
+
+    private String [] getRolesArray(User user) {
+        return user.getRoles().stream()
+                .map(Enum::name)
+                .toArray(String[]::new);
     }
 }

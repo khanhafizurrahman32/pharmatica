@@ -1,4 +1,4 @@
-package org.example.pharmaticb.utilities.security.rsa;
+package org.example.pharmaticb.service.security.rsa;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;

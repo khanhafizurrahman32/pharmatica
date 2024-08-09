@@ -1,4 +1,4 @@
-package org.example.pharmaticb.utilities.security;
+package org.example.pharmaticb.service.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -10,40 +10,44 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.service.auth.JwtTokenServiceImpl.TOKEN_PROVIDER;
+import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_CUSTOMER_NAME;
+import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_ROLE;
 
 @Slf4j
 @AllArgsConstructor
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
-    private static final String DEFAULT_ROLE = "ROLE_USER";
     private final Algorithm tokenAlgorithm;
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         var authToken = authentication.getCredentials().toString();
-        if (verifyToken(authToken)) {
-            return Mono.just(new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), null, getAuthorities()));
+        DecodedJWT jwt = getDecodedJwtToken(authToken);
+        String customerName = jwt.getAudience().get(0);
+        if (StringUtils.hasText(customerName)) {
+            return Mono.just(new UsernamePasswordAuthenticationToken(customerName, null, getAuthorities(jwt.getClaim(TOKEN_ROLE).asList(String.class))));
         }
-        return null;
+        return Mono.just(authentication);
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(() -> DEFAULT_ROLE);
+    private Collection<? extends GrantedAuthority> getAuthorities(List<String> roles) {
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
-    private boolean verifyToken(String authToken) {
+    private DecodedJWT getDecodedJwtToken(String authToken) {
         JWTVerifier verifier = JWT.require(this.tokenAlgorithm).withIssuer(TOKEN_PROVIDER).build();
-        DecodedJWT jwt = verifier.verify(authToken);
-
-        List<String> audiences = jwt.getAudience();
-        return !ObjectUtils.isEmpty(audiences);
+        return verifier.verify(authToken);
     }
 }

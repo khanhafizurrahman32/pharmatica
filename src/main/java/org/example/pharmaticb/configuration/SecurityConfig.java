@@ -3,16 +3,14 @@ package org.example.pharmaticb.configuration;
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pharmaticb.utilities.security.AuthenticationManager;
-import org.example.pharmaticb.utilities.security.ReactiveJWTTokenAuthenticationFilter;
-import org.example.pharmaticb.utilities.security.SecurityContextRepository;
+import org.example.pharmaticb.service.security.AuthenticationManager;
+import org.example.pharmaticb.service.security.jwt.ReactiveJWTTokenAuthenticationFilter;
+import org.example.pharmaticb.service.security.SecurityContextRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import reactor.core.publisher.Mono;
 
@@ -50,8 +48,9 @@ public class SecurityConfig {
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange((exchanges) ->
-                        exchanges.pathMatchers(openApis.toArray(new String[0]))
-                                .permitAll()
+                        exchanges.pathMatchers(openApis.toArray(new String[0])).permitAll()
+                                .pathMatchers("/admin/**").hasRole("ADMIN")
+                                .pathMatchers("/customer/**").hasRole("USER")
                                 .anyExchange()
                                 .authenticated()
                 )

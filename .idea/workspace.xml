@@ -5,95 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07ff34da-ba11-44c0-a852-b206fdf935c6" name="Changes" comment="git commit -m &quot;Create jwt token, registration controller, service&quot;">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/controller/auth/AuthenticationController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/dto/records/TokenResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/AuthenticationService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/AuthenticationServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/user/UserService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/user/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]/shelved.patch" beforeDir="false" afterPath="$PROJECT_DIR$/Notes/draft.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM_[Changes]/xl1.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_7_24_10_45_PM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/HELP.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/buckets/.bloomcycle.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/buckets/.usage.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/config/config.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/config/iam/format.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/config/iam/service-accounts/Qpvg0UaKKe2SHim2NzwL/identity.json/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/format.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/pool.bin/xl.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/.trash/013d74fd-a4e5-4e2b-b8d0-b742e4c4e8f9/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/.trash/0768e70d-383c-4ea3-b2b7-3451092c5178/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/.trash/24863927-f186-43ec-ae02-22176a993808/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/.trash/26019e08-6286-4235-ab28-b7f6c131e3b1/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/.trash/737810ca-b059-489d-b83a-88c45f0c2783/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/.trash/d34c08e3-cbba-48c1-9f51-0325d6a316ad/xl.meta.bkp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/minio/.minio.sys/tmp/aa567a76-5211-4b98-8083-a614858a064c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/DB/User.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Request/CommonRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Request/UploadFileRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Response/UploadFileResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Response/auth/LoginResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/PharmaticBApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/AppConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/MinioConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/SecurityConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/controller/BaseController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/controller/FileUploadController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/controller/auth/RegistrationController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/repositories/auth/UserRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/RegistrationService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/RegistrationServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileUploadService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileUploadServiceImpl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/minio/MinioService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/DateUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/Exception/RegistrationException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/Exception/ServiceError.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/AuthenticationManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/jwt/JwtTokenHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/rsa/RsaUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-dev.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/pharmaticb/PharmaticBApplicationTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application-dev.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/UploadFileRequest$UploadFileRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/UploadFileRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/UploadFileResponse$UploadFileResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/UploadFileResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/PharmaticBApplication.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/MinioConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/controller/BaseController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/controller/FileUploadController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileUploadService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileUploadServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/minio/MinioService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/Exception/ServiceError.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/Role.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/SecurityUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/DB/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/DB/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Response/auth/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Response/auth/LoginResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/AppConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/AppConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/AuthenticationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/AuthenticationServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/RegistrationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/RegistrationServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/AuthenticationManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/AuthenticationManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/jwt/ReactiveJWTTokenAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/SecurityContextRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/SecurityContextRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/jwt/JwtTokenHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/jwt/JwtTokenHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/rsa/RsaUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/rsa/RsaUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User$UserBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User$UserBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse$LoginResponseBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse$LoginResponseBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/AppConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/AppConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/SecurityConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/RegistrationServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/RegistrationServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/AuthenticationManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/SecurityContextRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/jwt/JwtTokenHelper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/rsa/RsaUtil.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,8 +47,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="Class" />
         <option value="Record" />
+        <option value="Class" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -139,32 +83,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Downloaded.Files.Path.Enabled": "false",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "false",
-    "Repository.Attach.Sources": "false",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.PharmaticBApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/usr/lib/jvm/java-17-openjdk-amd64",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.PharmaticBApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/usr/lib/jvm/java-17-openjdk-amd64&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="org.example.pharmaticb.service.file" />
@@ -204,7 +148,7 @@
       <workItem from="1722605243805" duration="1393000" />
       <workItem from="1722606648641" duration="722000" />
       <workItem from="1722607381566" duration="6941000" />
-      <workItem from="1722654841104" duration="70741000" />
+      <workItem from="1722654841104" duration="81579000" />
     </task>
     <task id="LOCAL-00001" summary="git commit -m &quot;Create jwt token, registration controller, service&quot;">
       <option name="closed" value="true" />

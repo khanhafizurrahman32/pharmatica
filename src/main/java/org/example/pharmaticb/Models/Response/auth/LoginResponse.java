@@ -15,7 +15,8 @@ import java.io.Serializable;
 public class LoginResponse implements Serializable {
     private String accessToken;
     private String refreshToken;
-    private int expiresIn;
+    private int accessExpiredIn;
+    private int refreshExpiredIn;
     @Builder.Default
     private String updateTime = DateUtil.formattedDateTime();
 }

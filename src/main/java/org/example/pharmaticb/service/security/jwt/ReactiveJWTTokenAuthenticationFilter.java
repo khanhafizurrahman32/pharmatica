@@ -1,4 +1,4 @@
-package org.example.pharmaticb.utilities.security;
+package org.example.pharmaticb.service.security.jwt;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

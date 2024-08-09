@@ -1,8 +1,7 @@
-package org.example.pharmaticb.utilities.security.jwt;
+package org.example.pharmaticb.service.security.jwt;
 
 import com.auth0.jwt.algorithms.Algorithm;
-import org.example.pharmaticb.utilities.security.rsa.RsaUtil;
-import org.springframework.beans.factory.annotation.Value;
+import org.example.pharmaticb.service.security.rsa.RsaUtil;
 import org.springframework.util.StringUtils;
 
 import java.security.GeneralSecurityException;

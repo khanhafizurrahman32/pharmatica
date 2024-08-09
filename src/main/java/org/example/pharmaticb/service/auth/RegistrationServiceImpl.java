@@ -8,7 +8,6 @@ import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.Exception.RegistrationException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -30,9 +29,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private Mono<LoginResponse> getLoginResponseMono(LoginRequest request) {
         return userService.save(request)
-                .thenReturn(LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(request.getUserName()))
-                        .expiresIn(jwtTokenService.getExpiredTime())
+                .map(user -> LoginResponse.builder()
+                        .accessToken(jwtTokenService.generateAccessToken(user))
+                        .refreshToken(jwtTokenService.generateRefreshToken(user))
+                        .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
+                        .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());
     }
 

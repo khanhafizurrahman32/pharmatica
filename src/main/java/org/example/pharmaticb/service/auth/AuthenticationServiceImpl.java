@@ -24,8 +24,10 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Username not found")))
                 .map(userDetails -> LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(request.getUserName()))
-                        .expiresIn(jwtTokenService.getExpiredTime())
+                        .accessToken(jwtTokenService.generateAccessToken(userDetails))
+                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails))
+                        .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
+                        .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());
     }
 }
