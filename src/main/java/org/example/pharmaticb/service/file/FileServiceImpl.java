@@ -1,7 +1,7 @@
 package org.example.pharmaticb.service.file;
 
 import lombok.RequiredArgsConstructor;
-import org.example.pharmaticb.service.minio.MinioService;
+import org.example.pharmaticb.service.MinioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
