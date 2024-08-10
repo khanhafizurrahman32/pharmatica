@@ -23,4 +23,7 @@ public class User {
     private String customerName;
     private String password;
     private Set<Role> roles;
+    private String email;
+    private String phoneNumber;
+    private String imageUniqueId;
 }

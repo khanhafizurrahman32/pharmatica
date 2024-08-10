@@ -4,39 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="07ff34da-ba11-44c0-a852-b206fdf935c6" name="Changes" comment="git commit -m &quot;Create jwt token, registration controller, service&quot;">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/Role.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/SecurityUtil.java" afterDir="false" />
+    <list default="true" id="07ff34da-ba11-44c0-a852-b206fdf935c6" name="Changes" comment="git commit -m &quot;Fix authentication response + Refactor code + Fix security logic&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/DB/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/DB/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Response/auth/LoginResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Response/auth/LoginResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/AppConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/AppConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/configuration/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/AuthenticationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/AuthenticationServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/RegistrationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/auth/RegistrationServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/AuthenticationManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/AuthenticationManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/jwt/ReactiveJWTTokenAuthenticationFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/SecurityContextRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/SecurityContextRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/jwt/JwtTokenHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/jwt/JwtTokenHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/security/rsa/RsaUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/security/rsa/RsaUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User$UserBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User$UserBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse$LoginResponseBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse$LoginResponseBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Response/auth/LoginResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/AppConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/AppConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/SecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/RegistrationServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/RegistrationServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/AuthenticationManager.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter$2.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/ReactiveJWTTokenAuthenticationFilter.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/SecurityContextRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/jwt/JwtTokenHelper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/security/rsa/RsaUtil.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Request/UploadFileRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Request/UploadFileRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Request/auth/LoginRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/Models/Request/auth/LoginRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/controller/FileUploadController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/controller/FileUploadController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileUploadService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileUploadService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileUploadServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/file/FileUploadServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/minio/MinioService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/service/minio/MinioService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/DateUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/pharmaticb/utilities/DateUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-dev.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-dev.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application-dev.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application-dev.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User$UserBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/DB/User.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/UploadFileRequest$UploadFileRequestBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/UploadFileRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/auth/LoginRequest$LoginRequestBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/auth/LoginRequest$LoginRequestBuilderImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/Models/Request/auth/LoginRequest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/configuration/SecurityConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/controller/FileUploadController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/auth/JwtTokenServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileUploadService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/file/FileUploadServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/minio/MinioService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/service/security/AuthenticationManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/pharmaticb/utilities/DateUtil.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +146,7 @@
       <workItem from="1722605243805" duration="1393000" />
       <workItem from="1722606648641" duration="722000" />
       <workItem from="1722607381566" duration="6941000" />
-      <workItem from="1722654841104" duration="81579000" />
+      <workItem from="1722654841104" duration="95916000" />
     </task>
     <task id="LOCAL-00001" summary="git commit -m &quot;Create jwt token, registration controller, service&quot;">
       <option name="closed" value="true" />
@@ -166,7 +164,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723105054465</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="git commit -m &quot;Fix authentication response + Refactor code + Fix security logic&quot;">
+      <option name="closed" value="true" />
+      <created>1723216812482</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1723216812482</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -185,7 +191,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="git commit -m &quot;Create jwt token, registration controller, service&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="git commit -m &quot;Create jwt token, registration controller, service&quot;" />
+    <MESSAGE value="git commit -m &quot;Fix authentication response + Refactor code + Fix security logic&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="git commit -m &quot;Fix authentication response + Refactor code + Fix security logic&quot;" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -17,4 +17,12 @@ public class DateUtil {
     public static ZonedDateTime getZonedDateTime() {
         return ZonedDateTime.ofInstant(Instant.now(), ZONE_ID_DHAKA);
     }
+
+    public static long currentTimeInSecond() {
+        return currentTimeInMillisecond() / 1000;
+    }
+
+    private static long currentTimeInMillisecond() {
+        return Instant.now().toEpochMilli();
+    }
 }

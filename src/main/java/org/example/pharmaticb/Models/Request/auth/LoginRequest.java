@@ -6,10 +6,12 @@ import org.example.pharmaticb.Models.Request.CommonRequest;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class LoginRequest extends CommonRequest implements Serializable {
     private String password;
 }

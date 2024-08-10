@@ -1,9 +1,7 @@
 package org.example.pharmaticb.Models.Request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -11,11 +9,13 @@ import javax.validation.constraints.Size;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class UploadFileRequest implements Serializable {
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class UploadFileRequest extends CommonRequest implements Serializable {
 
     @NotNull(message = ServiceError.INVALID_REQUEST)
     @Size(min = 1000, max = 4096000, message = ServiceError.INVALID_REQUEST)
