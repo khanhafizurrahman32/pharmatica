@@ -33,5 +33,5 @@ dist/
 nbdist/
 .nb-gradle/
 ssh-sit/
-.minio/
+./minio/
 Notes/
