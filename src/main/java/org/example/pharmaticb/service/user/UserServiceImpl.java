@@ -3,7 +3,7 @@ package org.example.pharmaticb.service.user;
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
-import org.example.pharmaticb.repositories.auth.UserRepository;
+import org.example.pharmaticb.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;

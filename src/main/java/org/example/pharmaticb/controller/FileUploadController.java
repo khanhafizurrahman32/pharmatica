@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 
-@Slf4j
 @BaseController
 @RestController
 @RequiredArgsConstructor

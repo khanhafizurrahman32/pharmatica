@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @Data
@@ -16,14 +17,19 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("user")
-public class User {
+public class User implements Serializable {
     @Id
     @Transient
-    private Long id;
+    private long id;
     private String customerName;
     private String password;
     private Set<Role> roles;
     private String email;
-    private String phoneNumber;
+    private String phone;
+    private String address;
+    private String bloodGroup;
+    private String gender;
+    private int age;
     private String imageUniqueId;
+    private String profilePictureUrl;
 }

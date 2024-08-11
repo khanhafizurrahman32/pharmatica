@@ -1,4 +1,4 @@
-package org.example.pharmaticb.repositories.auth;
+package org.example.pharmaticb.repositories;
 
 import org.example.pharmaticb.Models.DB.User;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;

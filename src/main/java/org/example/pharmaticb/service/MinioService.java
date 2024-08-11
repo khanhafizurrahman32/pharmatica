@@ -37,7 +37,5 @@ public class MinioService {
         } catch (Exception ex) {
             log.error("File upload error" + ex.getMessage());
         }
-
-
     }
 }
