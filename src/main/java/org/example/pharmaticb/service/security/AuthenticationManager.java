@@ -31,6 +31,7 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
+        log.info("authenticate");
         var authToken = authentication.getCredentials().toString();
         DecodedJWT jwt = getDecodedJwtToken(authToken);
         String customerName = jwt.getAudience().get(0);

@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Set;
+
+import static org.example.pharmaticb.utilities.Role.USER;
 
 @Service
 public class JwtTokenServiceImpl implements JwtTokenService {
@@ -26,7 +29,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     @Override
     public String generateAccessToken(User user) {
-        return createToken(user, accessTokenExpiration, getRolesArray(user));
+        return  createToken(user, accessTokenExpiration, getRolesArray(user));
     }
 
     @Override
@@ -56,7 +59,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     private String [] getRolesArray(User user) {
-        return user.getRoles().stream()
+        return Set.of(USER).stream()
                 .map(Enum::name)
                 .toArray(String[]::new);
     }

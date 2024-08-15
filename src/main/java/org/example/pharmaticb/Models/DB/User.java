@@ -16,7 +16,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("user")
+@Table("users")
 public class User implements Serializable {
     @Id
     @Transient

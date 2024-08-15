@@ -1,5 +1,6 @@
 package org.example.pharmaticb.service.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_PREFIX;
 
+@Slf4j
 public class SecurityContextRepository implements ServerSecurityContextRepository {
     private final AuthenticationManager authenticationManager;
     private final List<String> openApis;
@@ -36,6 +38,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
+        log.info("load");
         ServerHttpRequest request = exchange.getRequest();
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX) && !openApis.contains(extractApiPath(exchange))) {
@@ -50,6 +53,8 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     private String extractApiPath(ServerWebExchange exchange) {
         RequestPath path = exchange.getRequest().getPath();
-        return path.value().replace(path.contextPath().value(), "");
+        String replace = path.value().replace(path.contextPath().value(), "");
+        log.info("replacce {}", replace);
+        return replace;
     }
 }

@@ -27,6 +27,7 @@ public class ReactiveJWTTokenAuthenticationFilter implements WebFilter {
     private List<String> whiteList;
 
     public ReactiveJWTTokenAuthenticationFilter() {
+        log.info("ReactiveJWTTokenAuthenticationFilter");
         this.whiteList = new ArrayList<>();
     }
 

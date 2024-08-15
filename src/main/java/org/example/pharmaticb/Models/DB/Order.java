@@ -11,7 +11,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("order")
+@Table("orders")
 public class Order implements Serializable {
     @Id
     @Generated
