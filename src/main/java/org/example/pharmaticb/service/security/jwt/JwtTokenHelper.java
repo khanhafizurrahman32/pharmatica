@@ -1,6 +1,7 @@
 package org.example.pharmaticb.service.security.jwt;
 
 import com.auth0.jwt.algorithms.Algorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.service.security.rsa.RsaUtil;
 import org.springframework.util.StringUtils;
 
@@ -8,6 +9,7 @@ import java.security.GeneralSecurityException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
+@Slf4j
 public class JwtTokenHelper {
 
     private final String rsaPublicKey;
@@ -30,7 +32,9 @@ public class JwtTokenHelper {
             if (StringUtils.hasText(this.rsaPrivateKey)) {
                 privateKey = (RSAPrivateKey) rsaUtil.getPrivateKey(this.rsaPrivateKey);
             }
-            return Algorithm.RSA512(publicKey, privateKey);
+            Algorithm algorithm = Algorithm.RSA512(publicKey, privateKey);
+            log.info("algorithm: {}", algorithm.getSigningKeyId());
+            return algorithm;
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         }

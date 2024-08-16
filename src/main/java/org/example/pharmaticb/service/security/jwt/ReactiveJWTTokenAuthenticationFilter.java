@@ -38,19 +38,19 @@ public class ReactiveJWTTokenAuthenticationFilter implements WebFilter {
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext -> (User)securityContext.getAuthentication().getPrincipal())
+                .map(securityContext -> (String)securityContext.getAuthentication().getPrincipal())
                 .flatMap(user -> {
                     if (ObjectUtils.isEmpty(user)) {
-                        return chain.filter(decorate(exchange, user));
+                        return chain.filter(decorate(exchange));
                     }
                     return chain.filter(exchange);
                 });
     }
 
-    private ServerWebExchange decorate(ServerWebExchange exchange, User user) {
+    private ServerWebExchange decorate(ServerWebExchange exchange) {
         final ServerHttpRequest decorated = new ServerHttpRequestDecorator(exchange.getRequest()) {
             @Override
-            public Flux<DataBuffer> getBody() {
+            public Flux<DataBuffer>   getBody() {
                 return super.getBody().collectList()
                         .flatMapMany(dataBuffers -> {
                             StringBuilder requestBody = new StringBuilder();
