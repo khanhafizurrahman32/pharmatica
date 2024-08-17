@@ -14,6 +14,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
@@ -25,7 +28,7 @@ import java.util.List;
 @EnableReactiveMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login");
+    private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login", "/api/auth/login");
     @Bean
     public AuthenticationManager authenticationManager(Algorithm tokenAlgorithm) {
         return new AuthenticationManager(tokenAlgorithm);
@@ -49,6 +52,20 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));  // Be cautious with "*" in production
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+
+    @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
                                                             AuthenticationManager authenticationManager,
                                                             SecurityContextRepository securityContextRepository) {
@@ -60,12 +77,12 @@ public class SecurityConfig {
                 .authorizeExchange((exchanges) ->
                         exchanges.pathMatchers(openApisArray ).permitAll()
                                 .pathMatchers("/admin/**").hasRole("ADMIN")
-                                .pathMatchers("/customer/**").hasRole("USER")
+                                .pathMatchers("/customer/**").hasRole("https://13d8-61-247-182-213.ngrok-free.app/pharmatica/api/reg/loginUSER")
                                 .anyExchange()
                                 .authenticated()
                 )
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .exceptionHandling(exceptionHandlingSpec -> {

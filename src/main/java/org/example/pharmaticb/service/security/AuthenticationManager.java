@@ -3,9 +3,11 @@ package org.example.pharmaticb.service.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -49,6 +51,11 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     private DecodedJWT getDecodedJwtToken(String authToken) {
         JWTVerifier verifier = JWT.require(this.tokenAlgorithm).withIssuer(TOKEN_PROVIDER).build();
-        return verifier.verify(authToken);
+        try {
+            return verifier.verify(authToken);
+        } catch (JWTVerificationException ex) {
+            log.error("Jwt verifier token {}", ex.toString());
+            throw  new RuntimeException(HttpStatus.UNAUTHORIZED.name(), ex);
+        }
     }
 }

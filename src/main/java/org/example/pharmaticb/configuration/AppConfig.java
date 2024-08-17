@@ -2,6 +2,7 @@ package org.example.pharmaticb.configuration;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
+import org.example.pharmaticb.exception.ReactiveErrorResponseBuilder;
 import org.example.pharmaticb.service.security.jwt.JwtTokenHelper;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,11 @@ public class AppConfig {
     @Bean
     public ModelMapper getModelMapper() {
         return new ModelMapper();
+    }
+
+    @Bean
+    public ReactiveErrorResponseBuilder reactiveErrorResponseBuilder() {
+        return new ReactiveErrorResponseBuilder();
     }
 
 }
