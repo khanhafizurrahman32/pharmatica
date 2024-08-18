@@ -12,5 +12,5 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UploadFileResponse implements Serializable {
-    private String profileImageUrl;
+    private String fileUrl;
 }

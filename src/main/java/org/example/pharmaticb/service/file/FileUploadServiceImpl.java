@@ -20,15 +20,15 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final UserService userService;
 
     @Override
-    public Mono<UploadFileResponse> uploadFile(UploadFileRequest request, User user) {
-        return userService.findByCustomerName(request.getUserName())
+    public Mono<UploadFileResponse> uploadFile(UploadFileRequest request, String customerName) {
+        return userService.findByCustomerName(customerName)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Username not found")))
                 .map(currentUser -> {
                     var imageUniqueId = "" + DateUtil.currentTimeInSecond();
-                    user.setImageUniqueId(imageUniqueId);
-                    fileService.uploadFile(user.getCustomerName(), request.getFile(), request.getContentType());
+                    currentUser.setImageUniqueId(imageUniqueId);
+                    fileService.uploadFile(currentUser.getCustomerName(), request.getFile(), request.getContentType());
                     return UploadFileResponse.builder()
-                            .profileImageUrl(fileService.getProfileImageUrl(getProfileImageName(currentUser)))
+                            .fileUrl(fileService.getProfileImageUrl(currentUser.getCustomerName()))
                             .build();
                 });
     }

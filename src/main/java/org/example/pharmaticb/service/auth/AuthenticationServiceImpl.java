@@ -3,8 +3,11 @@ package org.example.pharmaticb.service.auth;
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
+import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.service.user.UserService;
+import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,10 +25,10 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     public Mono<LoginResponse> login(LoginRequest request, HttpHeaders httpHeaders) {
         return userService.findByCustomerName(request.getUserName())
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Username not found")))
+                .switchIfEmpty(Mono.error(new InternalException("Username not found", HttpStatus.BAD_REQUEST, ServiceError.INVALID_REQUEST)))
                 .map(userDetails -> LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(userDetails))
-                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails))
+                        .accessToken(jwtTokenService.generateAccessToken(userDetails, request))
+                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails, request))
                         .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
                         .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());

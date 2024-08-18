@@ -5,17 +5,14 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.example.pharmaticb.Models.DB.User;
+import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.utilities.SecurityUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.Set;
-
-import static org.example.pharmaticb.utilities.Role.USER;
 
 @Service
 public class JwtTokenServiceImpl implements JwtTokenService {
@@ -36,13 +33,13 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     @Override
-    public String generateAccessToken(User user) {
-        return  createToken(user, accessTokenExpiration, getRolesArray(user));
+    public String generateAccessToken(User user, LoginRequest request) {
+        return createToken(user, accessTokenExpiration, getRolesArray(request.getRole()));
     }
 
     @Override
-    public String generateRefreshToken(User user) {
-        return createToken(user, refreshTokenExpiration, getRolesArray(user));
+    public String generateRefreshToken(User user, LoginRequest request) {
+        return createToken(user, refreshTokenExpiration, getRolesArray(request.getRole()));
     }
 
     @Override
@@ -70,10 +67,8 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         }
     }
 
-    private String [] getRolesArray(User user) {
-        return Set.of(USER).stream()
-                .map(Enum::name)
-                .toArray(String[]::new);
+    private String [] getRolesArray(String role) {
+        return new String[] {role};
     }
 
     private Key getSignInKey() {

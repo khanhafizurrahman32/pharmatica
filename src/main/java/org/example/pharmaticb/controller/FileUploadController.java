@@ -17,12 +17,13 @@ import javax.validation.Valid;
 @BaseController
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class FileUploadController {
     private final FileUploadService fileUploadService;
 
-    @PostMapping(value = "/settings/upload-image")
+    @PostMapping(value = "/settings/upload-file")
     public Mono<UploadFileResponse> uploadFile(@Valid @RequestBody UploadFileRequest request, Authentication authentication) {
-        return fileUploadService.uploadFile(request, (User) authentication.getPrincipal());
+        log.info("String: {}", (String) authentication.getPrincipal());
+        return fileUploadService.uploadFile(request, (String) authentication.getPrincipal());
     }
-
 }
