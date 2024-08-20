@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.security.SecureRandom;
+
 @Configuration
 @RequiredArgsConstructor
 public class AppConfig {
@@ -36,6 +38,11 @@ public class AppConfig {
     @Bean
     public ReactiveErrorResponseBuilder reactiveErrorResponseBuilder() {
         return new ReactiveErrorResponseBuilder();
+    }
+
+    @Bean
+    SecureRandom secureRandom() {
+        return new SecureRandom();
     }
 
 }

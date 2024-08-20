@@ -5,11 +5,11 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class InternalException extends RuntimeException {
-    private HttpStatus status;
-    private String message;
-    private String code;
+    private final HttpStatus status;
+    private final String message;
+    private final String code;
 
-    public InternalException(String message, HttpStatus status, String code) {
+    public InternalException(HttpStatus status, String message, String code) {
         super(message);
         this.status = status;
         this.code = code;
