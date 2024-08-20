@@ -49,127 +49,127 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .cast(LoginResponse.class);
     }
 
-    @Override
-    public Mono<OtpResponse> sendOtp(OtpRequest request, HttpHeaders httpHeaders) {
-        return userRepository.findById(Long.valueOf(request.getPhone()))
-                .filter(user -> validateOtpRequest(request, user))
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, ServiceError.INVALID_REQUEST, USER_IS_NOT_ELIGIBLE_FOR_GETTING_OTP))))
-                .map(user -> {
-                    var otpCode = getOtpCode();
-                    var otpHash = generateHash(otpCode);
-
-                    var smsContent = String.format("otpsms", otpCode, otpHash);
-
-                    log.info("Final SMS Content: {}", smsContent);
-
-                    sendOtp(request, smsContent);
-                    return OtpResponse.builder().build();
-                });
-    }
-
-    @Override
-    public Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders) {
-        return userRepository.findById(Long.valueOf(request.getPhone()))
-                .filter(user -> validateOtpRequest(request, user))
-                .flatMap(user -> verifyOtp(request, user))
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Wrong otp", ServiceError.WRONG_OTP))));
-    }
-
-    private Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, User user) {
-        if (System.currentTimeMillis() > user.getOtpExpirationTime()) {
-            throw new InternalException(HttpStatus.INTERNAL_SERVER_ERROR, "OTP time exceeded", ServiceError.INVALID_REQUEST);
-        }
-
-        if (Objects.equal(user.getOtpCode(), Base64.getEncoder().encodeToString(request.getOtpCode().getBytes()))) {
-            return getVerifiedOtpResponse(user);
-        }
-
-        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Wrong otp", ServiceError.WRONG_OTP));
-    }
-
-    private Mono<VerifyOtpResponse> getVerifiedOtpResponse(User user) {
-        var pinNonce = getPinNonce();
-        updateUserTable(user, pinNonce);
-
-        return userRepository.save(user)
-                .map(ret -> VerifyOtpResponse.builder()
-                        .pinNonce(pinNonce)
-                        .build());
-    }
-
-    private void updateUserTable(User user, String pinNonce) {
-        user.setOtpStatus(true);
-        user.setPinNonce(pinNonce);
-
-    }
-
-    private String getPinNonce() {
-        return Long.toString(System.nanoTime());
-    }
-
-    private boolean validateOtpRequest(VerifyOtpRequest request, User user) {
-        return Utility.INITIATED.equals(user.getRegistrationStatus())
-                && !user.isOtpStatus();
-    }
-
-    private void sendOtp(OtpRequest request, String smsContent) {
-        // Todo: integrate sms gateway
-    }
-
-    private String getOtpCode() {
-        if (ProfileConstants.PROFILE_DEV.equals(profile) || ProfileConstants.PROFILE_SIT.equals(profile)) {
-            return "123456";
-        }
-        return getOtpCode(6, "content");//todo: cms
-    }
-
-    public static String generateHash(String otpCode) {
-        var otpSmsHourMinute = DateUtil.getOtpSmsHourMinute();
-
-        var rightShift = rightShift(otpSmsHourMinute + otpCode, 4);
-        var base64Data = Base64.getEncoder().encodeToString(rightShift.getBytes(StandardCharsets.UTF_8));
-
-        return leftShift(base64Data, 4);
-    }
-
-    private static String leftShift(String data, int position) {
-        if (data.length() <= position) return data;
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        String firstPart = data.substring(position);
-        String lastPart = data.substring(0, position);
-
-        stringBuilder.append(firstPart).append(lastPart);
-
-        return stringBuilder.toString();
-    }
-
-    public static String rightShift(String data, int position) {
-        if (data.length() <= position) return data;
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        String firstPart = data.substring(data.length() - position);
-        String lastPart = data.substring(0, data.length() - position);
-
-        stringBuilder.append(firstPart).append(lastPart);
-
-        return stringBuilder.toString();
-    }
-
-    private String getOtpCode(int length, String possible) {
-        StringBuilder otpCode = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            otpCode.append(possible.charAt((int) Math.floor(this.secureRandom.nextDouble() * possible.length())));
-        }
-        return otpCode.toString();
-    }
-
-    private boolean validateOtpRequest(OtpRequest request, User user) {
-//        return Utility.INITIATED.equals(user.getPhone()) && !user.isOtpStatus();
-        return false;
-    }
+//    @Override
+//    public Mono<OtpResponse> sendOtp(OtpRequest request, HttpHeaders httpHeaders) {
+//        return userRepository.findById(Long.valueOf(request.getPhone()))
+//                .filter(user -> validateOtpRequest(request, user))
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, ServiceError.INVALID_REQUEST, USER_IS_NOT_ELIGIBLE_FOR_GETTING_OTP))))
+//                .map(user -> {
+//                    var otpCode = getOtpCode();
+//                    var otpHash = generateHash(otpCode);
+//
+//                    var smsContent = String.format("otpsms", otpCode, otpHash);
+//
+//                    log.info("Final SMS Content: {}", smsContent);
+//
+//                    sendOtp(request, smsContent);
+//                    return OtpResponse.builder().build();
+//                });
+//    }
+//
+//    @Override
+//    public Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders) {
+//        return userRepository.findById(Long.valueOf(request.getPhone()))
+//                .filter(user -> validateOtpRequest(request, user))
+//                .flatMap(user -> verifyOtp(request, user))
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Wrong otp", ServiceError.WRONG_OTP))));
+//    }
+//
+//    private Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, User user) {
+//        if (System.currentTimeMillis() > user.getOtpExpirationTime()) {
+//            throw new InternalException(HttpStatus.INTERNAL_SERVER_ERROR, "OTP time exceeded", ServiceError.INVALID_REQUEST);
+//        }
+//
+//        if (Objects.equal(user.getOtpCode(), Base64.getEncoder().encodeToString(request.getOtpCode().getBytes()))) {
+//            return getVerifiedOtpResponse(user);
+//        }
+//
+//        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Wrong otp", ServiceError.WRONG_OTP));
+//    }
+//
+//    private Mono<VerifyOtpResponse> getVerifiedOtpResponse(User user) {
+//        var pinNonce = getPinNonce();
+//        updateUserTable(user, pinNonce);
+//
+//        return userRepository.save(user)
+//                .map(ret -> VerifyOtpResponse.builder()
+//                        .pinNonce(pinNonce)
+//                        .build());
+//    }
+//
+//    private void updateUserTable(User user, String pinNonce) {
+//        user.setOtpStatus(true);
+//        user.setPinNonce(pinNonce);
+//
+//    }
+//
+//    private String getPinNonce() {
+//        return Long.toString(System.nanoTime());
+//    }
+//
+//    private boolean validateOtpRequest(VerifyOtpRequest request, User user) {
+//        return Utility.INITIATED.equals(user.getRegistrationStatus())
+//                && !user.isOtpStatus();
+//    }
+//
+//    private void sendOtp(OtpRequest request, String smsContent) {
+//        // Todo: integrate sms gateway
+//    }
+//
+//    private String getOtpCode() {
+//        if (ProfileConstants.PROFILE_DEV.equals(profile) || ProfileConstants.PROFILE_SIT.equals(profile)) {
+//            return "123456";
+//        }
+//        return getOtpCode(6, "content");//todo: cms
+//    }
+//
+//    public static String generateHash(String otpCode) {
+//        var otpSmsHourMinute = DateUtil.getOtpSmsHourMinute();
+//
+//        var rightShift = rightShift(otpSmsHourMinute + otpCode, 4);
+//        var base64Data = Base64.getEncoder().encodeToString(rightShift.getBytes(StandardCharsets.UTF_8));
+//
+//        return leftShift(base64Data, 4);
+//    }
+//
+//    private static String leftShift(String data, int position) {
+//        if (data.length() <= position) return data;
+//
+//        StringBuilder stringBuilder = new StringBuilder();
+//
+//        String firstPart = data.substring(position);
+//        String lastPart = data.substring(0, position);
+//
+//        stringBuilder.append(firstPart).append(lastPart);
+//
+//        return stringBuilder.toString();
+//    }
+//
+//    public static String rightShift(String data, int position) {
+//        if (data.length() <= position) return data;
+//
+//        StringBuilder stringBuilder = new StringBuilder();
+//
+//        String firstPart = data.substring(data.length() - position);
+//        String lastPart = data.substring(0, data.length() - position);
+//
+//        stringBuilder.append(firstPart).append(lastPart);
+//
+//        return stringBuilder.toString();
+//    }
+//
+//    private String getOtpCode(int length, String possible) {
+//        StringBuilder otpCode = new StringBuilder();
+//        for (int i = 0; i < length; i++) {
+//            otpCode.append(possible.charAt((int) Math.floor(this.secureRandom.nextDouble() * possible.length())));
+//        }
+//        return otpCode.toString();
+//    }
+//
+//    private boolean validateOtpRequest(OtpRequest request, User user) {
+////        return Utility.INITIATED.equals(user.getPhone()) && !user.isOtpStatus();
+//        return false;
+//    }
 
     private Mono<LoginResponse> getLoginResponseMono(LoginRequest request) {
         return userService.save(request)

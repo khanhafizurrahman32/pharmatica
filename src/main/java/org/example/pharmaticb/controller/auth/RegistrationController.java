@@ -29,14 +29,14 @@ public class RegistrationController {
         return registrationService.registrationLogin(request, httpHeaders);
     }
 
-    @PostMapping("/otp/send")
-    public Mono<OtpResponse> sendOtp(@Valid @RequestBody OtpRequest request, @RequestHeader HttpHeaders httpHeaders) {
-        return registrationService.sendOtp(request, httpHeaders);
-    }
-
-    @PostMapping("/otp/verify")
-    public Mono<VerifyOtpResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request, @RequestHeader HttpHeaders httpHeaders) {
-        return registrationService.verifyOtp(request, httpHeaders);
-    }
+//    @PostMapping("/otp/send")
+//    public Mono<OtpResponse> sendOtp(@Valid @RequestBody OtpRequest request, @RequestHeader HttpHeaders httpHeaders) {
+//        return registrationService.sendOtp(request, httpHeaders);
+//    }
+//
+//    @PostMapping("/otp/verify")
+//    public Mono<VerifyOtpResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request, @RequestHeader HttpHeaders httpHeaders) {
+//        return registrationService.verifyOtp(request, httpHeaders);
+//    }
 
 }

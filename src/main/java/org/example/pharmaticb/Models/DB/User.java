@@ -24,8 +24,8 @@ public class User implements Serializable {
     private String customerName;
     private String password;
     private Set<Role> roles;
-    private boolean otpStatus;
-    private String otpCode;
+//    private boolean otpStatus;
+//    private String otpCode;
     private String email;
     private String phone;
     private String address;
@@ -34,7 +34,7 @@ public class User implements Serializable {
     private int age;
     private String imageUniqueId;
     private String profilePictureUrl;
-    private String registrationStatus;
-    private long otpExpirationTime;
-    private String pinNonce;
+//    private String registrationStatus;
+//    private long otpExpirationTime;
+//    private String pinNonce;
 }
