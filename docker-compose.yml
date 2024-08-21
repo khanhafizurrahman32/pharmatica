@@ -7,6 +7,8 @@ services:
     depends_on:
       - db
       - minio
+    networks:
+      - app-network
 
   db:
     image: postgres
@@ -17,6 +19,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - app-network
 
   minio:
     image: minio/minio
@@ -29,7 +33,12 @@ services:
     command: ["server", "/data"]
     volumes:
       - minio_data:/data
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
   minio_data:
+
+networks:
+  app-network:
