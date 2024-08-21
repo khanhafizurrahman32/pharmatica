@@ -1,6 +1,14 @@
 version: '3'
 services:
-  postgres:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - minio
+
+  db:
     image: postgres
     environment:
       POSTGRES_USER: postgres
@@ -10,6 +18,18 @@ services:
     ports:
       - "5432:5432"
 
+  minio:
+    image: minio/minio
+    ports:
+      - "9090:9090"
+    environment:
+      MINIO_ACCESS_KEY : minioadmin
+      MINIO_SECRET_KEY : minioadmin
+
+    command: ["server", "/data"]
+    volumes:
+      - minio_data:/data
 
 volumes:
   postgres_data:
+  minio_data:
