@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pharmaticb.exception.InternalException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,7 +56,7 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
             return verifier.verify(authToken);
         } catch (JWTVerificationException ex) {
             log.error("Jwt verifier token {}", ex.toString());
-            throw  new RuntimeException(HttpStatus.UNAUTHORIZED.name(), ex);
+            throw  new InternalException(HttpStatus.UNAUTHORIZED, "Code mismatch", "Code error");
         }
     }
 }

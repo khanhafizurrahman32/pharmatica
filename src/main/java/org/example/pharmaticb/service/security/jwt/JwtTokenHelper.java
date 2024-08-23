@@ -33,7 +33,6 @@ public class JwtTokenHelper {
                 privateKey = (RSAPrivateKey) rsaUtil.getPrivateKey(this.rsaPrivateKey);
             }
             Algorithm algorithm = Algorithm.RSA512(publicKey, privateKey);
-            log.info("algorithm: {}", algorithm.getSigningKeyId());
             return algorithm;
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
