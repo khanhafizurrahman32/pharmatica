@@ -8,6 +8,8 @@ import org.example.pharmaticb.utilities.Exception.ServiceError;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -16,16 +18,16 @@ import java.util.Date;
 @Builder
 public class OrderRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private String userId;
+    private long userId;
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private String productId;
+    private long productId;
     private String status;
     private double totalAmount;
     private int quantity;
     private double price;
     private double deliveryCharge;
     private String couponApplied;
-    private Date deliveryDate;
+    private LocalDate deliveryDate;
     private String paymentChannel;
     private String transactionId;
 

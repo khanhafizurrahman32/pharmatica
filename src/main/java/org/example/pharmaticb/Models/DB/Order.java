@@ -2,9 +2,12 @@ package org.example.pharmaticb.Models.DB;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -14,8 +17,7 @@ import java.util.Date;
 @Table("orders")
 public class Order implements Serializable {
     @Id
-    @Generated
-    private long id;
+    private Long id;
 //    FK
     private long userId;
 //    FK
@@ -26,7 +28,17 @@ public class Order implements Serializable {
     private double price;
     private double deliveryCharge;
     private String couponApplied;
-    private Date deliveryDate;
+    private LocalDate deliveryDate;
     private String paymentChannel;
     private String transactionId;
+    private Timestamp createdAt;
+
+    @Transient
+    @Builder.Default
+    private boolean newOrder = true;
+
+    public boolean isNewOrder() {
+        return this.newOrder || id == null;
+    }
+
 }

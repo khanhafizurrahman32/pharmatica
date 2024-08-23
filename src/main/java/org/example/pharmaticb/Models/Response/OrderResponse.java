@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -22,7 +23,7 @@ public class OrderResponse implements Serializable {
     private double price;
     private double deliveryCharge;
     private String couponApplied;
-    private Date deliveryDate;
+    private LocalDate deliveryDate;
     private String paymentChannel;
     private String transactionId;
 }
