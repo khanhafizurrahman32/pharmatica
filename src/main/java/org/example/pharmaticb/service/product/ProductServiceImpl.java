@@ -1,15 +1,18 @@
 package org.example.pharmaticb.service.product;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.ProductRequest;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
@@ -18,8 +21,18 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
-        return productRepository.save(convertDtoToDb(request))
-                .map(product -> ProductResponse.builder().productId(String.valueOf(product.getId())).build());
+        Product product = convertDtoToDb(request);
+        return productRepository.insertProduct(product.getProductName(), product.getPrice(), product.getImageUrl(), product.getCategoryId(),
+                product.getDiscount(), product.getBrand(), product.getExpires(), product.getCountryOfOrigin(),
+                product.getDescription(), product.getHowToUse(),product.getIngredients(), product.getStock(), product.getCoupons())
+                .map(id -> {
+                    product.setId(id);
+                    product.setNewProduct(true);
+                    return product;
+                })
+                .map(product1 -> mapper.map(product1, ProductResponse.class));
+//        return productRepository.save(product)
+//                .map(product -> ProductResponse.builder().productId(String.valueOf(product.getId())).build());
     }
 
     @Override
@@ -38,10 +51,34 @@ public class ProductServiceImpl implements ProductService{
     public Mono<ProductResponse> updateProduct(long id, ProductRequest request) {
         return productRepository.findById(id)
                 .flatMap(product -> {
-                    mapper.map(request, product);
-                    return productRepository.save(product)
-                            .map(product1 -> mapper.map(product1,ProductResponse.class));
-                });
+                    updateProductFromRequest(product, request);
+                    product.setNewProduct(false);
+                    return productRepository.save(product);
+                })
+                .map(product1 -> mapper.map(product1, ProductResponse.class));
+//        return productRepository.findById(id)
+//                .flatMap(product -> {
+//                    mapper.map(request, product);
+//                    return productRepository.save(product)
+//                            .map(product1 -> mapper.map(product1,ProductResponse.class));
+//                });
+    }
+
+    private void updateProductFromRequest(Product product, ProductRequest request) {
+        BeanUtils.copyProperties(request, product);
+//        product.setProductName(request.getProductName());
+//        product.setPrice(request.getPrice());
+//        product.setImageUrl(request.getImageUrl());
+//        product.setCategoryId(request.getCategoryId());
+//        product.setDiscount(request.getDiscount());
+//        product.setBrand(request.getBrand());
+//        product.setExpires(request.getExpires());
+//        product.setCountryOfOrigin(request.getCountryOfOrigin());
+//        product.setDescription(request.getDescription());
+//        product.setHowToUse(request.getHowToUse());
+//        product.setIngredients(request.getIngredients());
+//        product.setStock(request.getStock());
+//        product.setCoupons(request.getCoupons());
     }
 
     @Override

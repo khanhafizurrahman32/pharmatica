@@ -40,8 +40,4 @@ public class ProductController {
     public Mono<Void> deleteProduct(@Valid @PathVariable long id) {
         return productService.deleteProduct(id);
     }
-
-
-
-
 }
