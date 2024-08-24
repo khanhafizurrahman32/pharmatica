@@ -6,6 +6,7 @@ import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UploadFileRequest;
 import org.example.pharmaticb.Models.Response.UploadFileResponse;
 import org.example.pharmaticb.service.file.FileUploadService;
+import org.example.pharmaticb.utilities.Utility;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @BaseController
 @RestController
@@ -22,8 +24,7 @@ public class FileUploadController {
     private final FileUploadService fileUploadService;
 
     @PostMapping(value = "/settings/upload-file")
-    public Mono<UploadFileResponse> uploadFile(@Valid @RequestBody UploadFileRequest request, Authentication authentication) {
-        log.info("String: {}", (String) authentication.getPrincipal());
-        return fileUploadService.uploadFile(request, (String) authentication.getPrincipal());
+    public Mono<UploadFileResponse> uploadFile(@Valid @RequestBody UploadFileRequest request, Principal principal) {
+        return fileUploadService.uploadFile(request, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 }

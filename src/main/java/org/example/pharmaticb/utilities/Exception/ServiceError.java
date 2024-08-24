@@ -7,5 +7,6 @@ public final class ServiceError {
     public static final String WRONG_OTP = "WRONG_OTP";
     public static final String UNKNOWN = "UNKNOWN";
     public static final String JSON_CONVERSION_ERROR = "JSON_CONVERSION_ERROR";
+    public static final String USER_NOT_FOUND_ERROR = "USER_NOT_FOUND_ERROR";
 
 }

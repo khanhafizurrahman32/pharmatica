@@ -93,12 +93,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Flux<OrderResponse> getAllOrders() {
         return orderRepository.findAll()
-                .map(this::convertDbToDto);
+                .flatMap(order -> getProducts(order)
+                        .map(productResponse -> convertDbToDto(order, productResponse)));
     }
 
-    private OrderResponse convertDbToDto(Order order) {
+    private OrderResponse convertDbToDto(Order order, List<ProductResponse> product) {
         return OrderResponse.builder()
                 .id(String.valueOf(order.getId()))
+                .orderItems(getOrderItems(product, order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
                 .deliveryCharge(order.getDeliveryCharge())
@@ -177,8 +179,10 @@ public class OrderServiceImpl implements OrderService {
     public Mono<OrderResponse> updateOrder(long id, OrderRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findById(id)
                 .flatMap(order -> convertDtoToDb(request, order, authorizedUser.getId())
-                        .flatMap(orderRepository::save)
-                        .map(this::convertDbToDto));
+                        .flatMap(updatedOrder -> Mono.zip(userService.getUserById(authorizedUser.getId()),
+                                orderRepository.save(updatedOrder),
+                                getProducts(updatedOrder)))
+                        .map(tuple3 -> convertDbToDto(tuple3.getT2(), tuple3.getT3(), tuple3.getT1())));
     }
 
     @Override
