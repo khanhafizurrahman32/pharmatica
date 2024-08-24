@@ -8,7 +8,6 @@ import org.example.pharmaticb.dto.records.Item;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @Builder
@@ -18,10 +17,8 @@ public class OrderResponse implements Serializable {
     private String id;
     private String userId;
     private Item[] items;
-    private String productId;
     private String status;
     private double totalAmount;
-    private int quantity;
     private double deliveryCharge;
     private String couponApplied;
     private LocalDate deliveryDate;

@@ -3,6 +3,7 @@ package org.example.pharmaticb.service.order;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
@@ -14,13 +15,18 @@ import org.example.pharmaticb.service.product.ProductServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -31,32 +37,24 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<OrderResponse> createOrder(OrderRequest request) {
-//        Order order = convertDtoToDb(request);
-        return convertDtoToDb(request)
+        return convertDtoToDb(request, Order.builder().build())
                 .flatMap(order -> orderRepository.save(order)
                         .map(this::convertDbToDto));
-//        return orderRepository.insertOrder(order.getUserId(), order.getItems(), order.getStatus(), order.getTotalAmount(), order.getPrice(), order.getDeliveryCharge(), order.getCouponApplied(),
-//                order.getDeliveryDate(), order.getPaymentChannel(), order.getTransactionId(), order.getCreatedAt())
-//                .map(id -> {
-//                    order.setId(id);
-//                    order.setNewOrder(true);
-//                    return order;
-//                })
-//                .map(this::convertDbToDto);
     }
 
-    private Mono<Order> convertDtoToDb(OrderRequest request) {
+    private Mono<Order> convertDtoToDb(OrderRequest request, Order order) {
         return getTotalAmount(request.getItems())
                 .map(totalAmount -> Order.builder()
+                        .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
                         .userId(request.getUserId())
                         .items(objectMapper.valueToTree(request.getItems()))
                         .status(Status.INITIATED.name())
                         .totalAmount(totalAmount)
                         .deliveryCharge(0.0) //todo
                         .couponApplied(request.getCouponApplied())
-//                        .deliveryDate()
+                        .deliveryDate(LocalDate.now())
                         .paymentChannel(request.getPaymentChannel())
-                        .transactionId("001")
+                        .transactionId(UUID.randomUUID().toString().substring(0, 10))
                         .createdAt(new Timestamp(System.currentTimeMillis()))
                         .build());
 
@@ -101,7 +99,8 @@ public class OrderServiceImpl implements OrderService {
 
     private Item[] getItems(Order order) {
         try {
-            return new Item[]{objectMapper.treeToValue(order.getItems(), Item.class)};
+            String jsonString = objectMapper.writeValueAsString(order.getItems());
+            return objectMapper.readValue(jsonString, Item[].class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -116,12 +115,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<OrderResponse> updateOrder(long id, OrderRequest request) {
         return orderRepository.findById(id)
-                .flatMap(order -> {
-                    BeanUtils.copyProperties(request, order);
-                    order.setNewOrder(false);
-                    return orderRepository.save(order);
-                })
-                .map(updatedOrder -> mapper.map(updatedOrder, OrderResponse.class));
+                .flatMap(order -> convertDtoToDb(request, order)
+                        .flatMap(orderRepository::save)
+                        .map(this::convertDbToDto));
     }
 
     @Override

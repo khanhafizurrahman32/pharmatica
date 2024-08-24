@@ -9,9 +9,6 @@ import org.example.pharmaticb.utilities.Exception.ServiceError;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
