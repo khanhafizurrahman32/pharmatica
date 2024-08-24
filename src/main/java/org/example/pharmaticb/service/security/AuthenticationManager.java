@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.exception.InternalException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -14,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.service.auth.JwtTokenServiceImpl.TOKEN_PROVIDER;
-import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_CUSTOMER_NAME;
 import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_ROLE;
+import static org.example.pharmaticb.utilities.Utility.USER_ID;
 
 @Slf4j
 @AllArgsConstructor
@@ -34,12 +34,14 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
-        log.info("authenticate");
+        log.info("Authenticating user {}", authentication.getCredentials().toString());
         var authToken = authentication.getCredentials().toString();
         DecodedJWT jwt = getDecodedJwtToken(authToken);
         String customerName = jwt.getAudience().get(0);
+        Long userId = jwt.getClaim(USER_ID).asLong();
+        AuthorizedUser authorizedUser = new AuthorizedUser(userId, customerName);
         if (StringUtils.hasText(customerName)) {
-            return Mono.just(new UsernamePasswordAuthenticationToken(customerName, null, getAuthorities(jwt.getClaim(TOKEN_ROLE).asList(String.class))));
+            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, getAuthorities(jwt.getClaim(TOKEN_ROLE).asList(String.class))));
         }
         return Mono.just(authentication);
     }
@@ -55,7 +57,6 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
         try {
             return verifier.verify(authToken);
         } catch (JWTVerificationException ex) {
-            log.error("Jwt verifier token {}", ex.toString());
             throw  new InternalException(HttpStatus.UNAUTHORIZED, "Code mismatch", "Code error");
         }
     }
