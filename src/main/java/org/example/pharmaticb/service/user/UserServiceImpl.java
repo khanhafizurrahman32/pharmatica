@@ -3,6 +3,7 @@ package org.example.pharmaticb.service.user;
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.CategoryRequest;
+import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.repositories.UserRepository;
@@ -47,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<UserResponse> updateUser(long id, CategoryRequest request) {
+    public Mono<UserResponse> updateUser(long id, UserRequest request) {
         return userRepository.findById(id)
                 .flatMap(user -> {
                     mapper.map(request, user);

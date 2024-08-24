@@ -6,47 +6,61 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.Request.OrderRequest;
+import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
-import org.example.pharmaticb.dto.records.Item;
+import org.example.pharmaticb.Models.Response.UserResponse;
+import org.example.pharmaticb.dto.AuthorizedUser;
+import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
+import org.example.pharmaticb.dto.UserDto;
 import org.example.pharmaticb.dto.enums.Status;
+import org.example.pharmaticb.dto.records.Item;
+import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.OrderRepository;
+import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.product.ProductServiceImpl;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
+import org.example.pharmaticb.service.user.UserServiceImpl;
+import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
-    private final ModelMapper mapper;
     private final ObjectMapper objectMapper;
-    private final ProductServiceImpl productServiceImpl;
+    private final ProductServiceImpl productService;
+    private final ProductRepository productRepository;
+    private final UserServiceImpl userService;
 
     @Override
-    public Mono<OrderResponse> createOrder(OrderRequest request) {
-        return convertDtoToDb(request, Order.builder().build())
-                .flatMap(order -> orderRepository.save(order)
-                        .map(this::convertDbToDto));
+    public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
+        long authorizedUserId = authorizedUser.getId();
+        return Mono.zip(convertDtoToDb(request, Order.builder().build(), authorizedUserId), userService.getUserById(authorizedUserId))
+                .flatMap(tuple2 -> {
+                    var orderObj = tuple2.getT1();
+                    var user = tuple2.getT2();
+                    return orderRepository.save(orderObj)
+                            .flatMap(order -> getProducts(order)
+                                    .map(product -> convertDbToDto(order, product, user)));
+                });
     }
 
-    private Mono<Order> convertDtoToDb(OrderRequest request, Order order) {
+    private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long id) {
         return getTotalAmount(request.getItems())
                 .map(totalAmount -> Order.builder()
                         .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
-                        .userId(request.getUserId())
+                        .userId(id)
                         .items(objectMapper.valueToTree(request.getItems()))
                         .status(Status.INITIATED.name())
                         .totalAmount(totalAmount)
@@ -60,15 +74,15 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    private Mono<Double> getTotalAmount(Item[] items) {
-        return Flux.fromIterable(Arrays.asList(items))
+    private Mono<Double> getTotalAmount(List<Item> items) {
+        return Flux.fromIterable(items)
                 .flatMap(this::processOrderItem)
                 .reduce(0.0, Double::sum);
 
     }
 
     private Mono<Double> processOrderItem(Item item) {
-        return productServiceImpl.getProductById(item.productId())
+        return productService.getProductById(item.productId())
                 .map(productResponse -> calculateItemTotal(productResponse, item.quantity()));
     }
 
@@ -85,8 +99,6 @@ public class OrderServiceImpl implements OrderService {
     private OrderResponse convertDbToDto(Order order) {
         return OrderResponse.builder()
                 .id(String.valueOf(order.getId()))
-                .userId(String.valueOf(order.getUserId()))
-                .items(getItems(order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
                 .deliveryCharge(order.getDeliveryCharge())
@@ -97,10 +109,58 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
-    private Item[] getItems(Order order) {
+    private Mono<List<ProductResponse>> getProducts(Order order) {
+        return Flux.fromIterable(getItems(order))
+                .flatMap(item -> productService.getProductById(item.productId()))
+                .collectList();
+    }
+
+    private OrderResponse convertDbToDto(Order order, List<ProductResponse> product, UserResponse user) {
+        return OrderResponse.builder()
+                .user(getUserDetails(user))
+                .id(String.valueOf(order.getId()))
+                .orderItems(getOrderItems(product, order))
+                .status(order.getStatus())
+                .totalAmount(order.getTotalAmount())
+                .deliveryCharge(order.getDeliveryCharge())
+                .couponApplied(order.getCouponApplied())
+                .deliveryDate(order.getDeliveryDate())
+                .paymentChannel(order.getPaymentChannel())
+                .transactionId(order.getTransactionId())
+                .build();
+    }
+
+    private List<OrderItemDto> getOrderItems(List<ProductResponse> product, Order order) {
+        return product.stream()
+                .map(productResponse -> OrderItemDto.builder()
+                        .productId(productResponse.getProductId())
+                        .productName(productResponse.getProductName())
+                        .unitPrice(String.valueOf(productResponse.getPrice()))
+                        .quantity(getQuantity(getItems(order), productResponse.getProductId()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private String getQuantity(List<Item> items, String productId) {
+        return items.stream()
+                .filter(item -> productId.equals(String.valueOf(item.productId())))
+                .map(item -> String.valueOf(item.quantity()))
+                .collect(Collectors.joining());
+    }
+
+    private UserDto getUserDetails(UserResponse user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .userName(user.getUserName())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .build();
+    }
+
+    private List<Item> getItems(Order order) {
         try {
             String jsonString = objectMapper.writeValueAsString(order.getItems());
-            return objectMapper.readValue(jsonString, Item[].class);
+            return List.of(objectMapper.readValue(jsonString, Item[].class));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -109,13 +169,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<OrderResponse> getOrderById(long id) {
         return orderRepository.findById(id)
-                .map(order -> mapper.map(order, OrderResponse.class));
+                .flatMap(order -> Mono.zip(getProducts(order), userService.getUserById(order.getUserId()))
+                        .map(tuple2 -> convertDbToDto(order, tuple2.getT1(), tuple2.getT2())));
     }
 
     @Override
-    public Mono<OrderResponse> updateOrder(long id, OrderRequest request) {
+    public Mono<OrderResponse> updateOrder(long id, OrderRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findById(id)
-                .flatMap(order -> convertDtoToDb(request, order)
+                .flatMap(order -> convertDtoToDb(request, order, authorizedUser.getId())
                         .flatMap(orderRepository::save)
                         .map(this::convertDbToDto));
     }
@@ -123,5 +184,27 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<Void> deleteOrder(long id) {
         return orderRepository.deleteById(id);
+    }
+
+    @Override
+    public Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser) {
+        return orderRepository.findById(Long.valueOf(request.getOrderId()))
+                .flatMap(order -> {
+                    order.setStatus(request.getStatus());
+                    if (Status.COMPLETED.name().equals(request.getStatus())) {
+                        return Flux.fromIterable(getItems(order))
+                                .flatMap(item -> productRepository.findById(item.productId())
+                                        .flatMap(product -> {
+                                            if (product.getStock() < item.quantity()) {
+                                                return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Not available stock", ServiceError.INVALID_REQUEST));
+                                            }
+                                            product.setStock(product.getStock() - item.quantity());
+                                            return productRepository.save(product);
+                                        }))
+                                .then(orderRepository.save(order));
+                    }
+                    return orderRepository.save(order);
+                })
+                .map(order -> OrderResponse.builder().status(order.getStatus()).build());
     }
 }

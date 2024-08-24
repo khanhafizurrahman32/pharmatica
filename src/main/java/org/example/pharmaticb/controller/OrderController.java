@@ -2,13 +2,16 @@ package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.Request.OrderRequest;
+import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.service.order.OrderService;
+import org.example.pharmaticb.utilities.Utility;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @BaseController
 @RestController
@@ -17,8 +20,13 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/orders")
-    public Mono<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
-        return orderService.createOrder(request);
+    public Mono<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request, Principal principal) {
+        return orderService.createOrder(request, Utility.extractAuthorizedUserFromPrincipal(principal));
+    }
+
+    @PostMapping("/orders/update-status")
+    public Mono<OrderResponse> updateOrderStatus(@Valid @RequestBody OrderUpdateStatusRequest request, Principal principal) {
+        return orderService.updateOrderStatus(request, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
     @GetMapping("/orders")
@@ -32,8 +40,8 @@ public class OrderController {
     }
 
     @PutMapping("/orders/{id}")
-    public Mono<OrderResponse> updateOrder(@Valid @PathVariable long id, @Valid @RequestBody OrderRequest request) {
-        return orderService.updateOrder(id, request);
+    public Mono<OrderResponse> updateOrder(@Valid @PathVariable long id, @Valid @RequestBody OrderRequest request, Principal principal) {
+        return orderService.updateOrder(id, request, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
     @DeleteMapping("/orders/{id}")

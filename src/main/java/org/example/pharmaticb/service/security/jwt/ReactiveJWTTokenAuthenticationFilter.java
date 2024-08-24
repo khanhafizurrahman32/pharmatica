@@ -2,7 +2,7 @@ package org.example.pharmaticb.service.security.jwt;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pharmaticb.Models.DB.User;
+import org.example.pharmaticb.dto.AuthorizedUser;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -38,9 +38,10 @@ public class ReactiveJWTTokenAuthenticationFilter implements WebFilter {
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext -> (String)securityContext.getAuthentication().getPrincipal())
-                .flatMap(user -> {
-                    if (ObjectUtils.isEmpty(user)) {
+                .map(securityContext -> (AuthorizedUser)securityContext.getAuthentication().getPrincipal())
+                .defaultIfEmpty(AuthorizedUser.builder().build())
+                .flatMap(authorizedUser -> {
+                    if (ObjectUtils.isEmpty(authorizedUser)) {
                         return chain.filter(decorate(exchange));
                     }
                     return chain.filter(exchange);
@@ -50,7 +51,7 @@ public class ReactiveJWTTokenAuthenticationFilter implements WebFilter {
     private ServerWebExchange decorate(ServerWebExchange exchange) {
         final ServerHttpRequest decorated = new ServerHttpRequestDecorator(exchange.getRequest()) {
             @Override
-            public Flux<DataBuffer>   getBody() {
+            public Flux<DataBuffer>  getBody() {
                 return super.getBody().collectList()
                         .flatMapMany(dataBuffers -> {
                             StringBuilder requestBody = new StringBuilder();

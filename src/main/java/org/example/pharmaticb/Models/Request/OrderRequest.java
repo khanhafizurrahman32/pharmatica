@@ -9,6 +9,7 @@ import org.example.pharmaticb.utilities.Exception.ServiceError;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,9 +17,7 @@ import java.io.Serializable;
 @Builder
 public class OrderRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private long userId;
-    @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private Item[] items;
+    private List<Item> items;
     private String couponApplied;
     private String paymentChannel;
 }

@@ -2,6 +2,7 @@ package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.Request.CategoryRequest;
+import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.service.user.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public Mono<UserResponse> updateUser(@Valid @PathVariable long id, @Valid @RequestBody CategoryRequest request) {
+    public Mono<UserResponse> updateUser(@Valid @PathVariable long id, @Valid @RequestBody UserRequest request) {
         return userService.updateUser(id, request);
     }
 

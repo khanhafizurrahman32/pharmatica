@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.utilities.SecurityUtil;
+import org.example.pharmaticb.utilities.Utility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -58,6 +59,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
             return JWT.create()
                     .withIssuer(TOKEN_PROVIDER)
                     .withAudience(user.getCustomerName())
+                    .withClaim(Utility.USER_ID, user.getId())
                     .withArrayClaim(SecurityUtil.TOKEN_ROLE, rolesArray)
                     .withIssuedAt(new Date(System.currentTimeMillis()))
                     .withExpiresAt(new Date(System.currentTimeMillis() + expiration))

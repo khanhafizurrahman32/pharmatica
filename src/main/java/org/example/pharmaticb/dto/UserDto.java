@@ -1,4 +1,4 @@
-package org.example.pharmaticb.Models.Response;
+package org.example.pharmaticb.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,12 +8,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse implements Serializable {
+@NoArgsConstructor
+@Builder
+public class UserDto implements Serializable {
     private String id;
     private String userName;
     private String phone;
-    private String address;
+    @Builder.Default
+    private String address = "";
 }
