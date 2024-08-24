@@ -12,7 +12,7 @@ public interface CategoryService {
 
     Mono<CategoryResponse> getCategoryById(Long id);
 
-    Mono<CategoryResponse> updateCategory(long id, CategoryRequest request);
+    Mono<CategoryResponse>  updateCategory(long id, CategoryRequest request);
 
     Mono<Void> deleteCategory(long id);
 }

@@ -1,9 +1,6 @@
 package org.example.pharmaticb.Models.DB;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.pharmaticb.utilities.Role;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -19,7 +16,7 @@ import java.util.Set;
 @Table("users")
 public class User implements Serializable {
     @Id
-    @Transient
+    @Generated
     private long id;
     private String customerName;
     private String password;
