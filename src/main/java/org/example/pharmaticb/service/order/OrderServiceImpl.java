@@ -1,10 +1,16 @@
 package org.example.pharmaticb.service.order;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
+import org.example.pharmaticb.Models.Response.ProductResponse;
+import org.example.pharmaticb.dto.records.Item;
+import org.example.pharmaticb.dto.enums.Status;
 import org.example.pharmaticb.repositories.OrderRepository;
+import org.example.pharmaticb.service.product.ProductServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -12,42 +18,64 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ModelMapper mapper;
+    private final ObjectMapper objectMapper;
+    private final ProductServiceImpl productServiceImpl;
 
     @Override
     public Mono<OrderResponse> createOrder(OrderRequest request) {
-        Order order = convertDtoToDb(request);
-        return orderRepository.insertOrder(order.getUserId(), order.getProductId(), order.getStatus(), order.getTotalAmount(),
-                order.getQuantity(), order.getPrice(), order.getDeliveryCharge(), order.getCouponApplied(),
-                order.getDeliveryDate(), order.getPaymentChannel(), order.getTransactionId(), order.getCreatedAt())
-                .map(id -> {
-                    order.setId(id);
-                    order.setNewOrder(true);
-                    return order;
-                })
-                .map(this::convertDbToDto);
+//        Order order = convertDtoToDb(request);
+        return convertDtoToDb(request)
+                .flatMap(order -> orderRepository.save(order)
+                        .map(this::convertDbToDto));
+//        return orderRepository.insertOrder(order.getUserId(), order.getItems(), order.getStatus(), order.getTotalAmount(), order.getPrice(), order.getDeliveryCharge(), order.getCouponApplied(),
+//                order.getDeliveryDate(), order.getPaymentChannel(), order.getTransactionId(), order.getCreatedAt())
+//                .map(id -> {
+//                    order.setId(id);
+//                    order.setNewOrder(true);
+//                    return order;
+//                })
+//                .map(this::convertDbToDto);
     }
 
-    private Order convertDtoToDb(OrderRequest request) {
-        return Order.builder()
-                .userId(request.getUserId())
-                .productId(request.getProductId())
-                .status(request.getStatus())
-                .totalAmount(request.getTotalAmount())
-                .quantity(request.getQuantity())
-                .price(request.getPrice())
-                .deliveryCharge(request.getDeliveryCharge())
-                .couponApplied(request.getCouponApplied())
-                .deliveryDate(request.getDeliveryDate())
-                .paymentChannel(request.getPaymentChannel())
-                .transactionId("001")
-                .createdAt(new Timestamp(System.currentTimeMillis()))
-                .build();
+    private Mono<Order> convertDtoToDb(OrderRequest request) {
+        return getTotalAmount(request.getItems())
+                .map(totalAmount -> Order.builder()
+                        .userId(request.getUserId())
+                        .items(objectMapper.valueToTree(request.getItems()))
+                        .status(Status.INITIATED.name())
+                        .totalAmount(totalAmount)
+                        .deliveryCharge(0.0) //todo
+                        .couponApplied(request.getCouponApplied())
+//                        .deliveryDate()
+                        .paymentChannel(request.getPaymentChannel())
+                        .transactionId("001")
+                        .createdAt(new Timestamp(System.currentTimeMillis()))
+                        .build());
+
+    }
+
+    private Mono<Double> getTotalAmount(Item[] items) {
+        return Flux.fromIterable(Arrays.asList(items))
+                .flatMap(this::processOrderItem)
+                .reduce(0.0, Double::sum);
+
+    }
+
+    private Mono<Double> processOrderItem(Item item) {
+        return productServiceImpl.getProductById(item.productId())
+                .map(productResponse -> calculateItemTotal(productResponse, item.quantity()));
+    }
+
+    private Double calculateItemTotal(ProductResponse productResponse, int quantity) {
+        return (productResponse.getPrice() - productResponse.getDiscount()) * quantity;
     }
 
     @Override
@@ -60,17 +88,23 @@ public class OrderServiceImpl implements OrderService{
         return OrderResponse.builder()
                 .id(String.valueOf(order.getId()))
                 .userId(String.valueOf(order.getUserId()))
-                .productId(String.valueOf(order.getProductId()))
+                .items(getItems(order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
-                .quantity(order.getQuantity())
-                .price(order.getPrice())
                 .deliveryCharge(order.getDeliveryCharge())
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
                 .transactionId(order.getTransactionId())
                 .build();
+    }
+
+    private Item[] getItems(Order order) {
+        try {
+            return new Item[]{objectMapper.treeToValue(order.getItems(), Item.class)};
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

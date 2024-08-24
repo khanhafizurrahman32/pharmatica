@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.pharmaticb.dto.records.Item;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 
 import javax.validation.constraints.NotBlank;
@@ -20,17 +21,7 @@ public class OrderRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private long userId;
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private long productId;
-    private String status;
-    private double totalAmount;
-    private int quantity;
-    private double price;
-    private double deliveryCharge;
+    private Item[] items;
     private String couponApplied;
-    private LocalDate deliveryDate;
     private String paymentChannel;
-    private String transactionId;
-
-
-
 }
