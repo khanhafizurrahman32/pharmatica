@@ -6,7 +6,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.example.pharmaticb.Models.DB.User;
-import org.example.pharmaticb.Models.Request.auth.LoginRequest;
+import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.utilities.SecurityUtil;
 import org.example.pharmaticb.utilities.Utility;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,13 +34,13 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     @Override
-    public String generateAccessToken(User user, LoginRequest request) {
-        return createToken(user, accessTokenExpiration, getRolesArray(request.getRole()));
+    public String generateAccessToken(User user, String role) {
+        return createToken(user, accessTokenExpiration, getRolesArray(role));
     }
 
     @Override
-    public String generateRefreshToken(User user, LoginRequest request) {
-        return createToken(user, refreshTokenExpiration, getRolesArray(request.getRole()));
+    public String generateRefreshToken(User user, String role) {
+        return createToken(user, refreshTokenExpiration, getRolesArray(role));
     }
 
     @Override

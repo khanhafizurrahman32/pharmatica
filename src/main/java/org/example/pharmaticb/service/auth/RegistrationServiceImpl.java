@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Request.auth.OtpRequest;
+import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Request.auth.VerifyOtpRequest;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.Models.Response.auth.OtpResponse;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -41,10 +43,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
     @Override
-    public Mono<LoginResponse> registrationLogin(LoginRequest loginRequest, HttpHeaders httpHeaders) {
-        return findByPhoneNumber(loginRequest.getPhoneNumber())
+    public Mono<LoginResponse> registrationLogin(@Valid RegistrationRequest registrationRequest, HttpHeaders httpHeaders) {
+        return findByPhoneNumber(registrationRequest.getPhoneNumber())
                 .flatMap(existingUser -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User already exists", ServiceError.INVALID_REQUEST)))
-                .switchIfEmpty(Mono.defer(() -> getLoginResponseMono(loginRequest)))
+                .switchIfEmpty(Mono.defer(() -> getLoginResponseMono(registrationRequest)))
                 .cast(LoginResponse.class);
     }
 
@@ -175,11 +177,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         return otpCode.toString();
     }
 
-    private Mono<LoginResponse> getLoginResponseMono(LoginRequest request) {
+    private Mono<LoginResponse> getLoginResponseMono(RegistrationRequest request) {
         return userService.save(request)
                 .map(user -> LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(user, request))
-                        .refreshToken(jwtTokenService.generateRefreshToken(user, request))
+                        .accessToken(jwtTokenService.generateAccessToken(user, request.getRole().name()))
+                        .refreshToken(jwtTokenService.generateRefreshToken(user, request.getRole().name()))
                         .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
                         .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());

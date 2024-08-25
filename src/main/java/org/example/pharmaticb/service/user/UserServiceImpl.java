@@ -3,7 +3,7 @@ package org.example.pharmaticb.service.user;
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UserRequest;
-import org.example.pharmaticb.Models.Request.auth.LoginRequest;
+import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +12,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +27,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<User> save(LoginRequest request) {
+    public Mono<User> save(RegistrationRequest request) {
         var user = User
                 .builder()
                 .phoneNumber(request.getPhoneNumber())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .roles(Set.of(request.getRole()))
                 .build();
         return userRepository.save(user);
     }

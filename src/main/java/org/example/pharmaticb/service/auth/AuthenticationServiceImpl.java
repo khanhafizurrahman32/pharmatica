@@ -31,8 +31,8 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
                 .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username not found", ServiceError.INVALID_REQUEST)))
                 .map(userDetails -> LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(userDetails, request))
-                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails, request))
+                        .accessToken(jwtTokenService.generateAccessToken(userDetails, userDetails.getRoles().toString()))
+                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails, userDetails.getRoles().toString()))
                         .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
                         .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());

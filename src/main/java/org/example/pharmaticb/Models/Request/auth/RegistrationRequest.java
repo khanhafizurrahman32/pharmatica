@@ -15,7 +15,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class LoginRequest extends CommonRequest implements Serializable {
+public class RegistrationRequest extends CommonRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String password;
+    @NotBlank(message = ServiceError.INVALID_REQUEST)
+    private Role role;
 }
