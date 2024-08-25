@@ -14,6 +14,6 @@ import java.io.Serializable;
 public class UserResponse implements Serializable {
     private String id;
     private String userName;
-    private String phone;
+    private String phoneNumber;
     private String address;
 }

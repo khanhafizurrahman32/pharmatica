@@ -2,12 +2,10 @@ package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UploadFileRequest;
 import org.example.pharmaticb.Models.Response.UploadFileResponse;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.utilities.Utility;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

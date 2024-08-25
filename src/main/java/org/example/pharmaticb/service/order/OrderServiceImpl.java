@@ -154,7 +154,7 @@ public class OrderServiceImpl implements OrderService {
         return UserDto.builder()
                 .id(user.getId())
                 .userName(user.getUserName())
-                .phone(user.getPhone())
+                .phone(user.getPhoneNumber())
                 .address(user.getAddress())
                 .build();
     }

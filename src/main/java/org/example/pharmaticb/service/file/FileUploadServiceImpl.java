@@ -11,7 +11,6 @@ import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
@@ -25,20 +24,15 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public Mono<UploadFileResponse> uploadFile(UploadFileRequest request, AuthorizedUser authorizedUser) {
-        return userService.findByCustomerName(String.valueOf(authorizedUser.getPhone()))
+        return userService.findByPhoneNumber(String.valueOf(authorizedUser.getPhoneNumber()))
                 .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username not found", ServiceError.USER_NOT_FOUND_ERROR)))
                 .map(currentUser -> {
                     var imageUniqueId = "" + DateUtil.currentTimeInSecond();
                     currentUser.setImageUniqueId(imageUniqueId);
-                    fileService.uploadFile(currentUser.getCustomerName(), request.getFile(), request.getContentType());
+                    fileService.uploadFile(currentUser.getPhoneNumber(), request.getFile(), request.getContentType());
                     return UploadFileResponse.builder()
-                            .fileUrl(fileService.getProfileImageUrl(currentUser.getCustomerName()))
+                            .fileUrl(fileService.getProfileImageUrl(currentUser.getPhoneNumber()))
                             .build();
                 });
-    }
-
-    private String getProfileImageName(User currentUser) {
-        var key = !StringUtils.hasText(currentUser.getImageUniqueId()) ? "" : "_" + currentUser.getImageUniqueId();
-        return currentUser.getCustomerName() + key;
     }
 }

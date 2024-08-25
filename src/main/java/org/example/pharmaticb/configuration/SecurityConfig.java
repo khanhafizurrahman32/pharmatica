@@ -28,7 +28,7 @@ import java.util.List;
 @EnableReactiveMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login", "/api/auth/login");
+    private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login", "/api/auth/login", "/api/otp/send", "/api/otp/verify");
     @Bean
     public AuthenticationManager authenticationManager(Algorithm tokenAlgorithm) {
         return new AuthenticationManager(tokenAlgorithm);

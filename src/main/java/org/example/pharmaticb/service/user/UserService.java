@@ -1,7 +1,6 @@
 package org.example.pharmaticb.service.user;
 
 import org.example.pharmaticb.Models.DB.User;
-import org.example.pharmaticb.Models.Request.CategoryRequest;
 import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
@@ -11,7 +10,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 
 public interface UserService {
-    Mono<User> findByCustomerName(String customerName);
+    Mono<User> findByPhoneNumber(String phoneNumber);
 
     Mono<User> save(LoginRequest request);
 

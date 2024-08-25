@@ -20,17 +20,17 @@ public class FileServiceImpl implements FileService {
     private final MinioService minioService;
 
     @Override
-    public void uploadFile(String customerName, byte[] fileBuffer, String contentType) {
-        var key = getKey(customerName);
+    public void uploadFile(String phoneNumber, byte[] fileBuffer, String contentType) {
+        var key = getKey(phoneNumber);
         minioService.uploadFile(minioImageBucket, key, fileBuffer, contentType);
     }
 
-    private String getKey(String customerName) {
-        return minioProfileImagePath + customerName;
+    private String getKey(String phoneNumber) {
+        return minioProfileImagePath + phoneNumber;
     }
 
     @Override
-    public String getProfileImageUrl(String customerName) {
-        return minioService.getUrl(minioImageBucket, getKey(customerName));
+    public String getProfileImageUrl(String profileImageName) {
+        return minioService.getUrl(minioImageBucket, getKey(profileImageName));
     }
 }

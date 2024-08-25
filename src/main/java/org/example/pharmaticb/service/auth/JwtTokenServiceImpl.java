@@ -58,7 +58,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         try {
             return JWT.create()
                     .withIssuer(TOKEN_PROVIDER)
-                    .withAudience(user.getCustomerName())
+                    .withAudience(user.getPhoneNumber())
                     .withClaim(Utility.USER_ID, user.getId())
                     .withArrayClaim(SecurityUtil.TOKEN_ROLE, rolesArray)
                     .withIssuedAt(new Date(System.currentTimeMillis()))

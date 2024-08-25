@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class AuthorizedUser {
-    long id;
-    String phone;
+    private long id;
+    private String phoneNumber;
 }

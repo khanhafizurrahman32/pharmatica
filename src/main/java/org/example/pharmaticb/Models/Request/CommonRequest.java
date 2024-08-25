@@ -17,9 +17,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class CommonRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private String userName;
-
-//    @NotBlank(message = ServiceError.INVALID_REQUEST)
     @Pattern(regexp = Utility.BD_MSISDN_REGEX, message = ServiceError.INVALID_REQUEST)
-    private String phone;
+    private String phoneNumber;
 }

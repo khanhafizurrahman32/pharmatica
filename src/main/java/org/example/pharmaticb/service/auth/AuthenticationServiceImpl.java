@@ -27,7 +27,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 
     @Override
     public Mono<LoginResponse> login(LoginRequest request, HttpHeaders httpHeaders) {
-        return userService.findByCustomerName(request.getUserName())
+        return userService.findByPhoneNumber(request.getPhoneNumber())
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
                 .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username not found", ServiceError.INVALID_REQUEST)))
                 .map(userDetails -> LoginResponse.builder()

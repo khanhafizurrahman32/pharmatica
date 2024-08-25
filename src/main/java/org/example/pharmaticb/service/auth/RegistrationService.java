@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 public interface RegistrationService {
     Mono<LoginResponse> registrationLogin(LoginRequest loginRequest, HttpHeaders httpHeaders);
 
-//    Mono<OtpResponse> sendOtp(OtpRequest request, HttpHeaders httpHeaders);
-//
-//    Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders);
+    Mono<OtpResponse> sendOtp(OtpRequest request, HttpHeaders httpHeaders);
+
+    Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders);
 }
