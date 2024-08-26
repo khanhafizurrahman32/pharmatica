@@ -218,4 +218,11 @@ public class OrderServiceImpl implements OrderService {
                 .flatMap(order -> getProducts(order)
                         .map(productResponses -> convertDbToDto(order, productResponses)));
     }
+
+    @Override
+    public Flux<OrderResponse> getOrdersByStatus(String status) {
+        return orderRepository.findByStatus(status)
+                .flatMap(order -> getProducts(order)
+                        .map(productResponses -> convertDbToDto(order, productResponses)));
+    }
 }

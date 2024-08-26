@@ -54,6 +54,11 @@ public class OrderController {
         return orderService.getOrdersWithinDate(startDate, effectiveEndDate);
     }
 
+    @GetMapping("/orders/by-status")
+    public Flux<OrderResponse> getOrdersByStatus(@RequestParam String status) {
+        return orderService.getOrdersByStatus(status);
+    }
+
     @DeleteMapping("/orders/{id}")
     public Mono<Void> deleteOrder(@Valid @PathVariable long id) {
         return orderService.deleteOrder(id);

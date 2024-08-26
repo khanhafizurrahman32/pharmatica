@@ -4,12 +4,15 @@ import org.example.pharmaticb.Models.DB.Order;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
 public interface OrderRepository extends R2dbcRepository<Order, Long> {
     @Query("SELECT * FROM orders where date >= :startDate AND date <= :endDate")
     Flux<Order> findByCreatedAtBetween(LocalDate startDate, LocalDate endDate);
+    Flux<Order> findByStatus(String status);
+
 //    @Query("INSERT INTO orders (user_id, product_id, status, total_amount, quantity, price, delivery_charge, coupon_applied, delivery_date, payment_channel, transaction_id, created_at) " +
 //            "VALUES (:userId, :productId, :status, :totalAmount, :quantity, :price, :deliveryCharge, :couponApplied, :deliveryDate, :paymentChannel, :transactionId, :createdAt) " +
 //            "RETURNING id")
