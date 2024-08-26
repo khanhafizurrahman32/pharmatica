@@ -111,6 +111,7 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
                 .transactionId(order.getTransactionId())
+                .orderDate(String.valueOf(order.getCreatedAt()))
                 .build();
     }
 
@@ -132,6 +133,7 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
                 .transactionId(order.getTransactionId())
+                .orderDate(String.valueOf(order.getCreatedAt()))
                 .build();
     }
 
@@ -172,9 +174,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Mono<OrderResponse> getOrderById(long id) {
+    public Mono<OrderResponse> getOrderById(long id, AuthorizedUser authorizedUser) {
+        if (id != authorizedUser.getId()) {
+            return Mono.error(new InternalException(HttpStatus.FORBIDDEN, "Not allowed", ServiceError.INVALID_REQUEST));
+        }
         return orderRepository.findById(id)
-                .flatMap(order -> Mono.zip(getProducts(order), userService.getUserById(order.getUserId()))
+                .flatMap(order -> Mono.zip(getProducts(order), userService.getUserById(authorizedUser.getId()))
                         .map(tuple2 -> convertDbToDto(order, tuple2.getT1(), tuple2.getT2())));
     }
 

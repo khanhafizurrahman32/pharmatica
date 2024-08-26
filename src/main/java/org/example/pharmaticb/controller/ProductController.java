@@ -16,7 +16,7 @@ import javax.validation.Valid;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping("/products")
+    @PostMapping("/products/create")
     public Mono<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
         return productService.createProduct(request);
     }

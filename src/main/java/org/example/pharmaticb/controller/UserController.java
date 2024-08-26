@@ -5,11 +5,13 @@ import org.example.pharmaticb.Models.Request.CategoryRequest;
 import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.service.user.UserService;
+import org.example.pharmaticb.utilities.Utility;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @BaseController
 @RestController
@@ -23,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public Mono<UserResponse> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public Mono<UserResponse> getUserById(@PathVariable Long id, Principal principal) {
+        return userService.getUserById(id, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
     @PutMapping("/users/{id}")

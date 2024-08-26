@@ -28,7 +28,9 @@ import java.util.List;
 @EnableReactiveMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login", "/api/auth/login", "/api/otp/send", "/api/otp/verify");
+    private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login",
+            "/api/auth/login", "/api/otp/send", "/api/otp/verify", "api/products", "api/categories");
+
     @Bean
     public AuthenticationManager authenticationManager(Algorithm tokenAlgorithm) {
         return new AuthenticationManager(tokenAlgorithm);
@@ -40,7 +42,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityContextRepository  securityContextRepository(AuthenticationManager authenticationManager) {
+    public SecurityContextRepository securityContextRepository(AuthenticationManager authenticationManager) {
         return new SecurityContextRepository(authenticationManager);
     }
 
@@ -75,9 +77,9 @@ public class SecurityConfig {
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange((exchanges) ->
-                        exchanges.pathMatchers(openApisArray ).permitAll()
+                        exchanges.pathMatchers(openApisArray).permitAll()
                                 .pathMatchers("/admin/**").hasRole("ADMIN")
-                                .pathMatchers("/customer/**").hasRole("https://13d8-61-247-182-213.ngrok-free.app/pharmatica/api/reg/loginUSER")
+                                .pathMatchers("/customer/**").hasRole("USER")
                                 .anyExchange()
                                 .authenticated()
                 )

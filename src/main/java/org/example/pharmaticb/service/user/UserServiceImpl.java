@@ -5,7 +5,11 @@ import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
+import org.example.pharmaticb.dto.AuthorizedUser;
+import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.UserRepository;
+import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -67,6 +71,14 @@ public class UserServiceImpl implements UserService {
                 .profilePictureUrl(StringUtils.hasText(request.getProfilePictureUrl()) ? request.getProfilePictureUrl() : user.getProfilePictureUrl())
                 .imageUniqueId(user.getImageUniqueId())
                 .build();
+    }
+
+    @Override
+    public Mono<UserResponse> getUserById(Long id, AuthorizedUser authorizedUser) {
+        if (id != authorizedUser.getId()) {
+            return Mono.error(new InternalException(HttpStatus.FORBIDDEN, "Not allowed", ServiceError.INVALID_REQUEST));
+        }
+        return getUserById(id);
     }
 
     @Override

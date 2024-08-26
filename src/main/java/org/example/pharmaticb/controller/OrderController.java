@@ -39,8 +39,8 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{id}")
-    public Mono<OrderResponse> getOrderById(@Valid @PathVariable long id) {
-        return orderService.getOrderById(id);
+    public Mono<OrderResponse> getOrderById(@Valid @PathVariable long id, Principal principal) {
+        return orderService.getOrderById(id, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
     @PutMapping("/orders/{id}")

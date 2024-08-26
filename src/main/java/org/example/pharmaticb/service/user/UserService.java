@@ -4,6 +4,7 @@ import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
+import org.example.pharmaticb.dto.AuthorizedUser;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,6 +16,8 @@ public interface UserService {
     Mono<User> save(RegistrationRequest request);
 
     Flux<UserResponse> getAllUsers();
+
+    Mono<UserResponse> getUserById(Long id, AuthorizedUser authorizedUser);
 
     Mono<UserResponse> getUserById(Long id);
 

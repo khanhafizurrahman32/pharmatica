@@ -16,7 +16,7 @@ import javax.validation.Valid;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PostMapping("/categories")
+    @PostMapping("/categories/create")
     public Mono<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
         return categoryService.createCategory(request);
     }

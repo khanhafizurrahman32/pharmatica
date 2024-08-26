@@ -8,16 +8,14 @@ import org.example.pharmaticb.dto.AuthorizedUser;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public interface OrderService {
     Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser);
 
     Flux<OrderResponse> getAllOrders();
 
-    Mono<OrderResponse> getOrderById(long id);
+    Mono<OrderResponse> getOrderById(long id, AuthorizedUser authorizedUser);
 
     Mono<OrderResponse> updateOrder(long id, OrderRequest request, AuthorizedUser authorizedUser);
 
