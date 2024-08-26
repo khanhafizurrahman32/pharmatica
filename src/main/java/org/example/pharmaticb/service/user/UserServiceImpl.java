@@ -17,8 +17,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -36,7 +34,7 @@ public class UserServiceImpl implements UserService {
                 .builder()
                 .phoneNumber(request.getPhoneNumber())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(Set.of(request.getRole()))
+                .role(request.getRole())
                 .build();
         return userRepository.save(user);
     }
@@ -61,7 +59,7 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId())
                 .userName(StringUtils.hasText(request.getUserName()) ? request.getUserName() : user.getUserName())
                 .password(user.getPassword())
-                .roles(ObjectUtils.isEmpty(request.getRoles()) ? user.getRoles() : request.getRoles())
+                .role(ObjectUtils.isEmpty(request.getRole()) ? user.getRole() : request.getRole())
                 .email(StringUtils.hasText(request.getEmail()) ? request.getEmail() : user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .address(StringUtils.hasText(request.getAddress()) ? request.getAddress() : user.getAddress())

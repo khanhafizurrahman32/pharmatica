@@ -35,12 +35,12 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     @Override
     public String generateAccessToken(User user, String role) {
-        return createToken(user, accessTokenExpiration, getRolesArray(role));
+        return createToken(user, accessTokenExpiration, role);
     }
 
     @Override
     public String generateRefreshToken(User user, String role) {
-        return createToken(user, refreshTokenExpiration, getRolesArray(role));
+        return createToken(user, refreshTokenExpiration, role);
     }
 
     @Override
@@ -53,14 +53,14 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return this.refreshTokenExpiration;
     }
 
-    private String createToken(User user, long expiration, String [] rolesArray) {
+    private String createToken(User user, long expiration, String role) {
 
         try {
             return JWT.create()
                     .withIssuer(TOKEN_PROVIDER)
                     .withAudience(user.getPhoneNumber())
                     .withClaim(Utility.USER_ID, user.getId())
-                    .withArrayClaim(SecurityUtil.TOKEN_ROLE, rolesArray)
+                    .withClaim(SecurityUtil.TOKEN_ROLE, role)
                     .withIssuedAt(new Date(System.currentTimeMillis()))
                     .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
                     .sign(algorithm);

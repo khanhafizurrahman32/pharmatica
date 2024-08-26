@@ -38,9 +38,10 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
         DecodedJWT jwt = getDecodedJwtToken(authToken);
         String phoneNumber = jwt.getAudience().get(0);
         Long userId = jwt.getClaim(USER_ID).asLong();
-        AuthorizedUser authorizedUser = new AuthorizedUser(userId, phoneNumber);
+        String role = jwt.getClaim(TOKEN_ROLE).asString();
+        AuthorizedUser authorizedUser = new AuthorizedUser(userId, phoneNumber, role);
         if (StringUtils.hasText(phoneNumber)) {
-            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, getAuthorities(jwt.getClaim(TOKEN_ROLE).asList(String.class))));
+            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, getAuthorities(List.of(role))));
         }
         return Mono.just(authentication);
     }

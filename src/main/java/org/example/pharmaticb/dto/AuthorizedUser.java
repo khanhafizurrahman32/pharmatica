@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class AuthorizedUser {
     private long id;
     private String phoneNumber;
+    private String role;
 }

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.example.pharmaticb.utilities.Role;
 
 import java.io.Serializable;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -21,5 +20,5 @@ public class UserRequest implements Serializable {
     private String bloodGroup;
     private String gender;
     private int age;
-    private Set<Role> roles;
+    private Role role;
 }

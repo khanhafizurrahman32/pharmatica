@@ -29,10 +29,10 @@ public class AuthenticationServiceImpl implements AuthenticationService{
     public Mono<LoginResponse> login(LoginRequest request, HttpHeaders httpHeaders) {
         return userService.findByPhoneNumber(request.getPhoneNumber())
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
-                .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username not found", ServiceError.INVALID_REQUEST)))
+                .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username or Password is incorrect", ServiceError.INVALID_REQUEST)))
                 .map(userDetails -> LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(userDetails, userDetails.getRoles().toString()))
-                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails, userDetails.getRoles().toString()))
+                        .accessToken(jwtTokenService.generateAccessToken(userDetails, userDetails.getRole().name()))
+                        .refreshToken(jwtTokenService.generateRefreshToken(userDetails, userDetails.getRole().name()))
                         .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
                         .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());

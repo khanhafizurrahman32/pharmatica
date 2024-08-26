@@ -6,7 +6,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
-import java.util.Set;
 
 @Data
 @Builder
@@ -19,7 +18,7 @@ public class User implements Serializable {
     private long id;
     private String userName;
     private String password;
-    private Set<Role> roles;
+    private Role role;
     private boolean otpStatus;
     private String otpCode;
     private String email;
