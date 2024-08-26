@@ -8,6 +8,7 @@ import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
+import org.example.pharmaticb.Models.Response.PagedResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
@@ -21,6 +22,8 @@ import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.product.ProductServiceImpl;
 import org.example.pharmaticb.service.user.UserServiceImpl;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -224,5 +227,34 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByStatus(status)
                 .flatMap(order -> getProducts(order)
                         .map(productResponses -> convertDbToDto(order, productResponses)));
+    }
+
+    @Override
+    public Mono<PagedResponse<OrderResponse>> getPageOrders(int page, int size, String sortBy, String sortDirection) {
+        if (page < 0 || size <= 0) {
+            return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Invalid page or size parameters", ServiceError.INVALID_REQUEST));
+        }
+
+        Sort sort;
+        try {
+            Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+            sort = Sort.by(direction, sortBy);
+        } catch (IllegalArgumentException e) {
+            return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, e.getMessage(), ServiceError.INVALID_REQUEST));
+        }
+
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+
+        Flux<OrderResponse> orders = orderRepository.findAllBy(pageRequest)
+                .flatMap(order -> getProducts(order)
+                        .map(productResponses -> convertDbToDto(order, productResponses)));
+        return Mono.zip(orders.collectList(), orderRepository.count())
+                .map(tuple2 -> PagedResponse.<OrderResponse>builder()
+                        .content(tuple2.getT1())
+                        .totalElements(tuple2.getT2())
+                        .totalPages((int) Math.ceil((double) tuple2.getT2() / size))
+                        .currentPage(page)
+                        .size(size)
+                        .build());
     }
 }

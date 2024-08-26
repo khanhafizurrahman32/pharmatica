@@ -3,13 +3,11 @@ package org.example.pharmaticb.Models.DB;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @Builder

@@ -3,6 +3,7 @@ package org.example.pharmaticb.service.order;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
+import org.example.pharmaticb.Models.Response.PagedResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,4 +28,6 @@ public interface OrderService {
     Flux<OrderResponse> getOrdersWithinDate(LocalDate startDate, LocalDate effectiveEndDate);
 
     Flux<OrderResponse> getOrdersByStatus(String status);
+
+    Mono<PagedResponse<OrderResponse>> getPageOrders(int page, int size, String sortBy, String sortDirection);
 }

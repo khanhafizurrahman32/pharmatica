@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
+import org.example.pharmaticb.Models.Response.PagedResponse;
 import org.example.pharmaticb.service.order.OrderService;
 import org.example.pharmaticb.utilities.Utility;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -58,6 +59,16 @@ public class OrderController {
     public Flux<OrderResponse> getOrdersByStatus(@RequestParam String status) {
         return orderService.getOrdersByStatus(status);
     }
+
+    @GetMapping("/orders/paginated")
+    public Mono<PagedResponse<OrderResponse>> getOrdersPaginated(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "10") int size,
+                                                                @RequestParam(defaultValue = "id") String sortBy,
+                                                                @RequestParam(defaultValue = "ASC") String sortDirection) {
+        return orderService.getPageOrders(page, size, sortBy, sortDirection);
+    }
+
+
 
     @DeleteMapping("/orders/{id}")
     public Mono<Void> deleteOrder(@Valid @PathVariable long id) {
