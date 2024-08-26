@@ -3,6 +3,7 @@ package org.example.pharmaticb.repositories;
 import org.example.pharmaticb.Models.DB.Product;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProductRepository extends R2dbcRepository<Product, Long> {
@@ -12,4 +13,6 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
     Mono<Long> insertProduct(String productName, double price, String imageUrl, long categoryId, double discount, String brand, String expires,
                              String countryOfOrigin, String description, String howToUse, String ingredients, double stock, String[] coupons);
 
+
+    Flux<Product> findByCategoryId(long categoryId);
 }

@@ -40,4 +40,9 @@ public class ProductController {
     public Mono<Void> deleteProduct(@Valid @PathVariable long id) {
         return productService.deleteProduct(id);
     }
+
+    @GetMapping("/products/category/{categoryId}")
+    public Flux<ProductResponse> getProductsByCategoryId(@PathVariable long categoryId) {
+        return productService.getProductsByCategoryId(categoryId);
+    }
 }

@@ -1,6 +1,5 @@
 package org.example.pharmaticb.service.product;
 
-import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.ProductRequest;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import reactor.core.publisher.Flux;
@@ -16,4 +15,6 @@ public interface ProductService {
     Mono<ProductResponse> updateProduct(long id, ProductRequest request);
 
     Mono<Void> deleteProduct(long id);
+
+    Flux<ProductResponse> getProductsByCategoryId(long categoryId);
 }

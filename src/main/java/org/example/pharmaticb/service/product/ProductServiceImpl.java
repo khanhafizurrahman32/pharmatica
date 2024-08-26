@@ -84,6 +84,12 @@ public class ProductServiceImpl implements ProductService{
         return productRepository.deleteById(id);
     }
 
+    @Override
+    public Flux<ProductResponse> getProductsByCategoryId(long categoryId) {
+        return productRepository.findByCategoryId(categoryId)
+                .map(this::convertDbToDto);
+    }
+
     private ProductResponse convertDbToDto(Product product) {
         return mapper.map(product, ProductResponse.class);
 //        return ProductResponse.builder()
