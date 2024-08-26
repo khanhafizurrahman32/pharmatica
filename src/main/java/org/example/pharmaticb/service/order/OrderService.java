@@ -8,6 +8,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface OrderService {
     Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser);
@@ -21,4 +23,6 @@ public interface OrderService {
     Mono<Void> deleteOrder(long id);
 
     Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser);
+
+    Flux<OrderResponse> getOrdersWithinDate(LocalDate startDate, LocalDate effectiveEndDate);
 }

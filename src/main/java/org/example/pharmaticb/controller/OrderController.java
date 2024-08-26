@@ -6,12 +6,15 @@ import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.service.order.OrderService;
 import org.example.pharmaticb.utilities.Utility;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @BaseController
 @RestController
@@ -42,6 +45,13 @@ public class OrderController {
     @PutMapping("/orders/{id}")
     public Mono<OrderResponse> updateOrder(@Valid @PathVariable long id, @Valid @RequestBody OrderRequest request, Principal principal) {
         return orderService.updateOrder(id, request, Utility.extractAuthorizedUserFromPrincipal(principal));
+    }
+
+    @GetMapping("/orders/within-date")
+    public Flux<OrderResponse> getOrdersWithinDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                   @RequestParam(required = false) @DateTimeFormat() LocalDate endDate) {
+        LocalDate effectiveEndDate = endDate != null ? endDate : LocalDate.now();
+        return orderService.getOrdersWithinDate(startDate, effectiveEndDate);
     }
 
     @DeleteMapping("/orders/{id}")

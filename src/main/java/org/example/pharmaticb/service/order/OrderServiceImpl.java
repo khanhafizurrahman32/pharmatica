@@ -211,4 +211,11 @@ public class OrderServiceImpl implements OrderService {
                 })
                 .map(order -> OrderResponse.builder().status(order.getStatus()).build());
     }
+
+    @Override
+    public Flux<OrderResponse> getOrdersWithinDate(LocalDate startDate, LocalDate effectiveEndDate) {
+        return orderRepository.findByCreatedAtBetween(startDate, effectiveEndDate)
+                .flatMap(order -> getProducts(order)
+                        .map(productResponses -> convertDbToDto(order, productResponses)));
+    }
 }
