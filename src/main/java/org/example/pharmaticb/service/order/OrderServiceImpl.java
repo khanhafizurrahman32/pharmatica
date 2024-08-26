@@ -21,20 +21,25 @@ import org.example.pharmaticb.repositories.OrderRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.product.ProductServiceImpl;
 import org.example.pharmaticb.service.user.UserServiceImpl;
+import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.example.pharmaticb.utilities.DateUtil.currentTimeInDBTimeStamp;
 
 @Slf4j
 @Service
@@ -175,9 +180,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<OrderResponse> getOrderById(long id, AuthorizedUser authorizedUser) {
-        if (id != authorizedUser.getId()) {
-            return Mono.error(new InternalException(HttpStatus.FORBIDDEN, "Not allowed", ServiceError.INVALID_REQUEST));
-        }
         return orderRepository.findById(id)
                 .flatMap(order -> Mono.zip(getProducts(order), userService.getUserById(authorizedUser.getId()))
                         .map(tuple2 -> convertDbToDto(order, tuple2.getT1(), tuple2.getT2())));
@@ -221,8 +223,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<OrderResponse> getOrdersWithinDate(LocalDate startDate, LocalDate effectiveEndDate) {
-        return orderRepository.findByCreatedAtBetween(startDate, effectiveEndDate)
+    public Flux<OrderResponse> getOrdersWithinDate(String startDate, String endDate) {
+        long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
+        long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
+        return orderRepository.findByCreatedAtBetween(new Timestamp(effectiveStartDate), new Timestamp(effectiveEndDate))
                 .flatMap(order -> getProducts(order)
                         .map(productResponses -> convertDbToDto(order, productResponses)));
     }
@@ -261,5 +265,13 @@ public class OrderServiceImpl implements OrderService {
                         .currentPage(page)
                         .size(size)
                         .build());
+    }
+
+    @Override
+    public Flux<OrderResponse> getOrdersByUserId(long userId) {
+        return orderRepository.findByUserId(userId)
+                .flatMap(order -> getProducts(order)
+                        .map(productResponse -> convertDbToDto(order, productResponse)))
+                .sort(Comparator.comparing(OrderResponse::getOrderDate).reversed());
     }
 }

@@ -23,9 +23,11 @@ public interface OrderService {
 
     Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser);
 
-    Flux<OrderResponse> getOrdersWithinDate(LocalDate startDate, LocalDate effectiveEndDate);
+    Flux<OrderResponse> getOrdersWithinDate(String startDate, String endDate);
 
     Flux<OrderResponse> getOrdersByStatus(String status);
 
     Mono<PagedResponse<OrderResponse>> getPageOrders(int page, int size, String sortBy, String sortDirection);
+
+    Flux<OrderResponse> getOrdersByUserId(long userId);
 }

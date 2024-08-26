@@ -49,10 +49,9 @@ public class OrderController {
     }
 
     @GetMapping("/orders/within-date")
-    public Flux<OrderResponse> getOrdersWithinDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                                                   @RequestParam(required = false) @DateTimeFormat() LocalDate endDate) {
-        LocalDate effectiveEndDate = endDate != null ? endDate : LocalDate.now();
-        return orderService.getOrdersWithinDate(startDate, effectiveEndDate);
+    public Flux<OrderResponse> getOrdersWithinDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
+                                                   @RequestParam(required = false) @DateTimeFormat() String endDate) {
+        return orderService.getOrdersWithinDate(startDate, endDate);
     }
 
     @GetMapping("/orders/by-status")
@@ -73,5 +72,10 @@ public class OrderController {
     @DeleteMapping("/orders/{id}")
     public Mono<Void> deleteOrder(@Valid @PathVariable long id) {
         return orderService.deleteOrder(id);
+    }
+
+    @GetMapping("/orders/user/{userId}")
+    public Flux<OrderResponse> getOrdersByUserId(@PathVariable long userId) {
+        return orderService.getOrdersByUserId(userId);
     }
 }
