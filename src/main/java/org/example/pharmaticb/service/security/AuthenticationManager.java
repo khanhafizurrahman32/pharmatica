@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.exception.InternalException;
+import org.example.pharmaticb.service.auth.JwtTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,33 +33,25 @@ import static org.example.pharmaticb.utilities.Utility.USER_ID;
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     private final Algorithm tokenAlgorithm;
+    private final JwtTokenService jwtTokenService;
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
+        boolean roleAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> {
+                    log.info("Role AM: {}", a.getAuthority());
+                    return a.getAuthority().equals("ROLE_ADMIN");
+                });
+        log.info("isRoleAdmin {}", roleAdmin);
         var authToken = authentication.getCredentials().toString();
-        DecodedJWT jwt = getDecodedJwtToken(authToken);
+        DecodedJWT jwt = jwtTokenService.getDecodedJwtToken(authToken);
         String phoneNumber = jwt.getAudience().get(0);
         Long userId = jwt.getClaim(USER_ID).asLong();
         String role = jwt.getClaim(TOKEN_ROLE).asString();
-        AuthorizedUser authorizedUser = new AuthorizedUser(userId, phoneNumber, role);
+        AuthorizedUser authorizedUser = new AuthorizedUser(userId, phoneNumber, "ROLE_" + role);
         if (StringUtils.hasText(phoneNumber)) {
-            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, getAuthorities(List.of(role))));
+            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))));
         }
         return Mono.just(authentication);
-    }
-
-    private Collection<? extends GrantedAuthority> getAuthorities(List<String> roles) {
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-    }
-
-    private DecodedJWT getDecodedJwtToken(String authToken) {
-        JWTVerifier verifier = JWT.require(this.tokenAlgorithm).withIssuer(TOKEN_PROVIDER).build();
-        try {
-            return verifier.verify(authToken);
-        } catch (JWTVerificationException ex) {
-            throw  new InternalException(HttpStatus.UNAUTHORIZED, "Code mismatch", "Code error");
-        }
     }
 }

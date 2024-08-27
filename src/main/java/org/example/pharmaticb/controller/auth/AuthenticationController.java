@@ -29,7 +29,7 @@ public class AuthenticationController {
         return authenticationService.login(request, httpHeaders);
     }
 
-    @PostMapping("/auth/updatePassword")
+    @PostMapping("/auth/update-password")
     public Mono<UpdatePasswordResponse> updatePassword(@Valid @RequestBody UpdatePasswordRequest request,
                                                        Principal principal,
                                                        @RequestHeader HttpHeaders httpHeaders) {

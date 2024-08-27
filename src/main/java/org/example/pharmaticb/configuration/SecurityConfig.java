@@ -4,6 +4,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pharmaticb.service.auth.JwtTokenService;
 import org.example.pharmaticb.service.security.AuthenticationManager;
 import org.example.pharmaticb.service.security.jwt.ReactiveJWTTokenAuthenticationFilter;
 import org.example.pharmaticb.service.security.SecurityContextRepository;
@@ -31,9 +32,12 @@ public class SecurityConfig {
     private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login",
             "/api/auth/login", "/api/otp/send", "/api/otp/verify", "api/products", "api/categories");
 
+    private static final List<String> roleBasedOpenApis = List.of("/api/countries");
+    private final JwtTokenService jwtTokenService;
+
     @Bean
     public AuthenticationManager authenticationManager(Algorithm tokenAlgorithm) {
-        return new AuthenticationManager(tokenAlgorithm);
+        return new AuthenticationManager(tokenAlgorithm, jwtTokenService);
     }
 
     @PostConstruct
@@ -43,7 +47,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityContextRepository securityContextRepository(AuthenticationManager authenticationManager) {
-        return new SecurityContextRepository(authenticationManager);
+        return new SecurityContextRepository(authenticationManager, jwtTokenService);
     }
 
     @Bean
@@ -72,16 +76,20 @@ public class SecurityConfig {
                                                             AuthenticationManager authenticationManager,
                                                             SecurityContextRepository securityContextRepository) {
         String[] openApisArray = openApis.toArray(new String[0]);
-        Arrays.stream(openApisArray).forEach(log::info);
+        String[] roleBasedApisArray = roleBasedOpenApis.toArray(new String[0]);
         return http
                 .authenticationManager(authenticationManager)
                 .securityContextRepository(securityContextRepository)
-                .authorizeExchange((exchanges) ->
-                        exchanges.pathMatchers(openApisArray).permitAll()
-                                .pathMatchers("/admin/**").hasRole("ADMIN")
-                                .pathMatchers("/customer/**").hasRole("USER")
-                                .anyExchange()
-                                .authenticated()
+                .authorizeExchange((exchanges) -> {
+                            System.out.println("Role-based APIs: " + Arrays.toString(roleBasedApisArray));
+                            exchanges
+                                    .pathMatchers(openApisArray).permitAll()
+                                    .pathMatchers(roleBasedApisArray).hasRole("ADMIN")
+                                    .pathMatchers("/customer/**").hasRole("USER")
+                                    .anyExchange()
+                                    .authenticated();
+                        }
+
                 )
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

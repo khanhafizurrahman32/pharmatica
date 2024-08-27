@@ -1,7 +1,7 @@
 package org.example.pharmaticb.service.auth;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.example.pharmaticb.Models.DB.User;
-import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 
 public interface JwtTokenService {
     String generateAccessToken(User user, String role);
@@ -11,4 +11,6 @@ public interface JwtTokenService {
     int getAccessExpiredTime();
 
     int getRefreshExpiredTime();
+
+    DecodedJWT getDecodedJwtToken(String token);
 }

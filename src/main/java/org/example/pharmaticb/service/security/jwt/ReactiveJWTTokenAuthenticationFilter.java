@@ -6,6 +6,7 @@ import org.example.pharmaticb.dto.AuthorizedUser;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,7 +39,17 @@ public class ReactiveJWTTokenAuthenticationFilter implements WebFilter {
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext -> (AuthorizedUser)securityContext.getAuthentication().getPrincipal())
+                .map(securityContext -> {
+                    Authentication authentication = securityContext.getAuthentication();
+                    log.info("Authentication: {}", authentication);
+                    log.info("Username: {}", authentication.getName());
+                    log.info("Authorites: {}", authentication.getAuthorities());
+                    log.info("Is authenticated: {}", authentication.isAuthenticated());
+                    return (AuthorizedUser)securityContext.getAuthentication().getPrincipal();
+                })
+                .doOnNext(authorizedUser -> {
+                    log.info("Current user: {} :: role: {} " , authorizedUser.getPhoneNumber(), authorizedUser.getRole());
+                })
                 .defaultIfEmpty(AuthorizedUser.builder().build())
                 .flatMap(authorizedUser -> {
                     if (ObjectUtils.isEmpty(authorizedUser)) {

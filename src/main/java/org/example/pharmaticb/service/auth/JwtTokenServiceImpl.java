@@ -1,18 +1,19 @@
 package org.example.pharmaticb.service.auth;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.example.pharmaticb.Models.DB.User;
-import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
+import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.utilities.SecurityUtil;
 import org.example.pharmaticb.utilities.Utility;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
 import java.util.Date;
 
 @Service
@@ -69,12 +70,13 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         }
     }
 
-    private String [] getRolesArray(String role) {
-        return new String[] {role};
-    }
-
-    private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    @Override
+    public DecodedJWT getDecodedJwtToken(String token) {
+        JWTVerifier verifier = JWT.require(this.algorithm).withIssuer(TOKEN_PROVIDER).build();
+        try {
+            return verifier.verify(token);
+        } catch (JWTVerificationException exception) {
+            throw new InternalException(HttpStatus.UNAUTHORIZED, "Code mismatch", "Code error");
+        }
     }
 }
