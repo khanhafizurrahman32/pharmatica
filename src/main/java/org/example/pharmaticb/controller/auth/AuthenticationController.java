@@ -1,8 +1,10 @@
 package org.example.pharmaticb.controller.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.example.pharmaticb.Models.Request.auth.ForgetPasswordRequest;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Request.auth.UpdatePasswordRequest;
+import org.example.pharmaticb.Models.Response.auth.ForgetPasswordResponse;
 import org.example.pharmaticb.Models.Response.auth.UpdatePasswordResponse;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.controller.BaseController;
@@ -34,5 +36,10 @@ public class AuthenticationController {
                                                        Principal principal,
                                                        @RequestHeader HttpHeaders httpHeaders) {
         return authenticationService.updatePassword(request, Utility.extractAuthorizedUserFromPrincipal(principal), httpHeaders);
+    }
+
+    @PostMapping("/auth/forget-password")
+    public Mono<ForgetPasswordResponse> forgetPassword(@Valid @RequestBody ForgetPasswordRequest request, @RequestHeader HttpHeaders httpHeaders) {
+        return authenticationService.forgetPassword(request, httpHeaders);
     }
 }

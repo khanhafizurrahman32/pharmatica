@@ -1,4 +1,4 @@
-package org.example.pharmaticb.Models.Request.auth;
+package org.example.pharmaticb.Models.Response.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdatePasswordRequest implements Serializable {
-    private String oldPassword;
-    private String newPassword;
+public class ForgetPasswordResponse implements Serializable {
+    private String tempPassword;
 }

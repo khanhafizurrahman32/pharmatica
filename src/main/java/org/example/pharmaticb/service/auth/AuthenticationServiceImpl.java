@@ -1,8 +1,10 @@
 package org.example.pharmaticb.service.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.example.pharmaticb.Models.Request.auth.ForgetPasswordRequest;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Request.auth.UpdatePasswordRequest;
+import org.example.pharmaticb.Models.Response.auth.ForgetPasswordResponse;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.Models.Response.auth.UpdatePasswordResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
@@ -50,5 +52,20 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                     return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Password does not match", ServiceError.INVALID_REQUEST));
                 })
                 .switchIfEmpty(Mono.defer(() ->Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User does not exist", ServiceError.INVALID_REQUEST))));
+    }
+
+    @Override
+    public Mono<ForgetPasswordResponse> forgetPassword(ForgetPasswordRequest request, HttpHeaders httpHeaders) {
+        return userService.findByPhoneNumber(request.getPhoneNumber())
+                .map(user -> {
+                    sendOtp();
+                    return ForgetPasswordResponse.builder().tempPassword("temp").build();
+                })
+                .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User does not exist", ServiceError.INVALID_REQUEST)));
+    }
+
+    //todo: need to incorporate sending message code
+    private void sendOtp() {
+
     }
 }
