@@ -70,8 +70,8 @@ public class OrderController {
 
 
     @DeleteMapping("/orders/{id}")
-    public Mono<Void> deleteOrder(@Valid @PathVariable long id) {
-        return orderService.deleteOrder(id);
+    public Mono<Void> deleteOrder(@Valid @PathVariable long id, Principal principal) {
+        return orderService.deleteOrder(id, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
     @GetMapping("/orders/user/{userId}")

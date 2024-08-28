@@ -8,8 +8,6 @@ import org.example.pharmaticb.dto.AuthorizedUser;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
-
 public interface OrderService {
     Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser);
 
@@ -19,7 +17,7 @@ public interface OrderService {
 
     Mono<OrderResponse> updateOrder(long id, OrderRequest request, AuthorizedUser authorizedUser);
 
-    Mono<Void> deleteOrder(long id);
+    Mono<Void> deleteOrder(long id, AuthorizedUser authorizedUser);
 
     Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser);
 

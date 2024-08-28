@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.service.auth.JwtTokenServiceImpl.TOKEN_PROVIDER;
 import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_ROLE;
+import static org.example.pharmaticb.utilities.Utility.ROLE_PREFIX;
 import static org.example.pharmaticb.utilities.Utility.USER_ID;
 
 @Slf4j
@@ -48,9 +49,9 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
         String phoneNumber = jwt.getAudience().get(0);
         Long userId = jwt.getClaim(USER_ID).asLong();
         String role = jwt.getClaim(TOKEN_ROLE).asString();
-        AuthorizedUser authorizedUser = new AuthorizedUser(userId, phoneNumber, "ROLE_" + role);
+        AuthorizedUser authorizedUser = new AuthorizedUser(userId, phoneNumber, ROLE_PREFIX + role);
         if (StringUtils.hasText(phoneNumber)) {
-            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))));
+            return Mono.just(new UsernamePasswordAuthenticationToken(authorizedUser, null, Collections.singletonList(new SimpleGrantedAuthority(ROLE_PREFIX + role))));
         }
         return Mono.just(authentication);
     }

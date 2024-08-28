@@ -1,7 +1,7 @@
 package org.example.pharmaticb.Models.DB;
 
 import lombok.*;
-import org.example.pharmaticb.utilities.Role;
+import org.example.pharmaticb.dto.enums.Role;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 

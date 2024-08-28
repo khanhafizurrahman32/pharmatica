@@ -1,4 +1,4 @@
-package org.example.pharmaticb.utilities;
+package org.example.pharmaticb.dto.enums;
 
 public enum Role {
     USER,

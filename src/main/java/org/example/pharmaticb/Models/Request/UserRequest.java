@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.pharmaticb.utilities.Role;
+import org.example.pharmaticb.dto.enums.Role;
 
 import java.io.Serializable;
 

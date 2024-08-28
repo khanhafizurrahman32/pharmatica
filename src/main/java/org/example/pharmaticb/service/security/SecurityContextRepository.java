@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_PREFIX;
 import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_ROLE;
+import static org.example.pharmaticb.utilities.Utility.ROLE_PREFIX;
 
 @Slf4j
 public class SecurityContextRepository implements ServerSecurityContextRepository {
@@ -46,7 +47,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
             String token = authHeader.substring(7);
             DecodedJWT jwt = jwtTokenService.getDecodedJwtToken(token);
             String role = jwt.getClaim(TOKEN_ROLE).asString();
-            List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+            List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(ROLE_PREFIX+ role));
 
             var usernamePasswordAuthentication = new UsernamePasswordAuthenticationToken(token, token, authorities);
 

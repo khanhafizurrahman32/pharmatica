@@ -23,6 +23,7 @@ import org.example.pharmaticb.service.product.ProductServiceImpl;
 import org.example.pharmaticb.service.user.UserServiceImpl;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.example.pharmaticb.dto.enums.Role;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.utilities.DateUtil.currentTimeInDBTimeStamp;
+import static org.example.pharmaticb.utilities.Utility.ROLE_PREFIX;
 
 @Slf4j
 @Service
@@ -196,7 +198,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Mono<Void> deleteOrder(long id) {
+    public Mono<Void> deleteOrder(long id, AuthorizedUser authorizedUser) {
+        if ((ROLE_PREFIX + Role.USER.name()).equals(authorizedUser.getRole())) {
+            return orderRepository.findById(id)
+                    .filter(order -> OrderStatus.INITIATED.name().equals(order.getStatus()) && authorizedUser.getId() == order.getUserId())
+                    .flatMap(order -> orderRepository.deleteById(id))
+                    .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be deleted", "o1"))));
+        }
         return orderRepository.deleteById(id);
     }
 
@@ -204,6 +212,11 @@ public class OrderServiceImpl implements OrderService {
     public Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findById(Long.valueOf(request.getOrderId()))
                 .flatMap(order -> {
+                    var currentStatus = OrderStatus.valueOf(order.getStatus().toUpperCase());
+                    if (!currentStatus.canTransitionTo(OrderStatus.valueOf(request.getStatus().toUpperCase()))) {
+                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be updated", "o1"));
+                    }
+
                     order.setStatus(request.getStatus());
                     if (OrderStatus.COMPLETED.name().equals(request.getStatus())) {
                         return Flux.fromIterable(getItems(order))
