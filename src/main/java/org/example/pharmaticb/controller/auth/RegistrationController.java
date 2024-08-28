@@ -1,10 +1,11 @@
 package org.example.pharmaticb.controller.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.example.pharmaticb.Models.Request.auth.UserStatusRequest;
 import org.example.pharmaticb.Models.Request.auth.OtpRequest;
-import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Request.auth.VerifyOtpRequest;
+import org.example.pharmaticb.Models.Response.auth.UserStatusResponse;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.Models.Response.auth.OtpResponse;
 import org.example.pharmaticb.Models.Response.auth.VerifyOtpResponse;
@@ -24,6 +25,11 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class RegistrationController {
     private final RegistrationService registrationService;
+
+    @PostMapping("/reg/user-status")
+    public Mono<UserStatusResponse> getUserStatus(@Valid @RequestBody UserStatusRequest request, @RequestHeader HttpHeaders httpHeaders) {
+        return registrationService.getUserStatus(request, httpHeaders);
+    }
 
     @PostMapping("/reg/login")
     public Mono<LoginResponse> registrationLogin(@Valid @RequestBody RegistrationRequest request, @RequestHeader HttpHeaders httpHeaders) {

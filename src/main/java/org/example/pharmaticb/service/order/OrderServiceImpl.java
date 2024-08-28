@@ -14,7 +14,7 @@ import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
 import org.example.pharmaticb.dto.UserDto;
-import org.example.pharmaticb.dto.enums.Status;
+import org.example.pharmaticb.dto.enums.OrderStatus;
 import org.example.pharmaticb.dto.records.Item;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.OrderRepository;
@@ -70,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
                         .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
                         .userId(id)
                         .items(objectMapper.valueToTree(request.getItems()))
-                        .status(Status.INITIATED.name())
+                        .status(OrderStatus.INITIATED.name())
                         .totalAmount(totalAmount)
                         .deliveryCharge(0.0) //todo
                         .couponApplied(request.getCouponApplied())
@@ -205,7 +205,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(Long.valueOf(request.getOrderId()))
                 .flatMap(order -> {
                     order.setStatus(request.getStatus());
-                    if (Status.COMPLETED.name().equals(request.getStatus())) {
+                    if (OrderStatus.COMPLETED.name().equals(request.getStatus())) {
                         return Flux.fromIterable(getItems(order))
                                 .flatMap(item -> productRepository.findById(item.productId())
                                         .flatMap(product -> {

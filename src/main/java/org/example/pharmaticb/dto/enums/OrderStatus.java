@@ -1,6 +1,6 @@
 package org.example.pharmaticb.dto.enums;
 
-public enum Status {
+public enum OrderStatus {
     INITIATED,
     ACCEPTED,
     COMPLETED,

@@ -3,13 +3,12 @@ package org.example.pharmaticb.service.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
-import org.example.pharmaticb.Models.Request.auth.LoginRequest;
-import org.example.pharmaticb.Models.Request.auth.OtpRequest;
-import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
-import org.example.pharmaticb.Models.Request.auth.VerifyOtpRequest;
+import org.example.pharmaticb.Models.Request.auth.*;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.Models.Response.auth.OtpResponse;
+import org.example.pharmaticb.Models.Response.auth.UserStatusResponse;
 import org.example.pharmaticb.Models.Response.auth.VerifyOtpResponse;
+import org.example.pharmaticb.dto.enums.UserStatus;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.UserRepository;
 import org.example.pharmaticb.service.user.UserService;
@@ -21,12 +20,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
+
+import static org.example.pharmaticb.dto.enums.UserStatus.NOT_REGISTERED;
+import static org.example.pharmaticb.dto.enums.UserStatus.OTP_VERIFIED;
 
 
 @Service
@@ -45,9 +48,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public Mono<LoginResponse> registrationLogin(@Valid RegistrationRequest registrationRequest, HttpHeaders httpHeaders) {
         return findByPhoneNumber(registrationRequest.getPhoneNumber())
-                .flatMap(existingUser -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User already exists", ServiceError.INVALID_REQUEST)))
-                .switchIfEmpty(Mono.defer(() -> getLoginResponseMono(registrationRequest)))
-                .cast(LoginResponse.class);
+                .flatMap(existingUser -> {
+                    if (OTP_VERIFIED.name().equals(existingUser.getRegistrationStatus())) {
+                        return getLoginResponseMono(registrationRequest);
+                    }
+                    if (NOT_REGISTERED.name().equals(existingUser.getRegistrationStatus())) {
+                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is not verified through OTP", ServiceError.INVALID_REQUEST));
+                    }
+                    return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User already Registered", ServiceError.INVALID_REQUEST));
+                })
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is not found", ServiceError.INVALID_REQUEST))));
     }
 
     @Override
@@ -82,8 +92,29 @@ public class RegistrationServiceImpl implements RegistrationService {
     public Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders) {
         return userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .filter(this::validateOtpRequest)
-                .flatMap(user -> verifyOtp(request, user))
+                .flatMap(user -> {
+                    Mono<VerifyOtpResponse> verifyOtpResponseMono = verifyOtp(request, user);
+                    Schedulers.boundedElastic().schedule(() -> updateUserStatus(user).subscribe());
+                    return verifyOtpResponseMono;
+
+                })
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Wrong otp", ServiceError.WRONG_OTP))));
+    }
+
+    private Mono<User> updateUserStatus(User user) {
+        user.setRegistrationStatus(OTP_VERIFIED.name());
+        return userRepository.save(user);
+    }
+
+    @Override
+    public Mono<UserStatusResponse> getUserStatus(UserStatusRequest request, HttpHeaders httpHeaders) {
+        return userRepository.findByPhoneNumber(request.getPhoneNumber())
+                .map(user -> UserStatusResponse.builder().status(user.getRegistrationStatus()).build())
+                .switchIfEmpty(Mono.defer(() -> userRepository.save(User.builder()
+                                .phoneNumber(request.getPhoneNumber())
+                                .registrationStatus(UserStatus.NOT_REGISTERED.name())
+                                .build())
+                        .map(user -> UserStatusResponse.builder().status(user.getRegistrationStatus()).build())));
     }
 
     private Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, User user) {
