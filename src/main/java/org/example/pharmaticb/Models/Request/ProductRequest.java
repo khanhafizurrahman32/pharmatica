@@ -17,17 +17,19 @@ public class ProductRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String productName;
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private double price;
+    private String price;
     private String imageUrl;
     @NotBlank(message = ServiceError.INVALID_REQUEST)
-    private long categoryId;
-    private double discount;
-    private String brand;
+    private String categoryId;
+    private String discount;
+    @NotBlank(message = ServiceError.INVALID_REQUEST)
+    private String brandId;
     private String expires;
-    private String countryOfOrigin;
+    @NotBlank(message = ServiceError.INVALID_REQUEST)
+    private String countryId;
     private String description;
     private String howToUse;
     private String ingredients;
-    private double stock;
+    private String stock;
     private String[] coupons;
 }

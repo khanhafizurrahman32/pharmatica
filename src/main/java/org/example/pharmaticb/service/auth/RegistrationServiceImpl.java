@@ -8,6 +8,7 @@ import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.Models.Response.auth.OtpResponse;
 import org.example.pharmaticb.Models.Response.auth.UserStatusResponse;
 import org.example.pharmaticb.Models.Response.auth.VerifyOtpResponse;
+import org.example.pharmaticb.dto.enums.Role;
 import org.example.pharmaticb.dto.enums.UserStatus;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.UserRepository;
@@ -18,9 +19,9 @@ import org.example.pharmaticb.utilities.Utility;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +42,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
     private final SecureRandom secureRandom;
+    private final PasswordEncoder passwordEncoder;
     @Value("${app.profile}")
     private String profile;
 
@@ -50,7 +52,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         return findByPhoneNumber(registrationRequest.getPhoneNumber())
                 .flatMap(existingUser -> {
                     if (OTP_VERIFIED.name().equals(existingUser.getRegistrationStatus())) {
-                        return getLoginResponseMono(registrationRequest);
+                        return getLoginResponseMono(registrationRequest, existingUser);
                     }
                     if (NOT_REGISTERED.name().equals(existingUser.getRegistrationStatus())) {
                         return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is not verified through OTP", ServiceError.INVALID_REQUEST));
@@ -65,7 +67,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         return userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .filter(this::validateOtpRequest)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, ServiceError.INVALID_REQUEST, USER_IS_NOT_ELIGIBLE_FOR_GETTING_OTP))))
-                .map(user -> {
+                .flatMap(user -> {
                     var otpCode = getOtpCode();
 //                    var otpHash = generateHash(otpCode);
 
@@ -75,7 +77,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
                     sendOtp(request, smsContent);
                     UpdateUserData(otpCode, user);
-                    return OtpResponse.builder().build();
+                    return userRepository.save(user)
+                            .thenReturn(OtpResponse.builder().build());
                 });
     }
 
@@ -85,19 +88,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private long getOtpExpirationTime() {
-        return System.currentTimeMillis() + Utility.otpExpirationInSecond() * Utility.ONE_SECOND_IN_MILLIS;
+        var aa = System.currentTimeMillis() + Utility.otpExpirationInSecond() * Utility.ONE_SECOND_IN_MILLIS;
+        return aa;
     }
 
     @Override
     public Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders) {
         return userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .filter(this::validateOtpRequest)
-                .flatMap(user -> {
-                    Mono<VerifyOtpResponse> verifyOtpResponseMono = verifyOtp(request, user);
-                    Schedulers.boundedElastic().schedule(() -> updateUserStatus(user).subscribe());
-                    return verifyOtpResponseMono;
-
-                })
+                .flatMap(user -> verifyOtp(request, user)
+                        .flatMap(verifyOtpResponse -> updateUserStatus(user).map(u -> verifyOtpResponse)))
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Wrong otp", ServiceError.WRONG_OTP))));
     }
 
@@ -119,10 +119,14 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, User user) {
         if (System.currentTimeMillis() > user.getOtpExpirationTime()) {
+            log.info("current time {} :: otpExpirationTime {}", System.currentTimeMillis(), user.getOtpExpirationTime());
             throw new InternalException(HttpStatus.INTERNAL_SERVER_ERROR, "OTP time exceeded", ServiceError.INVALID_REQUEST);
         }
 
-        if (Objects.equals(user.getOtpCode(), Base64.getEncoder().encodeToString(request.getOtpCode().getBytes()))) {
+        byte[] decodedBytes  = Base64.getDecoder().decode(user.getOtpCode().getBytes());
+        String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+
+        if (Objects.equals(request.getOtpCode(), decodedString)) {
             return getVerifiedOtpResponse(user);
         }
 
@@ -150,8 +154,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private boolean validateOtpRequest(User user) {
-        return Utility.INITIATED.equals(user.getRegistrationStatus())
+        var aa = NOT_REGISTERED.name().equals(user.getRegistrationStatus())
                 && !user.isOtpStatus();
+        return aa;
     }
 
     private void sendOtp(OtpRequest request, String smsContent) {
@@ -208,8 +213,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         return otpCode.toString();
     }
 
-    private Mono<LoginResponse> getLoginResponseMono(RegistrationRequest request) {
-        return userService.save(request)
+    private Mono<LoginResponse> getLoginResponseMono(RegistrationRequest request, User existingUser) {
+        existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        existingUser.setRegistrationStatus(UserStatus.REGISTERED.name());
+        existingUser.setRole(request.getRole());
+        return userService.save(existingUser)
                 .map(user -> LoginResponse.builder()
                         .accessToken(jwtTokenService.generateAccessToken(user, request.getRole().name()))
                         .refreshToken(jwtTokenService.generateRefreshToken(user, request.getRole().name()))

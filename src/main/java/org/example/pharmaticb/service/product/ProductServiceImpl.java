@@ -4,8 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.ProductRequest;
+import org.example.pharmaticb.Models.Response.BrandResponse;
+import org.example.pharmaticb.Models.Response.CategoryResponse;
+import org.example.pharmaticb.Models.Response.CountryResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.repositories.ProductRepository;
+import org.example.pharmaticb.service.brand.BrandService;
+import org.example.pharmaticb.service.category.CategoryService;
+import org.example.pharmaticb.service.country.CountryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -15,34 +21,35 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper mapper;
+    private final CategoryService categoryService;
+    private final BrandService brandService;
+    private final CountryService countryService;
 
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
-        Product product = convertDtoToDb(request);
-        return productRepository.insertProduct(product.getProductName(), product.getPrice(), product.getImageUrl(), product.getCategoryId(),
-                product.getDiscount(), product.getBrand(), product.getExpires(), product.getCountryOfOrigin(),
-                product.getDescription(), product.getHowToUse(),product.getIngredients(), product.getStock(), product.getCoupons())
-                .map(id -> {
-                    product.setId(id);
-                    product.setNewProduct(true);
-                    return product;
-                })
-                .map(product1 -> mapper.map(product1, ProductResponse.class));
+        return productRepository.save(convertDtoToDb(request))
+                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
+                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
     @Override
     public Flux<ProductResponse> getAllProducts() {
         return productRepository.findAll()
-                .map(this::convertDbToDto);
+                .flatMap(product -> {
+                    log.info("Product Id: {}", product.getId());
+                    return Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
+                            .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3()));
+                });
     }
 
     @Override
     public Mono<ProductResponse> getProductById(long id) {
         return productRepository.findById(id)
-                .map(this::convertDbToDto);
+                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
+                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
     @Override
@@ -50,16 +57,10 @@ public class ProductServiceImpl implements ProductService{
         return productRepository.findById(id)
                 .flatMap(product -> {
                     updateProductFromRequest(product, request);
-                    product.setNewProduct(false);
                     return productRepository.save(product);
                 })
-                .map(product1 -> mapper.map(product1, ProductResponse.class));
-//        return productRepository.findById(id)
-//                .flatMap(product -> {
-//                    mapper.map(request, product);
-//                    return productRepository.save(product)
-//                            .map(product1 -> mapper.map(product1,ProductResponse.class));
-//                });
+                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
+                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
     private void updateProductFromRequest(Product product, ProductRequest request) {
@@ -87,44 +88,57 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public Flux<ProductResponse> getProductsByCategoryId(long categoryId) {
         return productRepository.findByCategoryId(categoryId)
-                .map(this::convertDbToDto);
+                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
+                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
-    private ProductResponse convertDbToDto(Product product) {
-        return mapper.map(product, ProductResponse.class);
-//        return ProductResponse.builder()
-//                .productId(String.valueOf(product.getId()))
-//                .productName(product.getProductName())
-//                .price(product.getPrice())
-//                .imageUrl(product.getImageUrl())
-//                .categoryId(product.getCategoryId())
-//                .discount(product.getDiscount())
-//                .brand(product.getBrand())
-//                .expires(product.getExpires())
-//                .countryOfOrigin(product.getCountryOfOrigin())
-//                .description(product.getDescription())
-//                .howToUse(product.getHowToUse())
-//                .ingredients(product.getIngredients())
-//                .stock(product.getStock())
-//                .coupons(product.getCoupons())
-//                .build();
+    private Mono<CountryResponse> getCountryResponse(long countryId) {
+        return countryService.getCategoryById(countryId);
     }
+
+    private ProductResponse convertDbToDto(Product product, CategoryResponse categoryResponse, BrandResponse brandResponse, CountryResponse countryResponse) {
+        return ProductResponse.builder()
+                .productId(String.valueOf(product.getId()))
+                .productName(product.getProductName())
+                .price(product.getPrice())
+                .imageUrl(product.getImageUrl())
+                .category(categoryResponse)
+                .discount(product.getDiscount())
+                .brand(brandResponse)
+                .expires(product.getExpires())
+                .country(countryResponse)
+                .description(product.getDescription())
+                .howToUse(product.getHowToUse())
+                .ingredients(product.getIngredients())
+                .stock(product.getStock())
+                .coupons(product.getCoupons())
+                .build();
+    }
+
+    private Mono<CategoryResponse> getCategoryResponse(long categoryId) {
+        return categoryService.getCategoryById(categoryId);
+    }
+
+    private Mono<BrandResponse> getBrandResponse(long brandId) {
+        return brandService.getBrandById(brandId);
+    }
+
 
     private Product convertDtoToDb(ProductRequest request) {
-        return mapper.map(request, Product.class);
-//        return Product.builder()
-//                .productName(request.getProductName())
-//                .price(request.getPrice())
-//                .categoryId(request.getCategoryId())
-//                .discount(request.getDiscount())
-//                .brand(request.getBrand())
-//                .expires(request.getExpires())
-//                .countryOfOrigin(request.getCountryOfOrigin())
-//                .description(request.getDescription())
-//                .howToUse(request.getHowToUse())
-//                .ingredients(request.getIngredients())
-//                .stock(request.getStock())
-//                .coupons(request.getCoupons())
-//                .build();
+        return Product.builder()
+                .productName(request.getProductName())
+                .price(Double.parseDouble(request.getPrice()))
+                .imageUrl(request.getImageUrl())
+                .categoryId(Long.parseLong(request.getCategoryId()))
+                .discount(Double.parseDouble(request.getDiscount()))
+                .brandId(Long.parseLong(request.getBrandId()))
+                .expires(request.getExpires())
+                .countryId(Long.parseLong(request.getCountryId()))
+                .description(request.getDescription())
+                .howToUse(request.getHowToUse())
+                .ingredients(request.getIngredients())
+                .stock(Double.parseDouble(request.getStock()))
+                .coupons(request.getCoupons())
+                .build();
     }
 }

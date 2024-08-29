@@ -1,9 +1,6 @@
 package org.example.pharmaticb.Models.DB;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 //import org.springframework.data.annotation.;
 import org.springframework.data.annotation.Transient;
@@ -18,6 +15,7 @@ import java.io.Serializable;
 @Table("product")
 public class Product implements Serializable {
     @Id
+    @Generated
     private Long id;
     private String productName;
     private double price;
@@ -25,19 +23,14 @@ public class Product implements Serializable {
 //    FK
     private long categoryId;
     private double discount;
-    private String brand;
+//    FK
+    private long brandId;
     private String expires;
-    private String countryOfOrigin;
+//    FK
+    private long countryId;
     private String description;
     private String howToUse;
     private String ingredients;
     private double stock;
     private String[] coupons;
-
-    @Transient
-    private boolean newProduct = true;
-
-    public boolean isNew() {
-        return this.newProduct || id == null;
-    }
 }

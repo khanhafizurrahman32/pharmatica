@@ -2,7 +2,6 @@ package org.example.pharmaticb.service.user;
 
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UserRequest;
-import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import reactor.core.publisher.Flux;
@@ -13,7 +12,7 @@ import javax.validation.Valid;
 public interface UserService {
     Mono<User> findByPhoneNumber(String phoneNumber);
 
-    Mono<User> save(RegistrationRequest request);
+    Mono<User> save(User user);
 
     Flux<UserResponse> getAllUsers();
 

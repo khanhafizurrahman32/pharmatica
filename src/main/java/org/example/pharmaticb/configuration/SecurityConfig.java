@@ -30,9 +30,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login",
-            "/api/auth/login", "/api/otp/send", "/api/otp/verify", "api/products", "api/categories", "/auth/forget-password");
+            "/api/auth/login", "/api/otp/send", "/api/otp/verify", "api/products", "api/categories", "/auth/forget-password",
+            "/api/reg/user-status");
 
-    private static final List<String> roleBasedOpenApis = List.of("/api/countries");
+    private static final List<String> roleBasedOpenApis = List.of("/api/unknown");
     private final JwtTokenService jwtTokenService;
 
     @Bean
