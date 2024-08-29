@@ -18,6 +18,5 @@ import java.io.Serializable;
 public class RegistrationRequest extends CommonRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String password;
-    @NotBlank(message = ServiceError.INVALID_REQUEST)
     private Role role;
 }

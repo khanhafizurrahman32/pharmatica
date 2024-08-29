@@ -3,7 +3,10 @@ package org.example.pharmaticb.service.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
-import org.example.pharmaticb.Models.Request.auth.*;
+import org.example.pharmaticb.Models.Request.auth.OtpRequest;
+import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
+import org.example.pharmaticb.Models.Request.auth.UserStatusRequest;
+import org.example.pharmaticb.Models.Request.auth.VerifyOtpRequest;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
 import org.example.pharmaticb.Models.Response.auth.OtpResponse;
 import org.example.pharmaticb.Models.Response.auth.UserStatusResponse;
@@ -21,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -123,7 +127,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new InternalException(HttpStatus.INTERNAL_SERVER_ERROR, "OTP time exceeded", ServiceError.INVALID_REQUEST);
         }
 
-        byte[] decodedBytes  = Base64.getDecoder().decode(user.getOtpCode().getBytes());
+        byte[] decodedBytes = Base64.getDecoder().decode(user.getOtpCode().getBytes());
         String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
 
         if (Objects.equals(request.getOtpCode(), decodedString)) {
@@ -219,8 +223,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         existingUser.setRole(request.getRole());
         return userService.save(existingUser)
                 .map(user -> LoginResponse.builder()
-                        .accessToken(jwtTokenService.generateAccessToken(user, request.getRole().name()))
-                        .refreshToken(jwtTokenService.generateRefreshToken(user, request.getRole().name()))
+                        .accessToken(jwtTokenService.generateAccessToken(user, ObjectUtils.isEmpty(request.getRole()) ? Role.USER.name() : request.getRole().name()))
+                        .refreshToken(jwtTokenService.generateRefreshToken(user, ObjectUtils.isEmpty(request.getRole()) ? Role.USER.name() : request.getRole().name()))
                         .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
                         .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
                         .build());
