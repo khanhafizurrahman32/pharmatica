@@ -20,4 +20,5 @@ public class OrderRequest implements Serializable {
     private List<Item> items;
     private String couponApplied;
     private String paymentChannel;
+    private String prescriptionUrl;
 }

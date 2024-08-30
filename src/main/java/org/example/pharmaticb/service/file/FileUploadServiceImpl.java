@@ -24,6 +24,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public Mono<UploadFileResponse> uploadFile(UploadFileRequest request, AuthorizedUser authorizedUser) {
+        log.info("file size: {}", request.getFile().length);
         return userService.findByPhoneNumber(String.valueOf(authorizedUser.getPhoneNumber()))
                 .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username not found", ServiceError.USER_NOT_FOUND_ERROR)))
                 .map(currentUser -> {

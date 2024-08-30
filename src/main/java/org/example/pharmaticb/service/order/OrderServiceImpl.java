@@ -78,6 +78,7 @@ public class OrderServiceImpl implements OrderService {
                         .couponApplied(request.getCouponApplied())
                         .deliveryDate(LocalDate.now())
                         .paymentChannel(request.getPaymentChannel())
+                        .prescriptionUrl(request.getPrescriptionUrl())
                         .transactionId(UUID.randomUUID().toString().substring(0, 10))
                         .createdAt(new Timestamp(System.currentTimeMillis()))
                         .build());
@@ -117,6 +118,7 @@ public class OrderServiceImpl implements OrderService {
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
+                .prescriptionUrl(order.getPrescriptionUrl())
                 .transactionId(order.getTransactionId())
                 .orderDate(String.valueOf(order.getCreatedAt()))
                 .build();
@@ -139,6 +141,7 @@ public class OrderServiceImpl implements OrderService {
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
+                .prescriptionUrl(order.getPrescriptionUrl())
                 .transactionId(order.getTransactionId())
                 .orderDate(String.valueOf(order.getCreatedAt()))
                 .build();
@@ -149,7 +152,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(productResponse -> OrderItemDto.builder()
                         .productId(productResponse.getProductId())
                         .productName(productResponse.getProductName())
-                        .unitPrice(String.valueOf(productResponse.getPrice()))
+                        .unitPrice(String.valueOf(productResponse.getPrice() - productResponse.getDiscount()))
                         .quantity(getQuantity(getItems(order), productResponse.getProductId()))
                         .build())
                 .collect(Collectors.toList());

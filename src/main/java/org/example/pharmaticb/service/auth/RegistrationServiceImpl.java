@@ -220,7 +220,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private Mono<LoginResponse> getLoginResponseMono(RegistrationRequest request, User existingUser) {
         existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
         existingUser.setRegistrationStatus(UserStatus.REGISTERED.name());
-        existingUser.setRole(request.getRole());
+        existingUser.setRole(ObjectUtils.isEmpty(request.getRole()) ? Role.USER : request.getRole());
         return userService.save(existingUser)
                 .map(user -> LoginResponse.builder()
                         .accessToken(jwtTokenService.generateAccessToken(user, ObjectUtils.isEmpty(request.getRole()) ? Role.USER.name() : request.getRole().name()))

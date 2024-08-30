@@ -28,6 +28,7 @@ public class Order implements Serializable {
     private String couponApplied;
     private LocalDate deliveryDate;
     private String paymentChannel;
+    private String prescriptionUrl;
     private String transactionId;
     private Timestamp createdAt;
 }
