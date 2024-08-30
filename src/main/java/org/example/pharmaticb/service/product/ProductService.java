@@ -17,4 +17,6 @@ public interface ProductService {
     Mono<Void> deleteProduct(long id);
 
     Flux<ProductResponse> getProductsByCategoryId(long categoryId);
+
+    Flux<ProductResponse> getProductsByBrandId(long brandId);
 }

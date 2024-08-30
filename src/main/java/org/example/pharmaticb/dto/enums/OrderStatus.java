@@ -3,8 +3,9 @@ package org.example.pharmaticb.dto.enums;
 public enum OrderStatus {
     INITIATED(1),
     ACCEPTED(2),
-    COMPLETED(3),
-    FAILED(4);
+    ON_THE_WAY(3),
+    COMPLETED(4),
+    FAILED(5);
 
     private final int precedence;
 

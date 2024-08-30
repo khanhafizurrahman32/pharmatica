@@ -92,6 +92,13 @@ public class ProductServiceImpl implements ProductService {
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
+    @Override
+    public Flux<ProductResponse> getProductsByBrandId(long brandId) {
+        return productRepository.findByBrandId(brandId)
+                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
+                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+    }
+
     private Mono<CountryResponse> getCountryResponse(long countryId) {
         return countryService.getCategoryById(countryId);
     }

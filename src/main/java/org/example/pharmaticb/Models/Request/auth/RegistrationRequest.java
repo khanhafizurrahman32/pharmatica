@@ -19,6 +19,6 @@ import java.io.Serializable;
 public class RegistrationRequest extends CommonRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String password;
-    @ValidEnum(enumClass = Role.class, message = ServiceError.INVALID_REQUEST)
+//    @ValidEnum(enumClass = Role.class, message = ServiceError.INVALID_REQUEST)
     private Role role;
 }

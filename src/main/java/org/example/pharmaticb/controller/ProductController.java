@@ -45,4 +45,9 @@ public class ProductController {
     public Flux<ProductResponse> getProductsByCategoryId(@PathVariable long categoryId) {
         return productService.getProductsByCategoryId(categoryId);
     }
+
+    @GetMapping("/products/brand/{brandId}")
+    public Flux<ProductResponse> getProductsByBrandId(@PathVariable long brandId) {
+        return productService.getProductsByBrandId(brandId);
+    }
 }

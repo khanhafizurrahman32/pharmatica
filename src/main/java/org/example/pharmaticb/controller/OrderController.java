@@ -67,8 +67,6 @@ public class OrderController {
         return orderService.getPageOrders(page, size, sortBy, sortDirection);
     }
 
-
-
     @DeleteMapping("/orders/{id}")
     public Mono<Void> deleteOrder(@Valid @PathVariable long id, Principal principal) {
         return orderService.deleteOrder(id, Utility.extractAuthorizedUserFromPrincipal(principal));
