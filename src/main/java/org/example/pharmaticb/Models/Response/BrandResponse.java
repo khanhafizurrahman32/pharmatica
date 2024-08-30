@@ -14,4 +14,5 @@ import java.io.Serializable;
 public class BrandResponse implements Serializable {
     private String id;
     private String brandName;
+    private String totalProductCount;
 }

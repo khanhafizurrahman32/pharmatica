@@ -19,4 +19,5 @@ public class CategoryResponse implements Serializable {
     private String[] subCategories;
     private String[] brand;
     private String[] priceRange;
+    private String totalProductCount;
 }

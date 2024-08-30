@@ -5,6 +5,7 @@ import org.example.pharmaticb.Models.DB.Category;
 import org.example.pharmaticb.Models.Request.CategoryRequest;
 import org.example.pharmaticb.Models.Response.CategoryResponse;
 import org.example.pharmaticb.repositories.CategoryRepository;
+import org.example.pharmaticb.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepository categoryRepository;
     private final ModelMapper mapper;
+    private final ProductRepository productRepository;
 
     @Override
     public Mono<CategoryResponse> createCategory(CategoryRequest request) {
@@ -25,7 +27,8 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public Flux<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll()
-                .map(category -> mapper.map(category, CategoryResponse.class));
+                .flatMap(category -> productRepository.countProductsByCategoryId(category.getId())
+                        .map(count -> convertDbToDto(category, count)));
     }
 
     @Override
@@ -49,5 +52,15 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryRepository.deleteById(id);
     }
 
-
+    private CategoryResponse convertDbToDto(Category category, long count) {
+        return CategoryResponse.builder()
+                .label(category.getLabel())
+                .iconUrl(category.getIconUrl())
+                .categorySlug(category.getCategorySlug())
+                .subCategories(category.getSubCategories())
+                .brand(category.getBrand())
+                .priceRange(category.getPriceRange())
+                .totalProductCount(String.valueOf(count))
+                .build();
+    }
 }

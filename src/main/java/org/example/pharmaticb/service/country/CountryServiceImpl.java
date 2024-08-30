@@ -5,6 +5,7 @@ import org.example.pharmaticb.Models.DB.Country;
 import org.example.pharmaticb.Models.Request.CountryRequest;
 import org.example.pharmaticb.Models.Response.CountryResponse;
 import org.example.pharmaticb.repositories.CountryRepository;
+import org.example.pharmaticb.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class CountryServiceImpl implements CountryService {
     private final CountryRepository countryRepository;
     private final ModelMapper mapper;
+    private final ProductRepository productRepository;
 
     @Override
     public Mono<CountryResponse> createCategory(CountryRequest request) {
@@ -25,7 +27,16 @@ public class CountryServiceImpl implements CountryService {
     @Override
     public Flux<CountryResponse> getAllCategories() {
         return countryRepository.findAll()
-                .map(country -> mapper.map(country, CountryResponse.class));
+                .flatMap(country -> productRepository.countProductsByCategoryId(country.getId())
+                        .map(count -> convertDbToDto(country, count)));
+    }
+
+    private CountryResponse convertDbToDto(Country country, Long count) {
+        return CountryResponse.builder()
+                .id(String.valueOf(country.getId()))
+                .countryName(country.getCountryName())
+                .totalProductCount(String.valueOf(count))
+                .build();
     }
 
     @Override

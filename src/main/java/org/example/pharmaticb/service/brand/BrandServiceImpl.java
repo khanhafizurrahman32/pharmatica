@@ -6,6 +6,7 @@ import org.example.pharmaticb.Models.DB.Brand;
 import org.example.pharmaticb.Models.Request.BrandRequest;
 import org.example.pharmaticb.Models.Response.BrandResponse;
 import org.example.pharmaticb.repositories.BrandRepository;
+import org.example.pharmaticb.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class BrandServiceImpl implements BrandService {
     private final BrandRepository brandRepository;
     private final ModelMapper modelMapper;
+    private final ProductRepository productRepository;
 
     @Override
     public Mono<BrandResponse> createBrand(BrandRequest request) {
@@ -27,7 +29,8 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public Flux<BrandResponse> getAllBrands() {
         return brandRepository.findAll()
-                .map(brand -> modelMapper.map(brand, BrandResponse.class));
+                .flatMap(brand -> productRepository.countProductsByBrandId(brand.getId())
+                        .map(count -> convertDbToDto(brand, count)));
     }
 
     @Override
@@ -49,5 +52,14 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public Mono<Void> deleteBrand(Long id) {
         return brandRepository.deleteById(id);
+    }
+
+    private BrandResponse convertDbToDto(Brand brand, Long count) {
+        return BrandResponse.builder()
+                .id(String.valueOf(brand.getId()))
+                .brandName(brand.getBrandName())
+                .totalProductCount(String.valueOf(count))
+                .build();
+
     }
 }

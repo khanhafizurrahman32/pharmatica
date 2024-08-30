@@ -17,10 +17,4 @@ public interface ProductService {
     Mono<Void> deleteProduct(long id);
 
     Flux<ProductResponse> getProductsByCategoryId(long categoryId);
-
-    Mono<Long> countProductsByCountryId(long countryId);
-
-    Mono<Long> countProductsByCategoryId(long categoryId);
-
-    Mono<Long> countProductsByBrandId(long brandId);
 }

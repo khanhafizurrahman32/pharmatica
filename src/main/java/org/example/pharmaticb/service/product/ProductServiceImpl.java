@@ -92,22 +92,6 @@ public class ProductServiceImpl implements ProductService {
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
-    @Override
-    public Mono<Long> countProductsByCountryId(long countryId) {
-        return productRepository.countProductsByCountryId(countryId);
-    }
-
-    @Override
-    public Mono<Long> countProductsByCategoryId(long categoryId) {
-        return productRepository.countProductsByCategoryId(categoryId);
-    }
-
-    @Override
-    public Mono<Long> countProductsByBrandId(long brandId) {
-        return productRepository.countProductsByBrandId(brandId);
-    }
-
-
     private Mono<CountryResponse> getCountryResponse(long countryId) {
         return countryService.getCategoryById(countryId);
     }

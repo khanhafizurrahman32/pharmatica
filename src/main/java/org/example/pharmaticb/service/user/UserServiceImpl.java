@@ -53,6 +53,8 @@ public class UserServiceImpl implements UserService {
                 .userName(StringUtils.hasText(request.getUserName()) ? request.getUserName() : user.getUserName())
                 .password(user.getPassword())
                 .role(ObjectUtils.isEmpty(request.getRole()) ? user.getRole() : request.getRole())
+                .otpStatus(user.isOtpStatus())
+                .otpCode(user.getOtpCode())
                 .email(StringUtils.hasText(request.getEmail()) ? request.getEmail() : user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .address(StringUtils.hasText(request.getAddress()) ? request.getAddress() : user.getAddress())
@@ -61,6 +63,9 @@ public class UserServiceImpl implements UserService {
                 .age(request.getAge() == 0 ? user.getAge() : request.getAge())
                 .profilePictureUrl(StringUtils.hasText(request.getProfilePictureUrl()) ? request.getProfilePictureUrl() : user.getProfilePictureUrl())
                 .imageUniqueId(user.getImageUniqueId())
+                .registrationStatus(user.getRegistrationStatus())
+                .otpExpirationTime(user.getOtpExpirationTime())
+                .pinNonce(user.getPinNonce())
                 .build();
     }
 
