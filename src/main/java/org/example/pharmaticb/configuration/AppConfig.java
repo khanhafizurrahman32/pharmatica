@@ -7,8 +7,10 @@ import org.example.pharmaticb.service.security.jwt.JwtTokenHelper;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 import java.security.SecureRandom;
 
@@ -43,6 +45,16 @@ public class AppConfig {
     @Bean
     SecureRandom secureRandom() {
         return new SecureRandom();
+    }
+
+    @Bean
+    public WebFluxConfigurer webFluxConfigurer() {
+        return new WebFluxConfigurer() {
+            @Override
+            public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+                configurer.defaultCodecs().maxInMemorySize(1024 * 1024); // 1MB
+            }
+        };
     }
 
 }
