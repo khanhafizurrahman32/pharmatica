@@ -205,8 +205,9 @@ public class OrderServiceImpl implements OrderService {
         if ((ROLE_PREFIX + Role.USER.name()).equals(authorizedUser.getRole())) {
             return orderRepository.findById(id)
                     .filter(order -> OrderStatus.INITIATED.name().equals(order.getStatus()) && authorizedUser.getId() == order.getUserId())
-                    .flatMap(order -> orderRepository.deleteById(id))
-                    .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be deleted", "o1"))));
+                    .flatMap(order -> orderRepository.deleteById(id).thenReturn(true))
+                    .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be deleted", "o1"))))
+                    .then();
         }
         return orderRepository.deleteById(id);
     }
