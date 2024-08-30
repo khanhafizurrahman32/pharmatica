@@ -45,4 +45,19 @@ public class ProductController {
     public Flux<ProductResponse> getProductsByCategoryId(@PathVariable long categoryId) {
         return productService.getProductsByCategoryId(categoryId);
     }
+
+    @GetMapping("/countries/{countryId}/product-count")
+    public Mono<Long> countProductsByCountryId(@PathVariable long countryId) {
+        return productService.countProductsByCountryId(countryId);
+    }
+
+    @GetMapping("/categories/{categoryId}/product-count")
+    public Mono<Long> countProductsByCategoryId(@PathVariable long categoryId) {
+        return productService.countProductsByCategoryId(categoryId);
+    }
+
+    @GetMapping("/brands/{brandId}/product-count")
+    public Mono<Long> countProductsByBrandId(@PathVariable long brandId) {
+        return productService.countProductsByBrandId(brandId);
+    }
 }
