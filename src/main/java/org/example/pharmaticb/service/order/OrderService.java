@@ -5,6 +5,7 @@ import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.PagedResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
+import org.example.pharmaticb.dto.OrderWithDetails;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,4 +29,6 @@ public interface OrderService {
     Mono<PagedResponse<OrderResponse>> getPageOrders(int page, int size, String sortBy, String sortDirection);
 
     Flux<OrderResponse> getOrdersByUserId(long userId);
+
+    Flux<OrderWithDetails> getOrderDetails(String userId, String orderId, String productId);
 }

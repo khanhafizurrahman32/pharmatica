@@ -5,6 +5,7 @@ import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.PagedResponse;
+import org.example.pharmaticb.dto.OrderWithDetails;
 import org.example.pharmaticb.service.order.OrderService;
 import org.example.pharmaticb.utilities.Utility;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,8 +15,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @BaseController
 @RestController
@@ -36,6 +35,13 @@ public class OrderController {
     @GetMapping("/orders")
     public Flux<OrderResponse> getAllOrders() {
         return orderService.getAllOrders();
+    }
+
+    @GetMapping("/orders/details")
+    public Flux<OrderWithDetails> getOrderDetails(@RequestParam(required = false) String userId,
+                                                  @RequestParam(required = false) String orderId,
+                                                  @RequestParam(required = false) String productId) {
+        return orderService.getOrderDetails(userId, orderId, productId);
     }
 
     @GetMapping("/orders/{id}")

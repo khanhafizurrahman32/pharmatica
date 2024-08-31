@@ -18,7 +18,7 @@ import java.io.Serializable;
 public class UploadFileRequest extends CommonRequest implements Serializable {
 
     @NotNull(message = ServiceError.INVALID_REQUEST)
-//    @Size(min = 1000, max = 4096000, message = ServiceError.INVALID_REQUEST)
+    @Size(min = 1000, max = 4096000, message = ServiceError.INVALID_REQUEST)
     private byte[] file;
 
     @NotNull(message = ServiceError.INVALID_REQUEST)

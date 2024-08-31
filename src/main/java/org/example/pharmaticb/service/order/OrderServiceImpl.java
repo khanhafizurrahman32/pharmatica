@@ -13,6 +13,7 @@ import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
+import org.example.pharmaticb.dto.OrderWithDetails;
 import org.example.pharmaticb.dto.UserDto;
 import org.example.pharmaticb.dto.enums.OrderStatus;
 import org.example.pharmaticb.dto.records.Item;
@@ -290,5 +291,12 @@ public class OrderServiceImpl implements OrderService {
                 .flatMap(order -> getProducts(order)
                         .map(productResponse -> convertDbToDto(order, productResponse)))
                 .sort(Comparator.comparing(OrderResponse::getOrderDate).reversed());
+    }
+
+    @Override
+    public Flux<OrderWithDetails> getOrderDetails(String userId, String orderId, String productId) {
+        return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ?Long.parseLong(userId) : null,
+                StringUtils.hasText(orderId) ?Long.parseLong(orderId) : null,
+                StringUtils.hasText(productId) ?Long.parseLong(productId) : null);
     }
 }

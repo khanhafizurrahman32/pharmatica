@@ -54,6 +54,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     private CategoryResponse convertDbToDto(Category category, long count) {
         return CategoryResponse.builder()
+                .id(String.valueOf(category.getId()))
                 .label(category.getLabel())
                 .iconUrl(category.getIconUrl())
                 .categorySlug(category.getCategorySlug())

@@ -1,11 +1,9 @@
 package org.example.pharmaticb.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.pharmaticb.dto.enums.Role;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -16,17 +14,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class OrderWithDetails implements Serializable {
-    private Long id;
-    //    FK
-    private long userId;
-    //    FK
-    private JsonNode items;
+    private Long orderId;
     private String status;
-    private double totalAmount;
-    private double deliveryCharge;
+    private String totalAmount;
+    private String deliveryCharge;
     private String couponApplied;
     private LocalDate deliveryDate;
     private String paymentChannel;
     private String transactionId;
     private Timestamp createdAt;
+
+    private long userId;
+    private String userName;
+    private String phoneNumber;
+    private String address;
+
+    private String productId;
+    private String quantity;
+    private String productName;
+    private String price;
+    private String discount;
 }
