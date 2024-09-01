@@ -294,9 +294,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<OrderWithDetails> getOrderDetails(String userId, String orderId, String productId) {
+    public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId) {
         return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ?Long.parseLong(userId) : null,
                 StringUtils.hasText(orderId) ?Long.parseLong(orderId) : null,
-                StringUtils.hasText(productId) ?Long.parseLong(productId) : null);
+                StringUtils.hasText(productId) ?Long.parseLong(productId) : null)
+                .map(orderWithDetails -> OrderResponse.builder()
+                        .user(getUserDetails2(orderWithDetails))
+                        .id(String.valueOf(orderWithDetails.getOrderId()))
+                        //todo: start from here
+                        .build());
+    }
+
+    private UserDto getUserDetails2(OrderWithDetails orderWithDetails) {
+        return UserDto.builder()
+                .id(String.valueOf(orderWithDetails.getUserId()))
+                .userName(orderWithDetails.getUserName())
+                .phone(orderWithDetails.getPhoneNumber())
+                .address(orderWithDetails.getAddress())
+                .build();
     }
 }

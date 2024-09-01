@@ -30,5 +30,5 @@ public interface OrderService {
 
     Flux<OrderResponse> getOrdersByUserId(long userId);
 
-    Flux<OrderWithDetails> getOrderDetails(String userId, String orderId, String productId);
+    Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId);
 }

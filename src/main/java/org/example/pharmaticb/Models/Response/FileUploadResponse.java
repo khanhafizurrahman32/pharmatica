@@ -1,4 +1,4 @@
-package org.example.pharmaticb.Models.Request;
+package org.example.pharmaticb.Models.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class PromoBannerRequest implements Serializable {
-    private String promoBannerId;
+public class FileUploadResponse implements Serializable {
+    private String key;
+    private String url;
 }

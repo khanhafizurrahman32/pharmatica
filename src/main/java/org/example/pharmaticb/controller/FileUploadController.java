@@ -3,12 +3,13 @@ package org.example.pharmaticb.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.Request.UploadFileRequest;
+import org.example.pharmaticb.Models.Response.FileUploadResponse;
 import org.example.pharmaticb.Models.Response.UploadFileResponse;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.utilities.Utility;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -24,5 +25,20 @@ public class FileUploadController {
     @PostMapping(value = "/settings/upload-file")
     public Mono<UploadFileResponse> uploadFile(@Valid @RequestBody UploadFileRequest request, Principal principal) {
         return fileUploadService.uploadFile(request, Utility.extractAuthorizedUserFromPrincipal(principal));
+    }
+
+    @PostMapping(value = "/settings/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<FileUploadResponse> uploadFile(@RequestPart("file") FilePart filePart, Principal principal) {
+        return fileUploadService.uploadFile(filePart, Utility.extractAuthorizedUserFromPrincipal(principal));
+    }
+
+    @GetMapping("/key")
+    public Mono<byte[]> downloadFile(@PathVariable String key) {
+        return fileUploadService.downloadFile(key);
+    }
+
+    @DeleteMapping("/key")
+    public Mono<Void> deleteFile(@PathVariable String key) {
+        return fileUploadService.deleteFile(key);
     }
 }

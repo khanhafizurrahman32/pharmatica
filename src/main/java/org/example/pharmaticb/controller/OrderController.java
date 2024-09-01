@@ -38,7 +38,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders/details")
-    public Flux<OrderWithDetails> getOrderDetails(@RequestParam(required = false) String userId,
+    public Flux<OrderResponse> getOrderDetails(@RequestParam(required = false) String userId,
                                                   @RequestParam(required = false) String orderId,
                                                   @RequestParam(required = false) String productId) {
         return orderService.getOrderDetails(userId, orderId, productId);
