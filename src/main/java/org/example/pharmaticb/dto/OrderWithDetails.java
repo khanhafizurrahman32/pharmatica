@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +22,7 @@ public class OrderWithDetails implements Serializable {
     private String couponApplied;
     private LocalDate deliveryDate;
     private String paymentChannel;
+    private String prescriptionUrl;
     private String transactionId;
     private Timestamp createdAt;
 
@@ -29,9 +31,10 @@ public class OrderWithDetails implements Serializable {
     private String phoneNumber;
     private String address;
 
+    private String items;
     private String productId;
     private String quantity;
     private String productName;
-    private String price;
-    private String discount;
+    private double price;
+    private double discount;
 }

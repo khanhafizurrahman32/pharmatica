@@ -1,6 +1,7 @@
 package org.example.pharmaticb.service.order;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
+import org.example.pharmaticb.dto.OrderItems;
 import org.example.pharmaticb.dto.OrderWithDetails;
 import org.example.pharmaticb.dto.UserDto;
 import org.example.pharmaticb.dto.enums.OrderStatus;
@@ -36,6 +38,7 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -295,14 +298,41 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId) {
-        return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ?Long.parseLong(userId) : null,
-                StringUtils.hasText(orderId) ?Long.parseLong(orderId) : null,
-                StringUtils.hasText(productId) ?Long.parseLong(productId) : null)
+        return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ? Long.parseLong(userId) : null,
+                        StringUtils.hasText(orderId) ? Long.parseLong(orderId) : null,
+                        StringUtils.hasText(productId) ? Long.parseLong(productId) : null)
                 .map(orderWithDetails -> OrderResponse.builder()
                         .user(getUserDetails2(orderWithDetails))
                         .id(String.valueOf(orderWithDetails.getOrderId()))
-                        //todo: start from here
+                        .status(orderWithDetails.getStatus())
+                        .totalAmount(Double.parseDouble(orderWithDetails.getTotalAmount()))
+                        .deliveryCharge(Double.parseDouble(orderWithDetails.getDeliveryCharge()))
+                        .couponApplied(orderWithDetails.getCouponApplied())
+                        .deliveryDate(orderWithDetails.getDeliveryDate())
+                        .paymentChannel(orderWithDetails.getPaymentChannel())
+                        .prescriptionUrl(orderWithDetails.getPrescriptionUrl())
+                        .transactionId(orderWithDetails.getTransactionId())
+                        .orderDate(String.valueOf(orderWithDetails.getCreatedAt()))
+                        .orderItems(getOrderItems(orderWithDetails))
                         .build());
+    }
+
+    private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
+        try {
+            List<OrderItems> orderItems = objectMapper.readValue(orderWithDetails.getItems(), new TypeReference<>() {
+            });
+            return orderItems.stream()
+                    .map(item -> OrderItemDto.builder()
+                            .productId(item.getProductId())
+                            .productName(orderWithDetails.getProductName())
+                            .unitPrice(String.valueOf(orderWithDetails.getPrice() - orderWithDetails.getDiscount()))
+                            .quantity(item.getQuantity())
+                            .build())
+                    .collect(Collectors.toList());
+        } catch (JsonProcessingException e) {
+            log.error("error in conversion from jsonb to list", e);
+            return new ArrayList<>();
+        }
     }
 
     private UserDto getUserDetails2(OrderWithDetails orderWithDetails) {

@@ -15,6 +15,7 @@ import org.example.pharmaticb.service.country.CountryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +31,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
-        return productRepository.save(convertDtoToDb(request))
+        return productRepository.save(convertDtoToDb(request, Product.builder().build()))
                 .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
@@ -56,8 +57,8 @@ public class ProductServiceImpl implements ProductService {
     public Mono<ProductResponse> updateProduct(long id, ProductRequest request) {
         return productRepository.findById(id)
                 .flatMap(product -> {
-                    updateProductFromRequest(product, request);
-                    return productRepository.save(product);
+                    var productUpdated = convertDtoToDb(request, product);
+                    return productRepository.save(productUpdated);
                 })
                 .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
@@ -131,8 +132,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    private Product convertDtoToDb(ProductRequest request) {
+    private Product convertDtoToDb(ProductRequest request, Product product) {
         return Product.builder()
+                .id(!ObjectUtils.isEmpty(product.getId()) ? product.getId() : null)
                 .productName(request.getProductName())
                 .price(Double.parseDouble(request.getPrice()))
                 .imageUrl(request.getImageUrl())

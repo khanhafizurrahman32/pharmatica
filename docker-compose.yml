@@ -11,7 +11,7 @@ services:
       - app-network
 
   db:
-    image: postgres
+    image: postgres:13
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
