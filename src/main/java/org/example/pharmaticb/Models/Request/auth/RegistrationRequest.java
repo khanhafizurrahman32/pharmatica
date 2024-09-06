@@ -3,9 +3,8 @@ package org.example.pharmaticb.Models.Request.auth;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.example.pharmaticb.Models.Request.CommonRequest;
-import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.example.pharmaticb.dto.enums.Role;
-import org.example.pharmaticb.utilities.validation.ValidEnum;
+import org.example.pharmaticb.utilities.Exception.ServiceError;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;

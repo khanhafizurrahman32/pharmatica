@@ -3,6 +3,7 @@ package org.example.pharmaticb.service.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
+import org.example.pharmaticb.Models.Request.SmsRequest;
 import org.example.pharmaticb.Models.Request.auth.OtpRequest;
 import org.example.pharmaticb.Models.Request.auth.RegistrationRequest;
 import org.example.pharmaticb.Models.Request.auth.UserStatusRequest;
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -43,6 +45,7 @@ import static org.example.pharmaticb.dto.enums.UserStatus.OTP_VERIFIED;
 public class RegistrationServiceImpl implements RegistrationService {
     public static final String USER_IS_NOT_ELIGIBLE_FOR_GETTING_OTP = "User is not eligible for getting Otp";
     private final UserService userService;
+    private final SmsApiService smsApiService;
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
     private final SecureRandom secureRandom;
@@ -79,10 +82,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
                     log.info("Final SMS Content: {}", smsContent);
 
-                    sendOtp(request, smsContent);
-                    UpdateUserData(otpCode, user);
-                    return userRepository.save(user)
-                            .thenReturn(OtpResponse.builder().build());
+                    return sendOtp(request, smsContent).then(Mono.defer(() -> {
+                        UpdateUserData(otpCode, user);
+                        return userRepository.save(user)
+                                .thenReturn(OtpResponse.builder().build());
+                    }));
                 });
     }
 
@@ -158,19 +162,27 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private boolean validateOtpRequest(User user) {
-        var aa = NOT_REGISTERED.name().equals(user.getRegistrationStatus())
+        return NOT_REGISTERED.name().equals(user.getRegistrationStatus())
                 && !user.isOtpStatus();
-        return aa;
     }
 
-    private void sendOtp(OtpRequest request, String smsContent) {
+    private Mono<Void> sendOtp(OtpRequest request, String smsContent) {
         // Todo: integrate sms gateway
+        return smsApiService.sendSms(SmsRequest.builder()
+                        .number(request.getPhoneNumber())
+                        .message(smsContent)
+                        .build())
+                .doOnNext(smsResponse -> {
+                    if (StringUtils.hasText(smsResponse.getErrorMessage())) {
+                        log.error("sms sending error:: code {} | message {}", smsResponse.getResponseCode(),smsResponse.getErrorMessage());
+                    } else {
+                        log.info("sms response code {} | message {}", smsResponse.getResponseCode(), smsResponse.getSuccessMessage());
+                    }
+                })
+                .then();
     }
 
     private String getOtpCode() {
-        if (ProfileConstants.PROFILE_DEV.equals(profile) || ProfileConstants.PROFILE_SIT.equals(profile)) {
-            return "123456";
-        }
         return getOtpCode(6, "0123456789");//todo: cms
     }
 

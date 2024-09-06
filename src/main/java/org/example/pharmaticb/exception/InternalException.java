@@ -2,6 +2,7 @@ package org.example.pharmaticb.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 public class InternalException extends RuntimeException {
