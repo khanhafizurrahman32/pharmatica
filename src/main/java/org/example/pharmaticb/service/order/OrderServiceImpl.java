@@ -297,10 +297,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId) {
+    public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId,String startDate, String endDate) {
+        long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
+        long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
         return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ? Long.parseLong(userId) : null,
                         StringUtils.hasText(orderId) ? Long.parseLong(orderId) : null,
-                        StringUtils.hasText(productId) ? Long.parseLong(productId) : null)
+                        StringUtils.hasText(productId) ? Long.parseLong(productId) : null,
+                        new Timestamp(effectiveStartDate), new Timestamp(effectiveEndDate)
+                        )
                 .map(orderWithDetails -> OrderResponse.builder()
                         .user(getUserDetails2(orderWithDetails))
                         .id(String.valueOf(orderWithDetails.getOrderId()))

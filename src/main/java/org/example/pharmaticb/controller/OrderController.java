@@ -39,9 +39,11 @@ public class OrderController {
 
     @GetMapping("/orders/details")
     public Flux<OrderResponse> getOrderDetails(@RequestParam(required = false) String userId,
-                                                  @RequestParam(required = false) String orderId,
-                                                  @RequestParam(required = false) String productId) {
-        return orderService.getOrderDetails(userId, orderId, productId);
+                                               @RequestParam(required = false) String orderId,
+                                               @RequestParam(required = false) String productId,
+                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
+                                               @RequestParam(required = false) @DateTimeFormat() String endDate) {
+        return orderService.getOrderDetails(userId, orderId, productId, startDate, endDate);
     }
 
     @GetMapping("/orders/{id}")
@@ -67,9 +69,9 @@ public class OrderController {
 
     @GetMapping("/orders/paginated")
     public Mono<PagedResponse<OrderResponse>> getOrdersPaginated(@RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size,
-                                                                @RequestParam(defaultValue = "id") String sortBy,
-                                                                @RequestParam(defaultValue = "ASC") String sortDirection) {
+                                                                 @RequestParam(defaultValue = "10") int size,
+                                                                 @RequestParam(defaultValue = "id") String sortBy,
+                                                                 @RequestParam(defaultValue = "ASC") String sortDirection) {
         return orderService.getPageOrders(page, size, sortBy, sortDirection);
     }
 

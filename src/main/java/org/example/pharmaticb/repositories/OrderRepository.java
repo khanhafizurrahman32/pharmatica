@@ -53,9 +53,11 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
             "WHERE (:userId IS NULL OR u.id = :userId) " +
             "AND (:productId IS NULL OR (items.item->>'productId')::integer = :productId) " +
             "AND (:orderId IS NULL OR o.id = :orderId) " +
+            "AND (:startDate IS NULL OR o.created_at >= :startDate) " +
+            "AND(:endDate IS NULL OR o.created_at <=:endDate)" +
             "ORDER BY\n" +
             "    o.created_at DESC")
-    Flux<OrderWithDetails> findAllOrdersWithDetails(Long userId, Long orderId, Long productId);
+    Flux<OrderWithDetails> findAllOrdersWithDetails(Long userId, Long orderId, Long productId, Timestamp startDate, Timestamp endDate);
 
 //    @Query("INSERT INTO orders (user_id, product_id, status, total_amount, quantity, price, delivery_charge, coupon_applied, delivery_date, payment_channel, transaction_id, created_at) " +
 //            "VALUES (:userId, :productId, :status, :totalAmount, :quantity, :price, :deliveryCharge, :couponApplied, :deliveryDate, :paymentChannel, :transactionId, :createdAt) " +
