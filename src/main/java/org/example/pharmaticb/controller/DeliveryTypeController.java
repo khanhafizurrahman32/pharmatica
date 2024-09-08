@@ -1,9 +1,7 @@
 package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.pharmaticb.Models.Request.CountryRequest;
 import org.example.pharmaticb.Models.Request.DeliveryTypeRequest;
-import org.example.pharmaticb.Models.Response.CountryResponse;
 import org.example.pharmaticb.Models.Response.DeliveryTypeResponse;
 import org.example.pharmaticb.service.delivery.type.DeliveryTypeService;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +32,7 @@ public class DeliveryTypeController {
     }
 
     @PutMapping("/delivery-options/{id}")
-    public Mono<DeliveryTypeResponse> updateDeliveryChargeType(@Valid @PathVariable Long id, @Valid @RequestBody CountryRequest request) {
+    public Mono<DeliveryTypeResponse> updateDeliveryChargeType(@Valid @PathVariable Long id, @Valid @RequestBody DeliveryTypeRequest request) {
         return deliveryTypeService.updateDeliveryChargeType(id, request);
     }
 

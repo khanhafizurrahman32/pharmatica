@@ -2,7 +2,6 @@ package org.example.pharmaticb.service.delivery.type;
 
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.DB.DeliveryType;
-import org.example.pharmaticb.Models.Request.CountryRequest;
 import org.example.pharmaticb.Models.Request.DeliveryTypeRequest;
 import org.example.pharmaticb.Models.Response.DeliveryTypeResponse;
 import org.example.pharmaticb.repositories.DeliveryTypeRepository;
@@ -45,7 +44,7 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     }
 
     @Override
-    public Mono<DeliveryTypeResponse> updateDeliveryChargeType(Long id, CountryRequest request) {
+    public Mono<DeliveryTypeResponse> updateDeliveryChargeType(Long id, DeliveryTypeRequest request) {
         return deliveryTypeRepository.findById(id)
                 .flatMap(deliveryType -> {
                     mapper.map(request, deliveryType);
