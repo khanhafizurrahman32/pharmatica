@@ -15,7 +15,7 @@ public class Utility {
     public static final String INITIATED = "INITIATED";
     public static final String COMPLETED = "COMPLETED";
     public static final String FAILED = "FAILED";
-    public static final String SMS_CONTENT = "Your otp code is %s. It will expire in 5 minutes. Please do not share to others.";
+    public static final String SMS_CONTENT = "Welcome to Pharmatic family. Your OTP code is %s. It will expire in 5 minutes. Please do not share to others.";
 
     public static final String ROLE_PREFIX = "ROLE_";
 
