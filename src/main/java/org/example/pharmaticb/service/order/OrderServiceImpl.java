@@ -78,6 +78,7 @@ public class OrderServiceImpl implements OrderService {
                         .items(objectMapper.valueToTree(request.getItems()))
                         .status(OrderStatus.INITIATED.name())
                         .totalAmount(totalAmount)
+                        .deliveryType(request.getDeliveryType())
                         .deliveryCharge(0.0) //todo
                         .couponApplied(request.getCouponApplied())
                         .deliveryDate(LocalDate.now())
@@ -118,6 +119,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderItems(getOrderItems(product, order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
+                .deliveryType(order.getDeliveryType())
                 .deliveryCharge(order.getDeliveryCharge())
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
@@ -141,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderItems(getOrderItems(product, order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
+                .deliveryType(order.getDeliveryType())
                 .deliveryCharge(order.getDeliveryCharge())
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
@@ -190,8 +193,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<OrderResponse> getOrderById(long id, AuthorizedUser authorizedUser) {
         return orderRepository.findById(id)
-                .flatMap(order -> Mono.zip(getProducts(order), userService.getUserById(authorizedUser.getId()))
-                        .map(tuple2 -> convertDbToDto(order, tuple2.getT1(), tuple2.getT2())));
+                .flatMap(order -> getProducts(order)
+                        .flatMap(productResponses -> userService.getUserById(order.getUserId())
+                                .map(userResponse -> convertDbToDto(order, productResponses, userResponse))));
     }
 
     @Override

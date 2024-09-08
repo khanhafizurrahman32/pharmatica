@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class ProductResponse implements Serializable {
     private String productId;
     private String productName;
+    private String composition;
     private double price;
     private String imageUrl;
     private CategoryResponse category;

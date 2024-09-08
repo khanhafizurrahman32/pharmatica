@@ -25,6 +25,7 @@ public class OrderResponse implements Serializable {
     private List<OrderItemDto> orderItems = new ArrayList<>();
     private String status;
     private double totalAmount;
+    private String deliveryType;
     private double deliveryCharge;
     private String couponApplied;
     private LocalDate deliveryDate;

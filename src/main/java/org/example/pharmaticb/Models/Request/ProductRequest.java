@@ -16,6 +16,7 @@ import java.io.Serializable;
 public class ProductRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String productName;
+    private String composition;
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String price;
     private String imageUrl;

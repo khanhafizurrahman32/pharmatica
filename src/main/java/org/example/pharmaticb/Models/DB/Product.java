@@ -2,8 +2,6 @@ package org.example.pharmaticb.Models.DB;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
-//import org.springframework.data.annotation.;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
@@ -19,6 +17,7 @@ public class Product implements Serializable {
     private Long id;
     private String productName;
     private double price;
+    private String composition;
     private String imageUrl;
 //    FK
     private long categoryId;

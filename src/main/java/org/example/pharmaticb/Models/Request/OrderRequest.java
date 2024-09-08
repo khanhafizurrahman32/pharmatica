@@ -18,6 +18,8 @@ import java.util.List;
 public class OrderRequest implements Serializable {
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private List<Item> items;
+//    todo: enum validation
+    private String deliveryType;
     private String couponApplied;
     private String paymentChannel;
     private String prescriptionUrl;
