@@ -40,7 +40,7 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
             "    (items.item->>'quantity')::integer AS quantity,\n" +
             "    p.product_name AS product_name,\n" +
             "    p.price,\n" +
-            "    p.discount\n" +
+            "    p.discount,\n" +
             "    d.id AS deliveryItemId,\n" +
             "    d.title,\n" +
             "    d.rate\n" +
