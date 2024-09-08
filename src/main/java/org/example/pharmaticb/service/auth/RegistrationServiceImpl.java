@@ -96,8 +96,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private long getOtpExpirationTime() {
-        var aa = System.currentTimeMillis() + Utility.otpExpirationInSecond() * Utility.ONE_SECOND_IN_MILLIS;
-        return aa;
+        return System.currentTimeMillis() + Utility.otpExpirationInSecond() * Utility.ONE_SECOND_IN_MILLIS;
     }
 
     @Override
@@ -167,7 +166,6 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private Mono<Void> sendOtp(OtpRequest request, String smsContent) {
-        // Todo: integrate sms gateway
         return smsApiService.sendSms(SmsRequest.builder()
                         .number(request.getPhoneNumber())
                         .message(smsContent)
