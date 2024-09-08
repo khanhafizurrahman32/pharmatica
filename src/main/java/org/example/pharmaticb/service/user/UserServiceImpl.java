@@ -5,6 +5,7 @@ import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
+import org.example.pharmaticb.dto.enums.Role;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.UserRepository;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
@@ -73,7 +74,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserResponse> getUserById(Long id, AuthorizedUser authorizedUser) {
-        if (id != authorizedUser.getId()) {
+        if (id != authorizedUser.getId() && Role.USER.name().equals(authorizedUser.getRole())) {
             return Mono.error(new InternalException(HttpStatus.FORBIDDEN, "Not allowed", ServiceError.INVALID_REQUEST));
         }
         return getUserById(id);
