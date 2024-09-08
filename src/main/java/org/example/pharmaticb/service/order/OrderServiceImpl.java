@@ -12,11 +12,8 @@ import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.PagedResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.Models.Response.UserResponse;
-import org.example.pharmaticb.dto.AuthorizedUser;
+import org.example.pharmaticb.dto.*;
 import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
-import org.example.pharmaticb.dto.OrderItems;
-import org.example.pharmaticb.dto.OrderWithDetails;
-import org.example.pharmaticb.dto.UserDto;
 import org.example.pharmaticb.dto.enums.OrderStatus;
 import org.example.pharmaticb.dto.records.Item;
 import org.example.pharmaticb.exception.InternalException;
@@ -70,15 +67,15 @@ public class OrderServiceImpl implements OrderService {
                 });
     }
 
-    private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long id) {
+    private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long userId) {
         return getTotalAmount(request.getItems())
                 .map(totalAmount -> Order.builder()
                         .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
-                        .userId(id)
+                        .userId(userId)
                         .items(objectMapper.valueToTree(request.getItems()))
                         .status(OrderStatus.INITIATED.name())
                         .totalAmount(totalAmount)
-                        .deliveryType(request.getDeliveryType())
+                        .deliveryOptionsId(Long.parseLong(request.getDeliveryOptionId()))
                         .deliveryCharge(0.0) //todo
                         .couponApplied(request.getCouponApplied())
                         .deliveryDate(LocalDate.now())
@@ -119,7 +116,6 @@ public class OrderServiceImpl implements OrderService {
                 .orderItems(getOrderItems(product, order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
-                .deliveryType(order.getDeliveryType())
                 .deliveryCharge(order.getDeliveryCharge())
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
@@ -143,7 +139,6 @@ public class OrderServiceImpl implements OrderService {
                 .orderItems(getOrderItems(product, order))
                 .status(order.getStatus())
                 .totalAmount(order.getTotalAmount())
-                .deliveryType(order.getDeliveryType())
                 .deliveryCharge(order.getDeliveryCharge())
                 .couponApplied(order.getCouponApplied())
                 .deliveryDate(order.getDeliveryDate())
@@ -322,7 +317,16 @@ public class OrderServiceImpl implements OrderService {
                         .transactionId(orderWithDetails.getTransactionId())
                         .orderDate(String.valueOf(orderWithDetails.getCreatedAt()))
                         .orderItems(getOrderItems(orderWithDetails))
+                        .deliveryItemType(getDeliveryItemType(orderWithDetails))
                         .build());
+    }
+
+    private DeliveryItemTypeDto getDeliveryItemType(OrderWithDetails orderWithDetails) {
+        return DeliveryItemTypeDto.builder()
+                .id(orderWithDetails.getDeliveryItemId())
+                .title(orderWithDetails.getTitle())
+                .rate(String.valueOf(orderWithDetails.getRate()))
+                .build();
     }
 
     private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {

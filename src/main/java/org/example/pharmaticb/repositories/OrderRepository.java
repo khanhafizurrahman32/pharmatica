@@ -41,6 +41,9 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
             "    p.product_name AS product_name,\n" +
             "    p.price,\n" +
             "    p.discount\n" +
+            "    d.id AS deliveryItemId,\n" +
+            "    d.title,\n" +
+            "    d.rate\n" +
             "    \n" +
             "FROM\n" +
             "    pharmatica.orders o\n" +
@@ -48,6 +51,8 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
             "    jsonb_array_elements(o.items::jsonb) AS items(item)\n" +
             "JOIN\n" +
             "    pharmatica.users u ON o.user_id = u.id\n" +
+            "JOIN\n" +
+            "    pharmatica.delivery_type d ON o.delivery_options_id = d.id\n" +
             "LEFT JOIN\n" +
             "    pharmatica.product p ON (items.item->>'productId')::integer = p.id\n" +
             "WHERE (:userId IS NULL OR u.id = :userId) " +

@@ -37,4 +37,8 @@ public class OrderWithDetails implements Serializable {
     private String productName;
     private double price;
     private double discount;
+
+    private String deliveryItemId;
+    private String title;
+    private double rate;
 }

@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.pharmaticb.dto.DeliveryItemTypeDto;
 import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
 import org.example.pharmaticb.dto.UserDto;
-import org.example.pharmaticb.dto.records.Item;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ public class OrderResponse implements Serializable {
     private List<OrderItemDto> orderItems = new ArrayList<>();
     private String status;
     private double totalAmount;
-    private String deliveryType;
+    private DeliveryItemTypeDto deliveryItemType;
     private double deliveryCharge;
     private String couponApplied;
     private LocalDate deliveryDate;

@@ -24,7 +24,7 @@ public class Order implements Serializable {
     private JsonNode items;
     private String status;
     private double totalAmount;
-    private String deliveryType;
+    private long deliveryOptionsId;
     private double deliveryCharge;
     private String couponApplied;
     private LocalDate deliveryDate;

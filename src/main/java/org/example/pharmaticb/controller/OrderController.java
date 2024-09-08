@@ -57,9 +57,12 @@ public class OrderController {
     }
 
     @GetMapping("/orders/within-date")
-    public Flux<OrderResponse> getOrdersWithinDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
+    public Flux<OrderResponse> getOrdersWithinDate(@RequestParam(required = false) String userId,
+                                                   @RequestParam(required = false) String orderId,
+                                                   @RequestParam(required = false) String productId,
+                                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
                                                    @RequestParam(required = false) @DateTimeFormat() String endDate) {
-        return orderService.getOrdersWithinDate(startDate, endDate);
+        return orderService.getOrderDetails(userId, orderId, productId, startDate, endDate);
     }
 
     @GetMapping("/orders/by-status")
