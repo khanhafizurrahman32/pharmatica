@@ -6,6 +6,7 @@ import org.example.pharmaticb.Models.Response.UserResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import javax.validation.Valid;
 
@@ -17,6 +18,8 @@ public interface UserService {
     Flux<UserResponse> getAllUsers();
 
     Mono<UserResponse> getUserById(Long id, AuthorizedUser authorizedUser);
+
+    Mono<UserResponse> getUserByPhoneNumber(String phoneNumber, AuthorizedUser authorizedUser);
 
     Mono<UserResponse> getUserById(Long id);
 

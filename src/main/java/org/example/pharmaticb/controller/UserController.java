@@ -29,6 +29,11 @@ public class UserController {
         return userService.getUserById(id, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
+    @GetMapping("/users/{phoneNumber}")
+    public Mono<UserResponse> getUserByPhoneNumber(@PathVariable String phoneNumber, Principal principal) {
+        return userService.getUserByPhoneNumber(phoneNumber, Utility.extractAuthorizedUserFromPrincipal(principal));
+    }
+
     @PutMapping("/users/{id}")
     public Mono<UserResponse> updateUser(@Valid @PathVariable long id, @Valid @RequestBody UserRequest request) {
         return userService.updateUser(id, request);
@@ -38,7 +43,4 @@ public class UserController {
     public Mono<Void> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
-
-
-
 }

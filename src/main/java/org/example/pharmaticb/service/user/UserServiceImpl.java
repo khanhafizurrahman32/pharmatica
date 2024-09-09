@@ -82,6 +82,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Mono<UserResponse> getUserByPhoneNumber(String phoneNumber, AuthorizedUser authorizedUser) {
+        if (Role.ADMIN.name().equals(authorizedUser.getRole())) {
+            return userRepository.findByPhoneNumber(phoneNumber)
+                    .map(this::convertDbToDto);
+        }
+        return Mono.error(new InternalException(HttpStatus.FORBIDDEN, "Not allowed", ServiceError.INVALID_REQUEST));
+    }
+
+    @Override
     public Mono<UserResponse> getUserById(Long id) {
         return userRepository.findById(id)
                 .map(this::convertDbToDto);
