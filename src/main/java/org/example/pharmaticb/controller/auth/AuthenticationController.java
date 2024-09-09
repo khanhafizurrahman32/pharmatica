@@ -1,9 +1,11 @@
 package org.example.pharmaticb.controller.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.example.pharmaticb.Models.Request.RefreshTokenRequest;
 import org.example.pharmaticb.Models.Request.auth.ForgetPasswordRequest;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
 import org.example.pharmaticb.Models.Request.auth.UpdatePasswordRequest;
+import org.example.pharmaticb.Models.Response.auth.RefreshTokenResponse;
 import org.example.pharmaticb.Models.Response.auth.ForgetPasswordResponse;
 import org.example.pharmaticb.Models.Response.auth.UpdatePasswordResponse;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
@@ -41,5 +43,10 @@ public class AuthenticationController {
     @PostMapping("/auth/forget-password")
     public Mono<ForgetPasswordResponse> forgetPassword(@Valid @RequestBody ForgetPasswordRequest request, @RequestHeader HttpHeaders httpHeaders) {
         return authenticationService.forgetPassword(request, httpHeaders);
+    }
+
+    @PostMapping("/auth/refresh-token")
+    public Mono<RefreshTokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        return authenticationService.refreshToken(request);
     }
 }

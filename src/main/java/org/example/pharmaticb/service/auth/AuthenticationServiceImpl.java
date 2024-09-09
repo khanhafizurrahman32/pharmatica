@@ -1,8 +1,10 @@
 package org.example.pharmaticb.service.auth;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
+import org.example.pharmaticb.Models.Request.RefreshTokenRequest;
 import org.example.pharmaticb.Models.Request.SmsRequest;
 import org.example.pharmaticb.Models.Request.auth.ForgetPasswordRequest;
 import org.example.pharmaticb.Models.Request.auth.LoginRequest;
@@ -10,6 +12,7 @@ import org.example.pharmaticb.Models.Request.auth.OtpRequest;
 import org.example.pharmaticb.Models.Request.auth.UpdatePasswordRequest;
 import org.example.pharmaticb.Models.Response.auth.ForgetPasswordResponse;
 import org.example.pharmaticb.Models.Response.auth.LoginResponse;
+import org.example.pharmaticb.Models.Response.auth.RefreshTokenResponse;
 import org.example.pharmaticb.Models.Response.auth.UpdatePasswordResponse;
 import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.exception.InternalException;
@@ -31,7 +34,7 @@ import static org.example.pharmaticb.utilities.Utility.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthenticationServiceImpl implements AuthenticationService{
+public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
@@ -62,7 +65,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                     }
                     return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Password does not match", ServiceError.INVALID_REQUEST));
                 })
-                .switchIfEmpty(Mono.defer(() ->Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User does not exist", ServiceError.INVALID_REQUEST))));
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User does not exist", ServiceError.INVALID_REQUEST))));
     }
 
     @Override
@@ -73,7 +76,18 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                 .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User does not exist", ServiceError.INVALID_REQUEST)));
     }
 
-    //todo: need to incorporate sending message code
+    @Override
+    public Mono<RefreshTokenResponse> refreshToken(RefreshTokenRequest request) {
+        DecodedJWT jwt = jwtTokenService.getDecodedJwtToken(request.getRefreshToken());
+        String phoneNumber = jwt.getAudience().get(0);
+        return userService.findByPhoneNumber(phoneNumber).map(user -> RefreshTokenResponse.builder()
+                .accessToken(jwtTokenService.generateAccessToken(user, user.getRole().name()))
+                .refreshToken(jwtTokenService.generateRefreshToken(user, user.getRole().name()))
+                .accessExpiredIn(jwtTokenService.getAccessExpiredTime())
+                .refreshExpiredIn(jwtTokenService.getRefreshExpiredTime())
+                .build());
+    }
+
     private Mono<String> sendOtp(String phoneNumber, User user) {
         String tempPassword = getTempPassword();
         var smsContent = String.format(Utility.SMS_CONTENT, tempPassword);
@@ -123,7 +137,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
                         .build())
                 .doOnNext(smsResponse -> {
                     if (StringUtils.hasText(smsResponse.getErrorMessage())) {
-                        log.error("sms sending error:: code {} | message {}", smsResponse.getResponseCode(),smsResponse.getErrorMessage());
+                        log.error("sms sending error:: code {} | message {}", smsResponse.getResponseCode(), smsResponse.getErrorMessage());
                     } else {
                         log.info("sms response code {} | message {}", smsResponse.getResponseCode(), smsResponse.getSuccessMessage());
                     }
