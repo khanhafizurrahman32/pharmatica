@@ -3,31 +3,34 @@ package org.example.pharmaticb.service.product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Product;
+import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
-import org.example.pharmaticb.Models.Response.BrandResponse;
-import org.example.pharmaticb.Models.Response.CategoryResponse;
-import org.example.pharmaticb.Models.Response.CountryResponse;
-import org.example.pharmaticb.Models.Response.ProductResponse;
+import org.example.pharmaticb.Models.Response.*;
 import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.brand.BrandService;
 import org.example.pharmaticb.service.category.CategoryService;
 import org.example.pharmaticb.service.country.CountryService;
-import org.modelmapper.ModelMapper;
+import org.example.pharmaticb.service.file.FileUploadService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
-    private final ModelMapper mapper;
     private final CategoryService categoryService;
     private final BrandService brandService;
     private final CountryService countryService;
+    private final FileUploadService fileUploadService;
 
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
@@ -98,6 +101,33 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByBrandId(brandId)
                 .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+    }
+
+    @Override
+    public Mono<BulkProductCreateResponse> createBulkProduct(BulkProductCreateRequest request) {
+        return fileUploadService.downloadFile(request.getFilePath())
+                .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
+                .flatMapMany(content -> Flux.fromStream(
+                        new BufferedReader(new InputStreamReader(
+                                new ByteArrayInputStream(content.getBytes())))
+                                .lines()
+                                .skip(1)
+                ))
+                .map(this::parseProductFromCsvLine)
+                .flatMap(this::insertProductIntoDatabase)
+                .collectList()
+                .map(ret ->BulkProductCreateResponse.builder().success(true).build());
+    }
+
+    private Mono<Product> insertProductIntoDatabase(Product product) {
+        return productRepository.save(product);
+    }
+
+    private Product parseProductFromCsvLine(String line) {
+        String[] parts = line.split(",");
+        return Product.builder()
+                .productName(parts[0])
+                .build();
     }
 
     private Mono<CountryResponse> getCountryResponse(long countryId) {

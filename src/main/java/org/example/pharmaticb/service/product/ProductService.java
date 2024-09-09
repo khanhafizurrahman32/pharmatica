@@ -1,9 +1,13 @@
 package org.example.pharmaticb.service.product;
 
+import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
+import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 public interface ProductService {
     Mono<ProductResponse> createProduct(ProductRequest request);
@@ -19,4 +23,6 @@ public interface ProductService {
     Flux<ProductResponse> getProductsByCategoryId(long categoryId);
 
     Flux<ProductResponse> getProductsByBrandId(long brandId);
+
+    Mono<BulkProductCreateResponse> createBulkProduct(@Valid BulkProductCreateRequest request);
 }

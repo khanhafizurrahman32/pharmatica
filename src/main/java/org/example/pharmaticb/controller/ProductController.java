@@ -1,7 +1,9 @@
 package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
+import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.service.product.ProductService;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +51,10 @@ public class ProductController {
     @GetMapping("/products/brand/{brandId}")
     public Flux<ProductResponse> getProductsByBrandId(@PathVariable long brandId) {
         return productService.getProductsByBrandId(brandId);
+    }
+
+    @PostMapping("/products/bulk-create")
+    public Mono<BulkProductCreateResponse> createBulkProduct(@Valid @RequestBody BulkProductCreateRequest request) {
+        return productService.createBulkProduct(request);
     }
 }
