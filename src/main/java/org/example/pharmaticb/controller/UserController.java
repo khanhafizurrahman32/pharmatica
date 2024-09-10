@@ -29,7 +29,7 @@ public class UserController {
         return userService.getUserById(id, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
-    @GetMapping("/users/{phoneNumber}")
+    @GetMapping("/users/phone-number/{phoneNumber}")
     public Mono<UserResponse> getUserByPhoneNumber(@PathVariable String phoneNumber, Principal principal) {
         return userService.getUserByPhoneNumber(phoneNumber, Utility.extractAuthorizedUserFromPrincipal(principal));
     }

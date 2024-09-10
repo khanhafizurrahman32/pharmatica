@@ -8,22 +8,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
-import org.example.pharmaticb.Models.Response.OrderResponse;
-import org.example.pharmaticb.Models.Response.PagedResponse;
-import org.example.pharmaticb.Models.Response.ProductResponse;
-import org.example.pharmaticb.Models.Response.UserResponse;
+import org.example.pharmaticb.Models.Response.*;
 import org.example.pharmaticb.dto.*;
 import org.example.pharmaticb.dto.OrderItemDto.OrderItemDto;
 import org.example.pharmaticb.dto.enums.OrderStatus;
+import org.example.pharmaticb.dto.enums.Role;
 import org.example.pharmaticb.dto.records.Item;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.OrderRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
+import org.example.pharmaticb.service.delivery.type.DeliveryTypeService;
 import org.example.pharmaticb.service.product.ProductServiceImpl;
-import org.example.pharmaticb.service.user.UserServiceImpl;
+import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
-import org.example.pharmaticb.dto.enums.Role;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -52,12 +50,13 @@ public class OrderServiceImpl implements OrderService {
     private final ObjectMapper objectMapper;
     private final ProductServiceImpl productService;
     private final ProductRepository productRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
+    private final DeliveryTypeService deliveryTypeService;
 
     @Override
     public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
         long authorizedUserId = authorizedUser.getId();
-        return Mono.zip(convertDtoToDb(request, Order.builder().build(), authorizedUserId), userService.getUserById(authorizedUserId))
+        return Mono.zip(convertDtoToDb(request, Order.builder().build(), authorizedUserId, true), userService.getUserById(authorizedUserId))
                 .flatMap(tuple2 -> {
                     var orderObj = tuple2.getT1();
                     var user = tuple2.getT2();
@@ -67,16 +66,16 @@ public class OrderServiceImpl implements OrderService {
                 });
     }
 
-    private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long userId) {
-        return getTotalAmount(request.getItems())
-                .map(totalAmount -> Order.builder()
+    private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long userId, boolean isNew) {
+        return Mono.zip(getTotalAmount(request.getItems()), getDeliveryCharge(request, isNew, order))
+                .map(tuple2 -> Order.builder()
                         .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
                         .userId(userId)
                         .items(objectMapper.valueToTree(request.getItems()))
                         .status(OrderStatus.INITIATED.name())
-                        .totalAmount(totalAmount)
+                        .totalAmount(tuple2.getT1())
                         .deliveryOptionsId(Long.parseLong(request.getDeliveryOptionId()))
-                        .deliveryCharge(0.0) //todo
+                        .deliveryCharge(Double.parseDouble(tuple2.getT2()))
                         .couponApplied(request.getCouponApplied())
                         .deliveryDate(LocalDate.now())
                         .paymentChannel(request.getPaymentChannel())
@@ -91,7 +90,12 @@ public class OrderServiceImpl implements OrderService {
         return Flux.fromIterable(items)
                 .flatMap(this::processOrderItem)
                 .reduce(0.0, Double::sum);
+    }
 
+    private Mono<String> getDeliveryCharge(OrderRequest request, boolean isNew, Order order) {
+        return isNew ? deliveryTypeService.getDeliveryChargeTypeById(Long.valueOf(request.getDeliveryOptionId()))
+                .map(DeliveryTypeResponse::getRate) : StringUtils.hasText(request.getDeliveryCharge()) ?
+                Mono.just(request.getDeliveryCharge()) : Mono.just(String.valueOf(order.getDeliveryCharge()));
     }
 
     private Mono<Double> processOrderItem(Item item) {
@@ -196,7 +200,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<OrderResponse> updateOrder(long id, OrderRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findById(id)
-                .flatMap(order -> convertDtoToDb(request, order, authorizedUser.getId())
+                .flatMap(order -> convertDtoToDb(request, order, authorizedUser.getId(), false)
                         .flatMap(updatedOrder -> Mono.zip(userService.getUserById(authorizedUser.getId()),
                                 orderRepository.save(updatedOrder),
                                 getProducts(updatedOrder)))
@@ -296,14 +300,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId,String startDate, String endDate) {
+    public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId, String startDate, String endDate) {
         long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
         long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
         return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ? Long.parseLong(userId) : null,
                         StringUtils.hasText(orderId) ? Long.parseLong(orderId) : null,
                         StringUtils.hasText(productId) ? Long.parseLong(productId) : null,
                         new Timestamp(effectiveStartDate), new Timestamp(effectiveEndDate)
-                        )
+                )
                 .map(orderWithDetails -> OrderResponse.builder()
                         .user(getUserDetails2(orderWithDetails))
                         .id(String.valueOf(orderWithDetails.getOrderId()))
