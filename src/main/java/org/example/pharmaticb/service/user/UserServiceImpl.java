@@ -17,6 +17,8 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static org.example.pharmaticb.utilities.Utility.ROLE_PREFIX;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -75,7 +77,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserResponse> getUserById(Long id, AuthorizedUser authorizedUser) {
-        if (id != authorizedUser.getId() && Role.USER.name().equals(authorizedUser.getRole())) {
+        String userRole = ROLE_PREFIX + Role.USER.name();
+        if (id != authorizedUser.getId() && userRole.equals(authorizedUser.getRole())) {
             return Mono.error(new InternalException(HttpStatus.FORBIDDEN, "Not allowed", ServiceError.INVALID_REQUEST));
         }
         return getUserById(id);
@@ -83,7 +86,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserResponse> getUserByPhoneNumber(String phoneNumber, AuthorizedUser authorizedUser) {
-        if (Role.ADMIN.name().equals(authorizedUser.getRole())) {
+        String adminRole = ROLE_PREFIX + Role.ADMIN.name();
+        if (adminRole.equals(authorizedUser.getRole())) {
             return userRepository.findByPhoneNumber(phoneNumber)
                     .map(this::convertDbToDto);
         }

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -19,6 +20,9 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
     Flux<Order> findAllBy(Pageable pageable);
 
     Flux<Order> findByUserId(Long userId);
+
+    @Query("SELECT MAX(id) FROM Orders")
+    Mono<Long> findLastProductId();
 
     @Query("SELECT\n" +
             "    o.id AS order_id,\n" +

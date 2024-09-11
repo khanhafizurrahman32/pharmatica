@@ -36,7 +36,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.utilities.DateUtil.currentTimeInDBTimeStamp;
@@ -67,23 +66,27 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long userId, boolean isNew) {
-        return Mono.zip(getTotalAmount(request.getItems()), getDeliveryCharge(request, isNew, order))
-                .map(tuple2 -> Order.builder()
+        return Mono.zip(getTotalAmount(request.getItems()), getDeliveryCharge(request, isNew, order), orderRepository.findLastProductId())
+                .map(tuple3 -> Order.builder()
                         .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
                         .userId(userId)
                         .items(objectMapper.valueToTree(request.getItems()))
                         .status(OrderStatus.INITIATED.name())
-                        .totalAmount(tuple2.getT1())
+                        .totalAmount(tuple3.getT1())
                         .deliveryOptionsId(Long.parseLong(request.getDeliveryOptionId()))
-                        .deliveryCharge(Double.parseDouble(tuple2.getT2()))
+                        .deliveryCharge(Double.parseDouble(tuple3.getT2()))
                         .couponApplied(request.getCouponApplied())
                         .deliveryDate(LocalDate.now())
                         .paymentChannel(request.getPaymentChannel())
                         .prescriptionUrl(request.getPrescriptionUrl())
-                        .transactionId(UUID.randomUUID().toString().substring(0, 10))
+                        .transactionId(getTransactionId(tuple3.getT3()))
                         .createdAt(new Timestamp(System.currentTimeMillis()))
                         .build());
 
+    }
+
+    private String getTransactionId(Long lastId) {
+        return String.format("%S%d", DateUtil.getTransactionIdDate(), lastId + 1);
     }
 
     private Mono<Double> getTotalAmount(List<Item> items) {
