@@ -3,10 +3,11 @@ package org.example.pharmaticb.service.file;
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.service.DigitalOceanStorageService;
 import org.example.pharmaticb.service.MinioService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -52,6 +53,22 @@ public class FileServiceImpl implements FileService {
                             doSpacesCDNEndpoint
                     );
                 });
+    }
+
+    @Override
+    public Mono<String> uploadReceiptFile(String key, byte[] bytes, String contentType) {
+        DefaultDataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(bytes);
+        long contentLength = dataBuffer.readableByteCount();
+        Flux<DataBuffer> content = Flux.just(dataBuffer);
+        return digitalOceanStorageService.uploadFile(
+                key,
+                content,
+                contentLength,
+                contentType,
+                doSpacesBucket,
+                doSpacesCDNEndpoint
+        );
+        
     }
 
     private String getKey(String phoneNumber) {

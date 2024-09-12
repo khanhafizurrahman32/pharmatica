@@ -6,7 +6,10 @@ import reactor.core.publisher.Mono;
 public interface FileService {
 
     void uploadFile(String phoneNumber, byte[] fileBuffer, String contentType);
+
     Mono<String> uploadFile(FilePart filePart, String key);
+
+    Mono<String> uploadReceiptFile(String key, byte[] bytes, String contentType);
 
     String getProfileImageUrl(String profileImageName);
 

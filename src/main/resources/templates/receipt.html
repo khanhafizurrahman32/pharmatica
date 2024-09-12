@@ -1,10 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Bill Receipt</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title> Bill Receipt</title>
+    <style th:inline="css">
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .billId {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .barcode {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .name {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .signature {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5rem;
+            margin-left: 5rem;
+            margin-right: 5rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-
+<div class="logo">
+    <img width="95" height="75" th:src="${companyLogo}" alt="Company Logo" />
+    <p th:text="${documentType}">Cash Memo</p>
+</div>
+<div class="billId">
+    <p>Bill Id: <span th:text="${billId}"></span></p>
+    <div class="barcode">
+        <span>Bar Code:</span>
+        <img width="100" height="20" th:src="${barcodeImage}" alt="Barcode" />
+    </div>
+</div>
+<div class="name">
+    <p>Name: <span th:text="${customerName}"></span></p>
+    <p>Date: <span th:text="${transactionDate}">05/11/2024</span></p>
+</div>
+<div>
+    <p>Address: <span th:text="${address}"></span></p>
+    <p>Phone No: <span th:text="${phoneNumber}"></span></p>
+    <p>Email ID: <span th:text="${email}"></span></p>
+</div>
+<div>
+    <table>
+        <tr>
+            <th>Sl/No</th>
+            <th>Product Name</th>
+            <th>Unit</th>
+            <th>Qty</th>
+            <th>Amount</th>
+            <th>Remarks</th>
+        </tr>
+        <tr th:each="product, iterStat : ${productDetails}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.unit}"></td>
+            <td th:text="${product.quantity}"></td>
+            <td th:text="${product.amount}"></td>
+            <td th:text="${product.remarks}"></td>
+        </tr>
+        <tr>
+            <td colspan="3"></td>
+            <td>Total</td>
+            <td><strong th:text="${#numbers.formatDecimal(totalPrice, 1, 'COMMA', 2, 'POINT')}"></strong></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+<div class="signature">
+    <p>Customer Signature</p>
+    <p>Signature</p>
+</div>
+<div class="footer">
+    <p th:text="${footerMessage}">Thanks for choosing us!!! Please visit us again!!!</p>
+</div>
 </body>
 </html>

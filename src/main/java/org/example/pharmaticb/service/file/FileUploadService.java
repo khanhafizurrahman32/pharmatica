@@ -9,7 +9,10 @@ import reactor.core.publisher.Mono;
 
 public interface FileUploadService {
     Mono<UploadFileResponse> uploadFile(UploadFileRequest request, AuthorizedUser authorizedUser);
-    Mono<FileUploadResponse> uploadFile(FilePart filePart, AuthorizedUser authorizedUser);
+
+    Mono<FileUploadResponse> uploadFile(FilePart filePart);
+
+    Mono<String> uploadFile(String key, byte[] bytes, String contentType);
 
     Mono<byte[]> downloadFile(String key);
 

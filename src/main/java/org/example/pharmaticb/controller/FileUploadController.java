@@ -28,8 +28,8 @@ public class FileUploadController {
     }
 
     @PostMapping(value = "/settings/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<FileUploadResponse> uploadFile(@RequestPart("file") FilePart filePart, Principal principal) {
-        return fileUploadService.uploadFile(filePart, Utility.extractAuthorizedUserFromPrincipal(principal));
+    public Mono<FileUploadResponse> uploadFile(@RequestPart("file") FilePart filePart) {
+        return fileUploadService.uploadFile(filePart);
     }
 
     @GetMapping("/key")

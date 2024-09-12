@@ -2,7 +2,6 @@ package org.example.pharmaticb.service.file;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UploadFileRequest;
 import org.example.pharmaticb.Models.Response.FileUploadResponse;
 import org.example.pharmaticb.Models.Response.UploadFileResponse;
@@ -14,7 +13,6 @@ import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -40,9 +38,14 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public Mono<FileUploadResponse> uploadFile(FilePart filePart, AuthorizedUser authorizedUser) {
+    public Mono<FileUploadResponse> uploadFile(FilePart filePart) {
         String key = generateUniqueKey(filePart.filename());
         return fileService.uploadFile(filePart, key).map(url -> FileUploadResponse.builder().key(key).url(url).build());
+    }
+
+    @Override
+    public Mono<String> uploadFile(String key, byte[] bytes, String contentType) {
+        return fileService.uploadReceiptFile(key, bytes, contentType);
     }
 
     @Override
