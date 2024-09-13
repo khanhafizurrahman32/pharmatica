@@ -13,4 +13,5 @@ import java.io.Serializable;
 @Builder
 public class AnnouncementRequest implements Serializable {
     private String description;
+    private boolean enabled;
 }

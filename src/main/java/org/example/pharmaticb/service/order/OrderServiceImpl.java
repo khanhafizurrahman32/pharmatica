@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.DB.Product;
-import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.*;
@@ -21,6 +20,7 @@ import org.example.pharmaticb.repositories.OrderRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.barcode.BarcodeService;
 import org.example.pharmaticb.service.delivery.type.DeliveryTypeService;
+import org.example.pharmaticb.service.email.EmailService;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.service.product.ProductServiceImpl;
 import org.example.pharmaticb.service.receipt.ReceiptGenerationService;
@@ -28,11 +28,9 @@ import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.example.pharmaticb.utilities.Utility;
-import org.reactivestreams.Publisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -62,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
     private final BarcodeService barcodeService;
     private final FileUploadService fileUploadService;
     private final ReceiptGenerationService receiptGenerationService;
+    private final EmailService emailService;
 
     @Override
     public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
@@ -72,7 +71,10 @@ public class OrderServiceImpl implements OrderService {
                     var user = tuple2.getT2();
                     return orderRepository.save(orderObj)
                             .flatMap(order -> getProducts(order)
-                                    .map(product -> convertDbToDto(order, product, user)));
+                                    .map(product -> {
+                                        emailService.sendEmail("pharmatic24@gmail.com", "New order", "A new order has been placed");
+                                        return convertDbToDto(order, product, user);
+                                    }));
                 });
     }
 
