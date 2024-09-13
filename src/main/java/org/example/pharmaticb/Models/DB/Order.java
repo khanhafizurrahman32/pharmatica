@@ -30,6 +30,7 @@ public class Order implements Serializable {
     private LocalDate deliveryDate;
     private String paymentChannel;
     private String prescriptionUrl;
+    private String receiptUrl;
     private String transactionId;
     private Timestamp createdAt;
 }

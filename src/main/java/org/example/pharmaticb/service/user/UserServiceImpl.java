@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
                 .userName(user.getUserName())
                 .phoneNumber(user.getPhoneNumber())
                 .address(user.getAddress())
+                .email(user.getEmail())
                 .registrationStatus(user.getRegistrationStatus())
                 .profilePictureUrl(user.getProfilePictureUrl())
                 .role(ObjectUtils.isEmpty(user.getRole()) ? "" :user.getRole().name())

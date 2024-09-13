@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Order;
+import org.example.pharmaticb.Models.DB.Product;
+import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.*;
@@ -17,14 +19,20 @@ import org.example.pharmaticb.dto.records.Item;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.OrderRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
+import org.example.pharmaticb.service.barcode.BarcodeService;
 import org.example.pharmaticb.service.delivery.type.DeliveryTypeService;
+import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.service.product.ProductServiceImpl;
+import org.example.pharmaticb.service.receipt.ReceiptGenerationService;
 import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.example.pharmaticb.utilities.Utility;
+import org.reactivestreams.Publisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -51,6 +59,9 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final UserService userService;
     private final DeliveryTypeService deliveryTypeService;
+    private final BarcodeService barcodeService;
+    private final FileUploadService fileUploadService;
+    private final ReceiptGenerationService receiptGenerationService;
 
     @Override
     public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
@@ -224,29 +235,84 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser) {
-        return orderRepository.findById(Long.valueOf(request.getOrderId()))
-                .flatMap(order -> {
-                    var currentStatus = OrderStatus.valueOf(order.getStatus().toUpperCase());
-                    if (!currentStatus.canTransitionTo(OrderStatus.valueOf(request.getStatus().toUpperCase()))) {
-                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be updated", "o1"));
-                    }
-
-                    order.setStatus(request.getStatus());
-                    if (OrderStatus.COMPLETED.name().equals(request.getStatus())) {
-                        return Flux.fromIterable(getItems(order))
-                                .flatMap(item -> productRepository.findById(item.productId())
-                                        .flatMap(product -> {
-                                            if (product.getStock() < item.quantity()) {
-                                                return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Not available stock", ServiceError.INVALID_REQUEST));
-                                            }
-                                            product.setStock(product.getStock() - item.quantity());
-                                            return productRepository.save(product);
-                                        }))
-                                .then(orderRepository.save(order));
-                    }
-                    return orderRepository.save(order);
+        return Mono.zip(orderRepository.findById(Long.valueOf(request.getOrderId())),
+                        userService.getUserById(authorizedUser.getId()))
+                .flatMap(tuple2 -> {
+                    var order = tuple2.getT1();
+                    var user = tuple2.getT2();
+                    return updateOrderStatus(order, user, request.getStatus());
                 })
                 .map(order -> OrderResponse.builder().status(order.getStatus()).build());
+    }
+
+    private Mono<String> getBarcodeImageInfo(String transactionId) {
+        var barcodeImage = barcodeService.generateBarcode(transactionId);
+        return ObjectUtils.isEmpty(barcodeImage) ? Mono.just(transactionId) : fileUploadService.uploadFile(transactionId, barcodeImage, "images/png");
+    }
+
+    private Mono<Order> updateOrderStatus(Order order, UserResponse user, String newStatus) {
+        OrderStatus currentStatus = OrderStatus.valueOf(order.getStatus().toUpperCase());
+        OrderStatus requestedStatus = OrderStatus.valueOf(newStatus.toUpperCase());
+
+        if (!currentStatus.canTransitionTo(requestedStatus)) {
+            return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be updated", "o1"));
+        }
+
+        order.setStatus(newStatus);
+
+        return switch (requestedStatus) {
+            case ON_THE_WAY -> handleOnTheWayStatus(order, user);
+            case COMPLETED -> handleCompletedStatus(order);
+            default -> orderRepository.save(order);
+        };
+    }
+
+    private Mono<Order> handleCompletedStatus(Order order) {
+        return Flux.fromIterable(getItems(order))
+                .flatMap(this::updateProductStock)
+                .then(orderRepository.save(order));
+    }
+
+    private Mono<Product> updateProductStock(Item item) {
+        return productRepository.findById(item.productId())
+                .flatMap(product -> {
+                    if (product.getStock() < item.quantity()) {
+                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Not available stock", ServiceError.INVALID_REQUEST));
+                    }
+                    product.setStock(product.getStock() - item.quantity());
+                    return productRepository.save(product);
+                });
+    }
+
+    private Mono<Order> handleOnTheWayStatus(Order order, UserResponse user) {
+        return Mono.zip(getBarcodeImageInfo(order.getTransactionId()), getProducts(order))
+                .flatMap(tuples -> {
+                    String barcodeUrl = tuples.getT1();
+                    var product = tuples.getT2();
+                    ReceiptGenerationDto receiptGeneration = getReceiptGenerationDto(order, user, product, barcodeUrl);
+                    return receiptGenerationService.generateReceiptPdf(receiptGeneration)
+                            .map(pdfUrl -> {
+                                order.setReceiptUrl(pdfUrl);
+                                return order;
+                            })
+                            .flatMap(orderRepository::save);
+                });
+    }
+
+    private ReceiptGenerationDto getReceiptGenerationDto(Order order, UserResponse userResponse,
+                                                         List<ProductResponse> productResponse, String barcodeUrl) {
+        return ReceiptGenerationDto.builder()
+                .companyLogo(Utility.COMPANY_LOGO)
+                .barcodeLogo(barcodeUrl)
+                .billId(order.getTransactionId())
+                .customerName(userResponse.getUserName())
+                .transactionDate(DateUtil.formattedDateTime())
+                .address(userResponse.getAddress())
+                .phoneNumber(userResponse.getPhoneNumber())
+                .email(userResponse.getEmail())
+                .orderItems(getOrderItems(productResponse, order))
+                .trxId(order.getTransactionId()) //todo: transactionId
+                .build();
     }
 
     @Override
