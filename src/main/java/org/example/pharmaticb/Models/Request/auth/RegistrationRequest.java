@@ -15,7 +15,7 @@ import java.io.Serializable;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class RegistrationRequest extends CommonRequest implements Serializable {
-    @PasswordConstraint
+    @PasswordConstraint(message = "Your password must contain uppercase, lowercase, special character, number and must be of 6 digit length")
     private String password;
 //    @ValidEnum(enumClass = Role.class, message = ServiceError.INVALID_REQUEST)
     private Role role;
