@@ -31,4 +31,13 @@ public class WebClientConfig {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
+
+    @Bean
+    public WebClient emailWebClient(@Value("${mailgun.api.url}") String apiUrl,
+                                    @Value("${mailgun.api.key}") String apiKey) {
+        return WebClient.builder()
+                .baseUrl(apiUrl)
+                .defaultHeaders(httpHeaders -> httpHeaders.setBasicAuth("api", apiKey))
+                .build();
+    }
 }
