@@ -1,6 +1,7 @@
 package org.example.pharmaticb.service.order;
 
 import org.example.pharmaticb.Models.Request.OrderRequest;
+import org.example.pharmaticb.Models.Request.OrderUpdateDeliveryChargeRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.PagedResponse;
@@ -8,6 +9,8 @@ import org.example.pharmaticb.dto.AuthorizedUser;
 import org.example.pharmaticb.dto.OrderWithDetails;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 public interface OrderService {
     Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser);
@@ -31,4 +34,6 @@ public interface OrderService {
     Flux<OrderResponse> getOrdersByUserId(long userId);
 
     Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId,String startDate, String endDate);
+
+    Mono<OrderResponse> updateOrderDeliveryCharge(OrderUpdateDeliveryChargeRequest request, AuthorizedUser authorizedUser);
 }

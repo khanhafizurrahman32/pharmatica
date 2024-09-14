@@ -2,6 +2,7 @@ package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.Request.OrderRequest;
+import org.example.pharmaticb.Models.Request.OrderUpdateDeliveryChargeRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.PagedResponse;
@@ -30,6 +31,11 @@ public class OrderController {
     @PostMapping("/orders/update-status")
     public Mono<OrderResponse> updateOrderStatus(@Valid @RequestBody OrderUpdateStatusRequest request, Principal principal) {
         return orderService.updateOrderStatus(request, Utility.extractAuthorizedUserFromPrincipal(principal));
+    }
+
+    @PostMapping("/orders/update-delivery-charge")
+    public Mono<OrderResponse> updateOrderDeliveryCharge(@Valid @RequestBody OrderUpdateDeliveryChargeRequest request, Principal principal) {
+        return orderService.updateOrderDeliveryCharge(request, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 
     @GetMapping("/orders")

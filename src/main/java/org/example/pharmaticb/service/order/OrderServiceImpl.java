@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Order;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.OrderRequest;
+import org.example.pharmaticb.Models.Request.OrderUpdateDeliveryChargeRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.*;
 import org.example.pharmaticb.dto.*;
@@ -258,6 +259,16 @@ public class OrderServiceImpl implements OrderService {
                 .map(order -> OrderResponse.builder().status(order.getStatus()).build());
     }
 
+    @Override
+    public Mono<OrderResponse> updateOrderDeliveryCharge(OrderUpdateDeliveryChargeRequest request, AuthorizedUser authorizedUser) {
+        return orderRepository.findById(Long.valueOf(request.getOrderId()))
+                .flatMap(order -> {
+                    order.setDeliveryCharge(Double.parseDouble(request.getDeliveryCharge()));
+                    return orderRepository.save(order);
+                })
+                .map(order -> OrderResponse.builder().deliveryCharge(order.getDeliveryCharge()).build());
+    }
+
     private Mono<String> getBarcodeImageInfo(String transactionId) {
         var barcodeImage = barcodeService.generateBarcode(transactionId);
         return ObjectUtils.isEmpty(barcodeImage) ? Mono.just(transactionId) : fileUploadService.uploadFile(transactionId, barcodeImage, "images/png");
@@ -424,29 +435,6 @@ public class OrderServiceImpl implements OrderService {
                 .rate(String.valueOf(orderWithDetails.getRate()))
                 .build();
     }
-
-//    private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
-//        try {
-//            List<OrderItems> orderItems = objectMapper.readValue(orderWithDetails.getItems(), new TypeReference<>() {
-//            });
-//            return orderItems.stream()
-//                    .map(item -> {
-//                        var unitPrice = orderWithDetails.getPrice() - orderWithDetails.getDiscount();
-//                        var quantity = item.getQuantity();
-//                        return OrderItemDto.builder()
-//                                .productId(item.getProductId())
-//                                .productName(orderWithDetails.getProductName())
-//                                .unitPrice(String.valueOf(unitPrice))
-//                                .quantity(quantity)
-//                                .totalPrice(String.valueOf(unitPrice * Double.parseDouble(quantity)))
-//                                .build();
-//                    })
-//                    .collect(Collectors.toList());
-//        } catch (JsonProcessingException e) {
-//            log.error("error in conversion from jsonb to list", e);
-//            return new ArrayList<>();
-//        }
-//    }
 
     private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
         try {
