@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -144,6 +145,7 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
                 .prescriptionUrl(order.getPrescriptionUrl())
+                .receiptUrl(order.getReceiptUrl())
                 .transactionId(order.getTransactionId())
                 .orderDate(String.valueOf(order.getCreatedAt()))
                 .build();
@@ -167,6 +169,7 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryDate(order.getDeliveryDate())
                 .paymentChannel(order.getPaymentChannel())
                 .prescriptionUrl(order.getPrescriptionUrl())
+                .receiptUrl(order.getReceiptUrl())
                 .transactionId(order.getTransactionId())
                 .orderDate(String.valueOf(order.getCreatedAt()))
                 .build();
@@ -174,12 +177,17 @@ public class OrderServiceImpl implements OrderService {
 
     private List<OrderItemDto> getOrderItems(List<ProductResponse> product, Order order) {
         return product.stream()
-                .map(productResponse -> OrderItemDto.builder()
-                        .productId(productResponse.getProductId())
-                        .productName(productResponse.getProductName())
-                        .unitPrice(String.valueOf(productResponse.getPrice() - productResponse.getDiscount()))
-                        .quantity(getQuantity(getItems(order), productResponse.getProductId()))
-                        .build())
+                .map(productResponse -> {
+                    var unitPrice = productResponse.getPrice() - productResponse.getDiscount();
+                    var quantity = getQuantity(getItems(order), productResponse.getProductId());
+                    return OrderItemDto.builder()
+                            .productId(productResponse.getProductId())
+                            .productName(productResponse.getProductName())
+                            .unitPrice(String.valueOf(unitPrice))
+                            .quantity(quantity)
+                            .totalPrice(String.valueOf(unitPrice * Double.parseDouble(quantity)))
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -306,6 +314,7 @@ public class OrderServiceImpl implements OrderService {
 
     private ReceiptGenerationDto getReceiptGenerationDto(Order order, UserResponse userResponse,
                                                          List<ProductResponse> productResponse, String barcodeUrl) {
+        List<OrderItemDto> orderItems = getOrderItems(productResponse, order);
         return ReceiptGenerationDto.builder()
                 .companyLogo(Utility.COMPANY_LOGO)
                 .barcodeLogo(barcodeUrl)
@@ -315,9 +324,16 @@ public class OrderServiceImpl implements OrderService {
                 .address(userResponse.getAddress())
                 .phoneNumber(userResponse.getPhoneNumber())
                 .email(userResponse.getEmail())
-                .orderItems(getOrderItems(productResponse, order))
+                .orderItems(orderItems)
                 .trxId(order.getTransactionId()) //todo: transactionId
+                .totalPrice(String.valueOf(getTotalPrice(orderItems)))
                 .build();
+    }
+
+    private BigDecimal getTotalPrice(List<OrderItemDto> orderItems) {
+        return orderItems.stream()
+                .map(item -> new BigDecimal(item.getTotalPrice()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
@@ -376,6 +392,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId, String startDate, String endDate) {
         long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
+        log.info("k {}", new Timestamp(effectiveStartDate));
         long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
         return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ? Long.parseLong(userId) : null,
                         StringUtils.hasText(orderId) ? Long.parseLong(orderId) : null,
@@ -392,6 +409,7 @@ public class OrderServiceImpl implements OrderService {
                         .deliveryDate(orderWithDetails.getDeliveryDate())
                         .paymentChannel(orderWithDetails.getPaymentChannel())
                         .prescriptionUrl(orderWithDetails.getPrescriptionUrl())
+                        .receiptUrl(orderWithDetails.getReceiptUrl())
                         .transactionId(orderWithDetails.getTransactionId())
                         .orderDate(String.valueOf(orderWithDetails.getCreatedAt()))
                         .orderItems(getOrderItems(orderWithDetails))
@@ -407,21 +425,49 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+//    private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
+//        try {
+//            List<OrderItems> orderItems = objectMapper.readValue(orderWithDetails.getItems(), new TypeReference<>() {
+//            });
+//            return orderItems.stream()
+//                    .map(item -> {
+//                        var unitPrice = orderWithDetails.getPrice() - orderWithDetails.getDiscount();
+//                        var quantity = item.getQuantity();
+//                        return OrderItemDto.builder()
+//                                .productId(item.getProductId())
+//                                .productName(orderWithDetails.getProductName())
+//                                .unitPrice(String.valueOf(unitPrice))
+//                                .quantity(quantity)
+//                                .totalPrice(String.valueOf(unitPrice * Double.parseDouble(quantity)))
+//                                .build();
+//                    })
+//                    .collect(Collectors.toList());
+//        } catch (JsonProcessingException e) {
+//            log.error("error in conversion from jsonb to list", e);
+//            return new ArrayList<>();
+//        }
+//    }
+
     private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
         try {
-            List<OrderItems> orderItems = objectMapper.readValue(orderWithDetails.getItems(), new TypeReference<>() {
-            });
-            return orderItems.stream()
-                    .map(item -> OrderItemDto.builder()
-                            .productId(item.getProductId())
-                            .productName(orderWithDetails.getProductName())
-                            .unitPrice(String.valueOf(orderWithDetails.getPrice() - orderWithDetails.getDiscount()))
-                            .quantity(item.getQuantity())
-                            .build())
+            List<ProductDetails> orderItems = objectMapper.readValue(orderWithDetails.getProductDetails(), new TypeReference<>() {});
+            return orderItems
+                    .stream()
+                    .map(productDetails -> {
+                        var unitPrice = productDetails.getPrice() - productDetails.getDiscount();
+                        var quantity = productDetails.getQuantity();
+
+                        return OrderItemDto.builder()
+                                .productId(productDetails.getProductId())
+                                .productName(productDetails.getProductName())
+                                .unitPrice(String.valueOf(unitPrice))
+                                .quantity(String.valueOf(quantity))
+                                .totalPrice(String.valueOf(unitPrice * quantity))
+                                .build();
+                    })
                     .collect(Collectors.toList());
         } catch (JsonProcessingException e) {
-            log.error("error in conversion from jsonb to list", e);
-            return new ArrayList<>();
+            throw new RuntimeException(e);
         }
     }
 

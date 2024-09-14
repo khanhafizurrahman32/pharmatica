@@ -23,6 +23,6 @@ public class ReceiptGenerationDto implements Serializable {
     private String phoneNumber;
     private String email;
     private List<OrderItemDto> orderItems;
-    private double totalPrice;
+    private String totalPrice;
     private String trxId;
 }

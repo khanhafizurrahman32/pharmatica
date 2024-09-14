@@ -31,7 +31,7 @@ import java.util.List;
 public class SecurityConfig {
     private static final List<String> openApis = List.of("/actuator/health", "/api/reg/login",
             "/api/auth/login", "/api/otp/send", "/api/otp/verify", "/api/products", "/api/categories", "/api/auth/forget-password",
-            "/api/reg/user-status", "/api/products/{id}", "/api/products/category/{id}");
+            "/api/reg/user-status", "/api/auth/refresh-token", "/api/products/{id}", "/api/products/category/{id}");
 
     private static final List<String> roleBasedOpenApis = List.of("/api/unknown");
     private final JwtTokenService jwtTokenService;

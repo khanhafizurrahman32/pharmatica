@@ -24,7 +24,7 @@ public class Utility {
     public static final String SMS_TEMP_PASSWORD_CONTENT = "Your Temp Password is %s. Please do not share to others and update Password";
 
     public static final String ROLE_PREFIX = "ROLE_";
-    public static final String COMPANY_LOGO = "https://pharmatica-test.blr1.cdn.digitaloceanspaces.com/1725813538130_Pharmatic Logo.png";
+    public static final String COMPANY_LOGO = "https://pharmatica-test.blr1.cdn.digitaloceanspaces.com/1725813538130_Pharmatic%20Logo.png";
 
     public static AuthorizedUser extractAuthorizedUserFromPrincipal(Principal principal) {
         return (AuthorizedUser) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();

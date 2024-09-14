@@ -16,4 +16,6 @@ public class OrderItemDto implements Serializable {
     private String productName;
     private String unitPrice;
     private String quantity;
+    private String totalPrice;
+    private String remarks;
 }

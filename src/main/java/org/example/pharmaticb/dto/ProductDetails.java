@@ -1,10 +1,10 @@
 package org.example.pharmaticb.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.Serializable;
 
@@ -13,10 +13,11 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class ProductDetails implements Serializable {
-    private String serialId;
-    private String name;
-    private double unitPrice;
-    private double quantity;
+    @JsonProperty("product_id")
+    private String productId;
+    @JsonProperty("product_name")
+    private String productName;
     private double price;
-    private String remarks;
+    private double quantity;
+    private double discount;
 }

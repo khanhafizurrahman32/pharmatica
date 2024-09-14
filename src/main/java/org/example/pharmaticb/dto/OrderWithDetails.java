@@ -23,20 +23,17 @@ public class OrderWithDetails implements Serializable {
     private LocalDate deliveryDate;
     private String paymentChannel;
     private String prescriptionUrl;
+    private String receiptUrl;
     private String transactionId;
     private Timestamp createdAt;
+    private String items;
 
     private long userId;
     private String userName;
     private String phoneNumber;
     private String address;
 
-    private String items;
-    private String productId;
-    private String quantity;
-    private String productName;
-    private double price;
-    private double discount;
+    private String productDetails;
 
     private String deliveryItemId;
     private String title;
