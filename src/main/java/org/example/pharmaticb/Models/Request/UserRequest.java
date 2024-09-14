@@ -15,6 +15,7 @@ import java.io.Serializable;
 public class UserRequest implements Serializable {
     private String userName;
     private String profilePictureUrl;
+    private String deactivated;
     private String email;
     private String address;
     private String bloodGroup;

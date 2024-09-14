@@ -20,6 +20,7 @@ public class User implements Serializable {
     private String password;
     private Role role;
     private boolean otpStatus;
+    private boolean deactivated;
     private String otpCode;
     private String email;
     private String phoneNumber;

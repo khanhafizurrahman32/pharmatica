@@ -46,6 +46,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return userService.findByPhoneNumber(request.getPhoneNumber())
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
                 .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Username or Password is incorrect", ServiceError.INVALID_REQUEST)))
+                .filter(user -> !user.isDeactivated())
+                .switchIfEmpty(Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is deactivated", ServiceError.DEACTIVATED_USER)))
                 .map(userDetails -> LoginResponse.builder()
                         .accessToken(jwtTokenService.generateAccessToken(userDetails, userDetails.getRole().name()))
                         .refreshToken(jwtTokenService.generateRefreshToken(userDetails, userDetails.getRole().name()))

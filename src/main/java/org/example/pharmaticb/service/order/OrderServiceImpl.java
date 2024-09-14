@@ -69,6 +69,9 @@ public class OrderServiceImpl implements OrderService {
                 .flatMap(tuple2 -> {
                     var orderObj = tuple2.getT1();
                     var user = tuple2.getT2();
+                    if (Boolean.parseBoolean(user.getDeactivated())) {
+                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is deactivated", ServiceError.DEACTIVATED_USER));
+                    }
                     return orderRepository.save(orderObj)
                             .flatMap(order -> getProducts(order)
                                     .map(product -> {

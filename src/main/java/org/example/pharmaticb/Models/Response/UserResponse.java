@@ -20,4 +20,5 @@ public class UserResponse implements Serializable {
     private String registrationStatus;
     private String profilePictureUrl;
     private String role;
+    private String deactivated;
 }

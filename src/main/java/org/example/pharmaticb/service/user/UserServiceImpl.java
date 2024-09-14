@@ -50,6 +50,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .registrationStatus(user.getRegistrationStatus())
                 .profilePictureUrl(user.getProfilePictureUrl())
+                .deactivated(String.valueOf(user.isDeactivated()))
                 .role(ObjectUtils.isEmpty(user.getRole()) ? "" :user.getRole().name())
                 .build();
     }
@@ -61,6 +62,7 @@ public class UserServiceImpl implements UserService {
                 .password(user.getPassword())
                 .role(ObjectUtils.isEmpty(request.getRole()) ? user.getRole() : request.getRole())
                 .otpStatus(user.isOtpStatus())
+                .deactivated(StringUtils.hasText(request.getDeactivated()) ? Boolean.parseBoolean(request.getDeactivated()) : user.isDeactivated())
                 .otpCode(user.getOtpCode())
                 .email(StringUtils.hasText(request.getEmail()) ? request.getEmail() : user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
