@@ -25,4 +25,6 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
 
     @Query("SELECT COUNT(*) FROM product WHERE brand_id = :brandId")
     Mono<Long> countProductsByBrandId(Long brandId);
+
+    Flux<Product> findByProductName(String productName);
 }

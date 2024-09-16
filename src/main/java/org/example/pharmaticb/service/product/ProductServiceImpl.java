@@ -2,10 +2,16 @@ package org.example.pharmaticb.service.product;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pharmaticb.Models.DB.Brand;
+import org.example.pharmaticb.Models.DB.Category;
+import org.example.pharmaticb.Models.DB.Country;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
 import org.example.pharmaticb.Models.Response.*;
+import org.example.pharmaticb.repositories.BrandRepository;
+import org.example.pharmaticb.repositories.CategoryRepository;
+import org.example.pharmaticb.repositories.CountryRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.brand.BrandService;
 import org.example.pharmaticb.service.category.CategoryService;
@@ -31,6 +37,9 @@ public class ProductServiceImpl implements ProductService {
     private final BrandService brandService;
     private final CountryService countryService;
     private final FileUploadService fileUploadService;
+    private final CategoryRepository categoryRepository;
+    private final BrandRepository brandRepository;
+    private final CountryRepository countryRepository;
 
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
@@ -114,6 +123,7 @@ public class ProductServiceImpl implements ProductService {
                                 .skip(1)
                 ))
                 .map(this::parseProductFromCsvLine)
+                .flatMap(productMono -> productMono)
                 .flatMap(this::insertProductIntoDatabase)
                 .collectList()
                 .map(ret ->BulkProductCreateResponse.builder().success(true).build());
@@ -123,11 +133,39 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    private Product parseProductFromCsvLine(String line) {
+    private Mono<Product> parseProductFromCsvLine(String line) {
         String[] parts = line.split(",");
-        return Product.builder()
-                .productName(parts[0])
-                .build();
+        return Mono.zip(getCategoryId(parts[3]), getBrandId(parts[5]), getCountryId(parts[7]))
+                .map(tuple3 -> Product.builder()
+                        .productName(parts[0])
+                        .price(Double.parseDouble(parts[1]))
+                        .imageUrl(parts[2])
+                        .categoryId(tuple3.getT1())
+                        .discount(Double.parseDouble(parts[4]))
+                        .brandId(tuple3.getT2())
+                        .expires(parts[6])
+                        .countryId(tuple3.getT3())
+                        .description(parts[8])
+                        .howToUse(parts[9])
+                        .ingredients(parts[10])
+                        .stock(Double.parseDouble(parts[11]))
+                        .composition(parts[12])
+                        .build());
+    }
+
+    private Mono<Long> getCategoryId(String label) {
+        return categoryRepository.findByLabel(label)
+                .map(Category::getId);
+    }
+
+    private Mono<Long> getBrandId(String label) {
+        return brandRepository.findByBrandName(label)
+                .map(Brand::getId);
+    }
+
+    private Mono<Long> getCountryId(String label) {
+        return countryRepository.findByCountryName(label)
+                .map(Country::getId);
     }
 
     private Mono<CountryResponse> getCountryResponse(long countryId) {
