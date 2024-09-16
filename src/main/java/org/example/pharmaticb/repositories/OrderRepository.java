@@ -46,11 +46,13 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
         "    o.transaction_id,\n" +
         "    o.receipt_url,\n" +
         "    o.created_at,\n" +
+        "    o.delivery_options_id,\n" +
         "    o.items,\n" +
         "    u.id AS user_id,\n" +
         "    u.user_name,\n" +
         "    u.phone_number,\n" +
         "    u.address,\n" +
+        "    u.email,\n" +
         "    d.id AS deliveryItemId,\n" +
         "    d.title,\n" +
         "    d.rate,\n" +

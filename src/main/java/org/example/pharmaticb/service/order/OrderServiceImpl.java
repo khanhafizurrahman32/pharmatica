@@ -41,9 +41,9 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.utilities.DateUtil.currentTimeInDBTimeStamp;
@@ -249,14 +249,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser) {
-        return Mono.zip(orderRepository.findById(Long.valueOf(request.getOrderId())),
-                        userService.getUserById(authorizedUser.getId()))
-                .flatMap(tuple2 -> {
-                    var order = tuple2.getT1();
-                    var user = tuple2.getT2();
-                    return updateOrderStatus(order, user, request.getStatus());
-                })
-                .map(order -> OrderResponse.builder().status(order.getStatus()).build());
+        return orderRepository.findAllOrdersWithDetails(null, Long.valueOf(request.getOrderId()), null, null, null)
+                .map(orderWithDetails -> updateOrderStatus(orderWithDetails, request.getStatus()))
+                .flatMap(orderMono -> orderMono)
+                .next()
+                .map(order -> OrderResponse.builder().status(order.getStatus()).build())
+                .onErrorResume(e -> {
+                    if (e instanceof NoSuchElementException) {
+                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "No orders found", "NO_ORDER_FOUND"));
+                    } else if (e instanceof IndexOutOfBoundsException) {
+                        return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "More orders found of single id", "MULTIPLE_ORDER_FOUND"));
+                    }
+                    return Mono.error(e);
+                });
     }
 
     @Override
@@ -274,21 +279,40 @@ public class OrderServiceImpl implements OrderService {
         return ObjectUtils.isEmpty(barcodeImage) ? Mono.just(transactionId) : fileUploadService.uploadFile(transactionId, barcodeImage, "images/png");
     }
 
-    private Mono<Order> updateOrderStatus(Order order, UserResponse user, String newStatus) {
-        OrderStatus currentStatus = OrderStatus.valueOf(order.getStatus().toUpperCase());
+    private Mono<Order> updateOrderStatus(OrderWithDetails orderWithDetails, String newStatus) {
+        OrderStatus currentStatus = OrderStatus.valueOf(orderWithDetails.getStatus().toUpperCase());
         OrderStatus requestedStatus = OrderStatus.valueOf(newStatus.toUpperCase());
 
         if (!currentStatus.canTransitionTo(requestedStatus)) {
             return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Order can not be updated", "o1"));
         }
 
-        order.setStatus(newStatus);
+        Order order = buildOrder(orderWithDetails, newStatus);
 
         return switch (requestedStatus) {
-            case ON_THE_WAY -> handleOnTheWayStatus(order, user);
+            case ON_THE_WAY -> handleOnTheWayStatus(orderWithDetails, order);
             case COMPLETED -> handleCompletedStatus(order);
             default -> orderRepository.save(order);
         };
+    }
+
+    private Order buildOrder(OrderWithDetails orderWithDetails, String newStatus) {
+        return  Order.builder()
+                .id(orderWithDetails.getOrderId())
+                .userId(orderWithDetails.getUserId())
+                .status(newStatus)
+                .totalAmount(Double.parseDouble(orderWithDetails.getTotalAmount()))
+                .deliveryCharge(Double.parseDouble(orderWithDetails.getDeliveryCharge()))
+                .couponApplied(orderWithDetails.getCouponApplied())
+                .deliveryDate(orderWithDetails.getDeliveryDate())
+                .paymentChannel(orderWithDetails.getPaymentChannel())
+                .transactionId(orderWithDetails.getTransactionId())
+                .createdAt(orderWithDetails.getCreatedAt())
+                .items(objectMapper.valueToTree(orderWithDetails.getItems()))
+                .prescriptionUrl(orderWithDetails.getPrescriptionUrl())
+                .deliveryOptionsId(orderWithDetails.getDeliveryOptionId())
+                .receiptUrl(orderWithDetails.getReceiptUrl())
+                .build();
     }
 
     private Mono<Order> handleCompletedStatus(Order order) {
@@ -308,35 +332,34 @@ public class OrderServiceImpl implements OrderService {
                 });
     }
 
-    private Mono<Order> handleOnTheWayStatus(Order order, UserResponse user) {
-        return Mono.zip(getBarcodeImageInfo(order.getTransactionId()), getProducts(order))
-                .flatMap(tuples -> {
-                    String barcodeUrl = tuples.getT1();
-                    var product = tuples.getT2();
-                    ReceiptGenerationDto receiptGeneration = getReceiptGenerationDto(order, user, product, barcodeUrl);
-                    return receiptGenerationService.generateReceiptPdf(receiptGeneration)
+    private Mono<Order> handleOnTheWayStatus(OrderWithDetails orderWithDetails, Order order) {
+        return getBarcodeImageInfo(orderWithDetails.getTransactionId())
+                .flatMap(barcodeUrl -> {
+                    List<OrderItemDto> orderItems = getOrderItems(orderWithDetails);
+                    ReceiptGenerationDto receiptGenerationDto = getReceiptGenerationDto(orderWithDetails, barcodeUrl, orderItems);
+                    return receiptGenerationService.generateReceiptPdf(receiptGenerationDto)
                             .map(pdfUrl -> {
                                 order.setReceiptUrl(pdfUrl);
                                 return order;
                             })
                             .flatMap(orderRepository::save);
                 });
+
     }
 
-    private ReceiptGenerationDto getReceiptGenerationDto(Order order, UserResponse userResponse,
-                                                         List<ProductResponse> productResponse, String barcodeUrl) {
-        List<OrderItemDto> orderItems = getOrderItems(productResponse, order);
+    private ReceiptGenerationDto getReceiptGenerationDto(OrderWithDetails orderWithDetails, String barcodeUrl, List<OrderItemDto> orderItems) {
+
         return ReceiptGenerationDto.builder()
                 .companyLogo(Utility.COMPANY_LOGO)
                 .barcodeLogo(barcodeUrl)
-                .billId(order.getTransactionId())
-                .customerName(userResponse.getUserName())
+                .billId(orderWithDetails.getTransactionId())
+                .customerName(orderWithDetails.getUserName())
                 .transactionDate(DateUtil.formattedDateTime())
-                .address(userResponse.getAddress())
-                .phoneNumber(userResponse.getPhoneNumber())
-                .email(userResponse.getEmail())
+                .address(orderWithDetails.getAddress())
+                .phoneNumber(orderWithDetails.getPhoneNumber())
+                .email(orderWithDetails.getEmail())
                 .orderItems(orderItems)
-                .trxId(order.getTransactionId()) //todo: transactionId
+                .trxId(orderWithDetails.getTransactionId())
                 .totalPrice(String.valueOf(getTotalPrice(orderItems)))
                 .build();
     }
