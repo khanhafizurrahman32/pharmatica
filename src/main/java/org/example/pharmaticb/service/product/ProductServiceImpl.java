@@ -44,25 +44,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
         return productRepository.save(convertDtoToDb(request, Product.builder().build()))
-                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
-                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null))
+                .next()
+                .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getAllProducts() {
-        return productRepository.findAll()
-                .flatMap(product -> {
-                    log.info("Product Id: {}", product.getId());
-                    return Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
-                            .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3()));
-                });
+        return productRepository.findAllProductDetails(null, null)
+                .map(this::convertDbToDto);
     }
 
     @Override
     public Mono<ProductResponse> getProductById(long id) {
-        return productRepository.findById(id)
-                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
-                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+        return productRepository.findAllProductDetails(id, null)
+                .next()
+                .map(this::convertDbToDto);
     }
 
     @Override
@@ -72,8 +69,9 @@ public class ProductServiceImpl implements ProductService {
                     var productUpdated = convertDtoToDb(request, product);
                     return productRepository.save(productUpdated);
                 })
-                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
-                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null))
+                .next()
+                .map(this::convertDbToDto);
     }
 
     @Override
