@@ -9,6 +9,7 @@ import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
 import org.example.pharmaticb.Models.Response.*;
+import org.example.pharmaticb.dto.ProductWithDetails;
 import org.example.pharmaticb.repositories.BrandRepository;
 import org.example.pharmaticb.repositories.CategoryRepository;
 import org.example.pharmaticb.repositories.CountryRepository;
@@ -17,7 +18,6 @@ import org.example.pharmaticb.service.brand.BrandService;
 import org.example.pharmaticb.service.category.CategoryService;
 import org.example.pharmaticb.service.country.CountryService;
 import org.example.pharmaticb.service.file.FileUploadService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
@@ -76,23 +76,6 @@ public class ProductServiceImpl implements ProductService {
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
     }
 
-    private void updateProductFromRequest(Product product, ProductRequest request) {
-        BeanUtils.copyProperties(request, product);
-//        product.setProductName(request.getProductName());
-//        product.setPrice(request.getPrice());
-//        product.setImageUrl(request.getImageUrl());
-//        product.setCategoryId(request.getCategoryId());
-//        product.setDiscount(request.getDiscount());
-//        product.setBrand(request.getBrand());
-//        product.setExpires(request.getExpires());
-//        product.setCountryOfOrigin(request.getCountryOfOrigin());
-//        product.setDescription(request.getDescription());
-//        product.setHowToUse(request.getHowToUse());
-//        product.setIngredients(request.getIngredients());
-//        product.setStock(request.getStock());
-//        product.setCoupons(request.getCoupons());
-    }
-
     @Override
     public Mono<Void> deleteProduct(long id) {
         return productRepository.deleteById(id);
@@ -110,6 +93,12 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByBrandId(brandId)
                 .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
                         .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+    }
+
+    @Override
+    public Flux<ProductResponse> getProductsByProductName(String productName) {
+        return productRepository.findAllProductDetails(null, productName)
+                .map(this::convertDbToDto);
     }
 
     @Override
@@ -184,6 +173,40 @@ public class ProductServiceImpl implements ProductService {
                 .brand(brandResponse)
                 .expires(product.getExpires())
                 .country(countryResponse)
+                .description(product.getDescription())
+                .howToUse(product.getHowToUse())
+                .ingredients(product.getIngredients())
+                .stock(product.getStock())
+                .coupons(product.getCoupons())
+                .build();
+    }
+
+    private ProductResponse convertDbToDto(ProductWithDetails product) {
+        return ProductResponse.builder()
+                .productId(String.valueOf(product.getId()))
+                .productName(product.getProductName())
+                .composition(product.getComposition())
+                .price(product.getPrice())
+                .imageUrl(product.getImageUrl())
+                .categoryInfo(Category.builder()
+                        .id(product.getCategoryId())
+                        .label(product.getCategoryLabel())
+                        .iconUrl(product.getCategoryIconUrl())
+                        .categorySlug(product.getCategorySlug())
+                        .subCategories(product.getSubCategories())
+                        .brand(product.getBrand())
+                        .priceRange(product.getPriceRange())
+                        .build())
+                .discount(product.getDiscount())
+                .brandInfo(Brand.builder()
+                        .id(product.getBrandId())
+                        .brandName(product.getBrandName())
+                        .build())
+                .expires(product.getExpires())
+                .countryInfo(Country.builder()
+                        .id(product.getCountryId())
+                        .countryName(product.getCountryName())
+                        .build())
                 .description(product.getDescription())
                 .howToUse(product.getHowToUse())
                 .ingredients(product.getIngredients())

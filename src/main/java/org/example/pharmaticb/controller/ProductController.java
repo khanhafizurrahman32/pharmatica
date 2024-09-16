@@ -33,6 +33,11 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
+    @GetMapping("/products/{productName}")
+    public Flux<ProductResponse> getProductsByProductName(@Valid @PathVariable String productName) {
+        return productService.getProductsByProductName(productName);
+    }
+
     @PutMapping("/products/{id}")
     public Mono<ProductResponse> updateProduct(@Valid @PathVariable long id, @Valid @RequestBody ProductRequest request) {
         return productService.updateProduct(id, request);

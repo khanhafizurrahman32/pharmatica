@@ -24,5 +24,7 @@ public interface ProductService {
 
     Flux<ProductResponse> getProductsByBrandId(long brandId);
 
+    Flux<ProductResponse> getProductsByProductName(String productName);
+
     Mono<BulkProductCreateResponse> createBulkProduct(@Valid BulkProductCreateRequest request);
 }

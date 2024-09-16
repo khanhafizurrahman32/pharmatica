@@ -12,7 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductDetails implements Serializable {
+public class ProductInfos implements Serializable {
     @JsonProperty("product_id")
     private String productId;
     @JsonProperty("product_name")

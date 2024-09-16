@@ -462,16 +462,16 @@ public class OrderServiceImpl implements OrderService {
 
     private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
         try {
-            List<ProductDetails> orderItems = objectMapper.readValue(orderWithDetails.getProductDetails(), new TypeReference<>() {});
+            List<ProductInfos> orderItems = objectMapper.readValue(orderWithDetails.getProductDetails(), new TypeReference<>() {});
             return orderItems
                     .stream()
-                    .map(productDetails -> {
-                        var unitPrice = productDetails.getPrice() - productDetails.getDiscount();
-                        var quantity = productDetails.getQuantity();
+                    .map(productInfos -> {
+                        var unitPrice = productInfos.getPrice() - productInfos.getDiscount();
+                        var quantity = productInfos.getQuantity();
 
                         return OrderItemDto.builder()
-                                .productId(productDetails.getProductId())
-                                .productName(productDetails.getProductName())
+                                .productId(productInfos.getProductId())
+                                .productName(productInfos.getProductName())
                                 .unitPrice(String.valueOf(unitPrice))
                                 .quantity(String.valueOf(quantity))
                                 .totalPrice(String.valueOf(unitPrice * quantity))

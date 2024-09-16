@@ -1,24 +1,15 @@
 package org.example.pharmaticb.repositories;
 
 import org.example.pharmaticb.Models.DB.Product;
+import org.example.pharmaticb.dto.ProductWithDetails;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProductRepository extends R2dbcRepository<Product, Long> {
-    @Query("INSERT INTO product (product_name, price, image_url, category_id, discount, brand, expires, country_of_origin, description, how_to_use, ingredients, stock, coupons) " +
-            "VALUES (:productName, :price, :imageUrl, :categoryId, :discount, :brand, :expires, :countryOfOrigin, :description, :howToUse, :ingredients, :stock, :coupons) " +
-            "RETURNING id")
-    Mono<Long> insertProduct(String productName, double price, String imageUrl, long categoryId, double discount, String brand, String expires,
-                             String countryOfOrigin, String description, String howToUse, String ingredients, double stock, String[] coupons);
-
-
     Flux<Product> findByCategoryId(long categoryId);
     Flux<Product> findByBrandId(long brandId);
-
-    @Query("SELECT COUNT(*) FROM product WHERE country_id = :countryId")
-    Mono<Long> countProductsByCountryId(Long countryId);
 
     @Query("SELECT COUNT(*) FROM product WHERE category_id = :categoryId")
     Mono<Long> countProductsByCategoryId(Long categoryId);
@@ -26,5 +17,16 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
     @Query("SELECT COUNT(*) FROM product WHERE brand_id = :brandId")
     Mono<Long> countProductsByBrandId(Long brandId);
 
-    Flux<Product> findByProductName(String productName);
+    @Query("SELECT p.*, " +
+            "c.id as category_id,  c.label as category_label, c.icon_url as category_icon_url" +
+            "c.category_slug, c. sub_categories, c.brand, c.price_range" +
+            "b.id as brand_id, b.brand_name " +
+            "co.id as country_id, co.country_name " +
+            "FROM product p " +
+            "LEFT JOIN category c ON p.category_id = c.id " +
+            "LEFT JOIN brand b ON p.brand_id = b.id " +
+            "LEFT JOIN country co ON p.country_id = co.id " +
+            "WHERE (:id IS NULL OR p.id = :id) " +
+            "AND (:productName IS NULL OR p.product_name LIKE CONCAT('%', :productName, '%'))")
+    Flux<ProductWithDetails> findAllProductDetails(Long id, String productName);
 }

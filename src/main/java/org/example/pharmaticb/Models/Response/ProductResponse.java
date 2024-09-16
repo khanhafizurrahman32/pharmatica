@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.pharmaticb.Models.DB.Brand;
+import org.example.pharmaticb.Models.DB.Category;
+import org.example.pharmaticb.Models.DB.Country;
 
 import java.io.Serializable;
 
@@ -18,10 +21,13 @@ public class ProductResponse implements Serializable {
     private double price;
     private String imageUrl;
     private CategoryResponse category;
+    private Category categoryInfo;
     private double discount;
     private BrandResponse brand;
+    private Brand brandInfo;
     private String expires;
     private CountryResponse country;
+    private Country countryInfo;
     private String description;
     private String howToUse;
     private String ingredients;
