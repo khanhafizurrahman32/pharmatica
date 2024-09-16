@@ -16,7 +16,7 @@ public class AnnouncementController {
 
     private final AnnouncementService announcementService;
 
-    @PutMapping("/announcement/{id}")
+    @PutMapping("/announcement-update/{id}")
     public Mono<AnnouncementResponse> updateAnnouncement(@PathVariable Long id, @Valid @RequestBody AnnouncementRequest request) {
         return announcementService.updateAnnouncement(id, request);
     }
