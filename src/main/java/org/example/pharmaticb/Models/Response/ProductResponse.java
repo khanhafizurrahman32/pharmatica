@@ -20,14 +20,11 @@ public class ProductResponse implements Serializable {
     private String composition;
     private double price;
     private String imageUrl;
-    private CategoryResponse category;
-    private Category categoryInfo;
+    private Category category;
     private double discount;
-    private BrandResponse brand;
-    private Brand brandInfo;
+    private Brand brand;
     private String expires;
-    private CountryResponse country;
-    private Country countryInfo;
+    private Country country;
     private String description;
     private String howToUse;
     private String ingredients;

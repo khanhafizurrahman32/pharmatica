@@ -8,15 +8,15 @@ import org.example.pharmaticb.Models.DB.Country;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
-import org.example.pharmaticb.Models.Response.*;
+import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
+import org.example.pharmaticb.Models.Response.CountryResponse;
+import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.dto.ProductWithDetails;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.BrandRepository;
 import org.example.pharmaticb.repositories.CategoryRepository;
 import org.example.pharmaticb.repositories.CountryRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
-import org.example.pharmaticb.service.brand.BrandService;
-import org.example.pharmaticb.service.category.CategoryService;
 import org.example.pharmaticb.service.country.CountryService;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.utilities.DateUtil;
@@ -44,8 +44,6 @@ import static org.example.pharmaticb.utilities.DateUtil.BULK_PRODUCT_INPUT_FORMA
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
-    private final CategoryService categoryService;
-    private final BrandService brandService;
     private final CountryService countryService;
     private final FileUploadService fileUploadService;
     private final CategoryRepository categoryRepository;
@@ -55,20 +53,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
         return productRepository.save(convertDtoToDb(request, Product.builder().build()))
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null))
                 .next()
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getAllProducts() {
-        return productRepository.findAllProductDetails(null, null)
+        return productRepository.findAllProductDetails(null, null, null, null)
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Mono<ProductResponse> getProductById(long id) {
-        return productRepository.findAllProductDetails(id, null)
+        return productRepository.findAllProductDetails(id, null, null, null)
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -80,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
                     var productUpdated = convertDtoToDb(request, product);
                     return productRepository.save(productUpdated);
                 })
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null))
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -92,21 +90,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Flux<ProductResponse> getProductsByCategoryId(long categoryId) {
-        return productRepository.findByCategoryId(categoryId)
-                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
-                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+        return productRepository.findAllProductDetails(null, null, categoryId, null)
+                .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getProductsByBrandId(long brandId) {
-        return productRepository.findByBrandId(brandId)
-                .flatMap(product -> Mono.zip(getCategoryResponse(product.getCategoryId()), getBrandResponse(product.getBrandId()), getCountryResponse(product.getCountryId()))
-                        .map(tuple3 -> convertDbToDto(product, tuple3.getT1(), tuple3.getT2(), tuple3.getT3())));
+        return productRepository.findAllProductDetails(null, null, null, brandId)
+                .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getProductsByProductName(String productName) {
-        return productRepository.findAllProductDetails(null, productName)
+        return productRepository.findAllProductDetails(null, productName, null, null)
                 .map(this::convertDbToDto);
     }
 
@@ -242,26 +238,6 @@ public class ProductServiceImpl implements ProductService {
         return countryService.getCategoryById(countryId);
     }
 
-    private ProductResponse convertDbToDto(Product product, CategoryResponse categoryResponse, BrandResponse brandResponse, CountryResponse countryResponse) {
-        return ProductResponse.builder()
-                .productId(String.valueOf(product.getId()))
-                .productName(product.getProductName())
-                .price(product.getPrice())
-                .composition(product.getComposition())
-                .imageUrl(product.getImageUrl())
-                .category(categoryResponse)
-                .discount(product.getDiscount())
-                .brand(brandResponse)
-                .expires(product.getExpires())
-                .country(countryResponse)
-                .description(product.getDescription())
-                .howToUse(product.getHowToUse())
-                .ingredients(product.getIngredients())
-                .stock(product.getStock())
-                .coupons(product.getCoupons())
-                .build();
-    }
-
     private ProductResponse convertDbToDto(ProductWithDetails product) {
         return ProductResponse.builder()
                 .productId(String.valueOf(product.getId()))
@@ -269,7 +245,7 @@ public class ProductServiceImpl implements ProductService {
                 .composition(product.getComposition())
                 .price(product.getPrice())
                 .imageUrl(product.getImageUrl())
-                .categoryInfo(Category.builder()
+                .category(Category.builder()
                         .id(product.getCategoryId())
                         .label(product.getCategoryLabel())
                         .iconUrl(product.getCategoryIconUrl())
@@ -279,12 +255,12 @@ public class ProductServiceImpl implements ProductService {
                         .priceRange(product.getPriceRange())
                         .build())
                 .discount(product.getDiscount())
-                .brandInfo(Brand.builder()
+                .brand(Brand.builder()
                         .id(product.getBrandId())
                         .brandName(product.getBrandName())
                         .build())
                 .expires(product.getExpires())
-                .countryInfo(Country.builder()
+                .country(Country.builder()
                         .id(product.getCountryId())
                         .countryName(product.getCountryName())
                         .build())
@@ -294,14 +270,6 @@ public class ProductServiceImpl implements ProductService {
                 .stock(product.getStock())
                 .coupons(product.getCoupons())
                 .build();
-    }
-
-    private Mono<CategoryResponse> getCategoryResponse(long categoryId) {
-        return categoryService.getCategoryById(categoryId);
-    }
-
-    private Mono<BrandResponse> getBrandResponse(long brandId) {
-        return brandService.getBrandById(brandId);
     }
 
 
