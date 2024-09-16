@@ -18,9 +18,9 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
     Mono<Long> countProductsByBrandId(Long brandId);
 
     @Query("SELECT p.*, " +
-            "c.id as category_id,  c.label as category_label, c.icon_url as category_icon_url" +
-            "c.category_slug, c. sub_categories, c.brand, c.price_range" +
-            "b.id as brand_id, b.brand_name " +
+            "c.id as category_id,  c.label as category_label, c.icon_url as category_icon_url," +
+            "c.category_slug, c. sub_categories, c.brand, c.price_range," +
+            "b.id as brand_id, b.brand_name, " +
             "co.id as country_id, co.country_name " +
             "FROM product p " +
             "LEFT JOIN category c ON p.category_id = c.id " +
