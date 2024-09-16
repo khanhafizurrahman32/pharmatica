@@ -1,6 +1,5 @@
 package org.example.pharmaticb.utilities;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -39,6 +38,10 @@ public class DateUtil {
     }
 
     public static String getTransactionIdDate() {
+        return TRANSACTION_ID_FORMATTER.format(getZonedDateTime());
+    }
+
+    public static String getReceiptDate() {
         return TRANSACTION_ID_FORMATTER.format(getZonedDateTime());
     }
 

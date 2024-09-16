@@ -70,7 +70,7 @@
     <p>Bill Id: <span th:text="${receiptGenerationRequest.billId}"></span></p>
     <div class="barcode">
         <span>Bar Code:</span>
-        <img width="100" height="20" th:src="${receiptGenerationRequest.barcodeLogo}" alt="Barcode" />
+        <img width="150" height="30" th:src="${receiptGenerationRequest.barcodeLogo}" alt="Barcode" />
     </div>
 </div>
 <div class="name">
@@ -87,7 +87,7 @@
         <tr>
             <th>Sl/No</th>
             <th>Product Name</th>
-            <th>Unit</th>
+            <th>Unit Rate</th>
             <th>Qty</th>
             <th>Price</th>
             <th>Remarks</th>
@@ -102,10 +102,17 @@
         </tr>
         <tr>
             <td colspan="3"></td>
+            <td>Delivery Charge</td>
+            <td><strong th:text="${#numbers.formatDecimal(receiptGenerationRequest.deliveryCharge, 1, 'COMMA', 2, 'POINT')}"></strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="3"></td>
             <td>Total</td>
             <td><strong th:text="${#numbers.formatDecimal(receiptGenerationRequest.totalPrice, 1, 'COMMA', 2, 'POINT')}"></strong></td>
             <td></td>
         </tr>
+
     </table>
 </div>
 <div class="signature">

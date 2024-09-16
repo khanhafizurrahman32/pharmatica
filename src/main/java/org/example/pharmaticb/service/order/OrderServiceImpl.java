@@ -354,13 +354,14 @@ public class OrderServiceImpl implements OrderService {
                 .barcodeLogo(barcodeUrl)
                 .billId(orderWithDetails.getTransactionId())
                 .customerName(orderWithDetails.getUserName())
-                .transactionDate(DateUtil.formattedDateTime())
+                .transactionDate(DateUtil.getReceiptDate())
                 .address(orderWithDetails.getAddress())
                 .phoneNumber(orderWithDetails.getPhoneNumber())
                 .email(orderWithDetails.getEmail())
                 .orderItems(orderItems)
                 .trxId(orderWithDetails.getTransactionId())
-                .totalPrice(String.valueOf(getTotalPrice(orderItems)))
+                .deliveryCharge(orderWithDetails.getDeliveryCharge())
+                .totalPrice(String.valueOf(getTotalPrice(orderItems).add(new BigDecimal(orderWithDetails.getDeliveryCharge()))))
                 .build();
     }
 
