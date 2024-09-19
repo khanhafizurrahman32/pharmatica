@@ -10,6 +10,7 @@ import org.example.pharmaticb.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,8 +35,8 @@ public class ReportingServiceImpl implements ReportingService {
 
     @Override
     public Mono<List<WeeklyOrderResponse>> getWeeklySummaries() {
-        LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusDays(7);
+        LocalDate endDate = LocalDateTime.now().toLocalDate();
+        LocalDate startDate = endDate.minusDays(6);
         return orderRepository.findDailyOrderCountsLastWeek(startDate, endDate)
                 .collectList()
                 .map(orders -> orders.stream()

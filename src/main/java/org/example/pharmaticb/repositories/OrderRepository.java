@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface OrderRepository extends R2dbcRepository<Order, Long> {
@@ -26,12 +27,27 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
     Mono<Long> findLastProductId();
 
 
-    @Query("SELECT DATE(created_at) as date, COUNT(*) as order_count " +
-            "FROM orders " +
-            "WHERE created_at >= :startDate AND created_at < :endDate " +
-            "GROUP BY DATE(created_at) " +
-            "ORDER BY DATE(created_at) DESC")
-    Flux<DailyOrderCount> findDailyOrderCountsLastWeek(LocalDateTime startDate, LocalDateTime endDate);
+    @Query("WITH RECURSIVE date_range AS (\n" +
+            "                SELECT :startDate AS date\n" +
+            "                UNION ALL\n" +
+            "                SELECT (date + INTERVAL '1 day')::DATE\n" +
+            "                FROM date_range\n" +
+            "                WHERE date < :endDate\n" +
+            "            )\n" +
+            "            SELECT\n" +
+            "                dr.date,\n" +
+            "                COALESCE(COUNT(o.created_at), 0) AS order_count\n" +
+            "            FROM\n" +
+            "                date_range dr\n" +
+            "            LEFT JOIN\n" +
+            "                pharmatica.orders o ON DATE(o.created_at) = dr.date\n" +
+            "                AND o.created_at >= :startDate\n" +
+            "                AND o.created_at < :endDate\n" +
+            "            GROUP BY\n" +
+            "                dr.date\n" +
+            "            ORDER BY\n" +
+            "                dr.date DESC")
+    Flux<DailyOrderCount> findDailyOrderCountsLastWeek(LocalDate startDate, LocalDate endDate);
 
 @Query("SELECT\n" +
         "    o.id AS order_id,\n" +

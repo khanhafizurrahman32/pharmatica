@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
 import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
+import org.example.pharmaticb.Models.Response.PagedResponse;
 import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.service.product.ProductService;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,14 @@ public class ProductController {
     @GetMapping("/products/name/{productName}")
     public Flux<ProductResponse> getProductsByProductName(@Valid @PathVariable String productName) {
         return productService.getProductsByProductName(productName);
+    }
+
+    @GetMapping("/products/paginated")
+    public Mono<PagedResponse<ProductResponse>> getProductsPaginated(@RequestParam(defaultValue = "0") int page,
+                                                                 @RequestParam(defaultValue = "10") int size,
+                                                                 @RequestParam(defaultValue = "id") String sortBy,
+                                                                 @RequestParam(defaultValue = "ASC") String sortDirection) {
+        return productService.getPageProducts(page, size, sortBy, sortDirection);
     }
 
     @PutMapping("/products/{id}")

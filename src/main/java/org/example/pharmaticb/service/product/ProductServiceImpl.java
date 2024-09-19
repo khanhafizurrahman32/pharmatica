@@ -8,9 +8,7 @@ import org.example.pharmaticb.Models.DB.Country;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
-import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
-import org.example.pharmaticb.Models.Response.CountryResponse;
-import org.example.pharmaticb.Models.Response.ProductResponse;
+import org.example.pharmaticb.Models.Response.*;
 import org.example.pharmaticb.dto.ProductWithDetails;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.BrandRepository;
@@ -20,6 +18,9 @@ import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.service.country.CountryService;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.utilities.DateUtil;
+import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -36,6 +37,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.example.pharmaticb.utilities.DateUtil.BULK_PRODUCT_INPUT_FORMATTER;
 
@@ -53,20 +55,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<ProductResponse> createProduct(ProductRequest request) {
         return productRepository.save(convertDtoToDb(request, Product.builder().build()))
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null, Integer.MAX_VALUE, 0L))
                 .next()
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getAllProducts() {
-        return productRepository.findAllProductDetails(null, null, null, null)
+        return productRepository.findAllProductDetails(null, null, null, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Mono<ProductResponse> getProductById(long id) {
-        return productRepository.findAllProductDetails(id, null, null, null)
+        return productRepository.findAllProductDetails(id, null, null, null, Integer.MAX_VALUE, 0L)
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -78,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
                     var productUpdated = convertDtoToDb(request, product);
                     return productRepository.save(productUpdated);
                 })
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null, Integer.MAX_VALUE, 0L))
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -90,19 +92,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Flux<ProductResponse> getProductsByCategoryId(long categoryId) {
-        return productRepository.findAllProductDetails(null, null, categoryId, null)
+        return productRepository.findAllProductDetails(null, null, categoryId, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getProductsByBrandId(long brandId) {
-        return productRepository.findAllProductDetails(null, null, null, brandId)
+        return productRepository.findAllProductDetails(null, null, null, brandId, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getProductsByProductName(String productName) {
-        return productRepository.findAllProductDetails(null, productName, null, null)
+        return productRepository.findAllProductDetails(null, productName, null, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
@@ -131,6 +133,39 @@ public class ProductServiceImpl implements ProductService {
                 .collectList()
                 .map(ret -> BulkProductCreateResponse.builder().success(true).build())
                 .log("Final result");
+    }
+
+    @Override
+    public Mono<PagedResponse<ProductResponse>> getPageProducts(int page, int size, String sortBy, String sortDirection) {
+        if (page < 0 || size <= 0) {
+            return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Invalid page or size parameters", ServiceError.INVALID_REQUEST));
+        }
+
+        Sort sort;
+        try {
+            Sort.Direction direction = Sort.Direction.fromString(sortDirection.toUpperCase());
+            sort = Sort.by(direction, sortBy);
+        } catch (IllegalArgumentException e) {
+            return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, e.getMessage(), ServiceError.INVALID_REQUEST));
+        }
+
+        long offset = (long) page * size;
+
+        Mono<Long> countMono = productRepository.countProducts(null, null, null, null);
+        Flux<ProductWithDetails> productsFlux = productRepository.findAllProductDetails(null, null, null, null, size, offset);
+
+        return Mono.zip(countMono, productsFlux.collectList())
+                .map(tuple -> {
+                    Long total = tuple.getT1();
+                    List<ProductWithDetails> products = tuple.getT2();
+                    return PagedResponse.<ProductResponse>builder()
+                            .content(convertDbToDto(products))
+                            .totalElements(total)
+                            .totalPages((int) Math.ceil((double) total / size))
+                            .currentPage(page)
+                            .size(size)
+                            .build();
+                });
     }
 
     private Mono<Product> insertProductIntoDatabase(Product product) {
@@ -236,6 +271,12 @@ public class ProductServiceImpl implements ProductService {
 
     private Mono<CountryResponse> getCountryResponse(long countryId) {
         return countryService.getCategoryById(countryId);
+    }
+
+    private List<ProductResponse> convertDbToDto(List<ProductWithDetails> product) {
+        return product.stream()
+                .map(this::convertDbToDto)
+                .collect(Collectors.toList());
     }
 
     private ProductResponse convertDbToDto(ProductWithDetails product) {
