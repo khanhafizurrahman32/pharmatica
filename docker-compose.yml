@@ -4,42 +4,5 @@ services:
     build: .
     ports:
       - "8080:8080"
-    depends_on:
-      - db
-      - minio
-    networks:
-      - app-network
-
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - app-network
-
-  minio:
-    image: minio/minio
-    ports:
-      - "9000:9000"  # API port
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER : minioadmin
-      MINIO_ROOT_PASSWORD : minioadmin
-
-    command: server /data --console-address ":9001"
-    volumes:
-      - minio_data:/data
-    networks:
-      - app-network
-
-volumes:
-  postgres_data:
-  minio_data:
-
-networks:
-  app-network:
+    env_file:
+      - .env
