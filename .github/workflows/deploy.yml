@@ -68,4 +68,12 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "mkdir -p $APP_DIR"
           scp -o StrictHostKeyChecking=no -r ./* .env root@$DROPLET_IP:$APP_DIR || echo "Failed to copy files"
-          ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "cd $APP_DIR && docker-compose down && docker-compose up -d --build" || echo "Failed to run Docker commands"
+          ssh -o StrictHostKeyChecking=no root@$DROPLET_IP << EOF
+            cd $APP_DIR
+            if [ ! -f mvnw ]; then
+              apt-get update && apt-get install -y maven
+              mvn -N io.takari:maven:wrapper
+            fi
+            docker-compose down
+            docker-compose up -d --build
+          EOF
