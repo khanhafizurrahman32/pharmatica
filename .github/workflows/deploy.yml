@@ -52,6 +52,5 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          ssh root@${{ secrets.DROPLET_IP }} "mkdir -p /root/spring-boot-app"
           scp -r ./* .env root@${{ secrets.DROPLET_IP }}:/root/spring-boot-app
           ssh root@${{ secrets.DROPLET_IP }} "cd /root/spring-boot-app && docker-compose down && docker-compose up -d --build"
