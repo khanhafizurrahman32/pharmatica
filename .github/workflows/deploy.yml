@@ -23,13 +23,15 @@ jobs:
       - name: Add SSH Key
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          SSH_PRIVATE_KEY: ${{ secrets.DROPLET_SSH_KEY }}
+          SSH_KEY_PASSPHRASE: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.DROPLET_IP }} >> ~/.ssh/known_hosts
-          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add ~/.ssh/id_rsa
+          eval $(ssh-agent -s)
+          echo "$SSH_KEY_PASSPHRASE" | tr -d '\r' | ssh-add ~/.ssh/id_rsa
 
       - name: Create environment file
         run : |
