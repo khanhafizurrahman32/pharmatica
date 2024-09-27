@@ -46,7 +46,20 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa root@$DROPLET_IP "echo 'SSH connection successful'" || echo "SSH connection failed"
 
-      # ... rest of your workflow ...
+      - name: Create environment file
+        run : |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_SCHEMA_NAME=${{ secrets.DB_SCHEMA_NAME }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DO_SPACES_BUCKET=${{ secrets.DO_SPACES_BUCKET }}" >> .env
+          echo "DO_SPACES_ENDPOINT=${{ secrets.DO_SPACES_ENDPOINT }}" >> .env
+          echo "DO_SPACES_CDN_ENDPOINT=${{ secrets.DO_SPACES_CDN_ENDPOINT }}" >> .env
+          echo "DO_SPACES_KEY=${{ secrets.DO_SPACES_KEY }}" >> .env
+          echo "DO_SPACES_SECRET=${{ secrets.DO_SPACES_SECRET }}" >> .env
+          echo "DO_SPACES_REGION=${{ secrets.DO_SPACES_REGION }}" >> .env
 
       - name: Deploy to Digital Ocean droplet
         env:
