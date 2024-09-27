@@ -20,6 +20,14 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
+      - name: Debug SSH setup
+        run: |
+          echo "SSH key fingerprint:"
+          ssh-keygen -lf ~/.ssh/id_rsa || echo "No existing SSH key found"
+          echo "Known hosts:"
+          cat ~/.ssh/known_hosts || echo "No known hosts file found"
+          ssh-keygen -y -f ~/.ssh/id_rsa
+
       - name: Add SSH Key
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
@@ -27,11 +35,21 @@ jobs:
           SSH_KEY_PASSPHRASE: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keygen -p -P "$SSH_KEY_PASSPHRASE" -N "" -f ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.DROPLET_IP }} >> ~/.ssh/known_hosts
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           eval $(ssh-agent -s)
           echo "$SSH_KEY_PASSPHRASE" | tr -d '\r' | ssh-add ~/.ssh/id_rsa
+
+      - name: Verify SSH connection
+        env:
+          DROPLET_IP: ${{ secrets.DROPLET_IP }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -vvv root@$DROPLET_IP "echo 'SSH connection successful'" || echo "SSH connection failed"
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -vvv root@$DROPLET_IP "echo 'SSH connection successful'" || echo "SSH connection failed"
 
       - name: Create environment file
         run : |
@@ -50,7 +68,9 @@ jobs:
 
       - name: Deploy to Digital Ocean droplet
         env:
+          DROPLET_IP: ${{ secrets.DROPLET_IP }}
+          APP_DIR: /root/spring-boot-app
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          scp -r ./* .env root@${{ secrets.DROPLET_IP }}:/root/spring-boot-app
-          ssh root@${{ secrets.DROPLET_IP }} "cd /root/spring-boot-app && docker-compose down && docker-compose up -d --build"
+          scp -o StrictHostKeyChecking=no -r ./* .env root@$DROPLET_IP:$APP_DIR || echo "Failed to copy files"
+          ssh -o StrictHostKeyChecking=no root@$DROPLET_IP "cd $APP_DIR && docker-compose down && docker-compose up -d --build" || echo "Failed to run Docker commands"
