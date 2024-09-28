@@ -63,7 +63,8 @@ jobs:
           echo "DO_SPACES_REGION=${{ secrets.DO_SPACES_REGION }}" >> .env
           echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> .env
           echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
-          echo "MAIL_USER_NAME=${{ secrets.MAIL_USER_NAME}}" >> .env
+          echo "MAIL_USER_NAME=${{ secrets.MAIL_USER_NAME }}" >> .env
+          echo "SMS_URL=${{ secrets.SMS_URL }}" >> .env
 
       - name: Deploy to Digital Ocean droplet
         env:
