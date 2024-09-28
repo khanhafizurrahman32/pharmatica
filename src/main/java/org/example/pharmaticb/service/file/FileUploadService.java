@@ -8,7 +8,6 @@ import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
 
 public interface FileUploadService {
-    Mono<UploadFileResponse> uploadFile(UploadFileRequest request, AuthorizedUser authorizedUser);
 
     Mono<FileUploadResponse> uploadFile(FilePart filePart);
 

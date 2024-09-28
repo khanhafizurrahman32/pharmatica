@@ -22,11 +22,6 @@ import java.security.Principal;
 public class FileUploadController {
     private final FileUploadService fileUploadService;
 
-    @PostMapping(value = "/settings/upload-file")
-    public Mono<UploadFileResponse> uploadFile(@Valid @RequestBody UploadFileRequest request, Principal principal) {
-        return fileUploadService.uploadFile(request, Utility.extractAuthorizedUserFromPrincipal(principal));
-    }
-
     @PostMapping(value = "/settings/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<FileUploadResponse> uploadFile(@RequestPart("file") FilePart filePart) {
         return fileUploadService.uploadFile(filePart);
