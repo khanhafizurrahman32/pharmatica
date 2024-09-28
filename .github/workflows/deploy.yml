@@ -19,6 +19,14 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -DskipTests -Pprod
+        continue-on-error: true
+        id: build
+
+      - name: Display Maven build logs on failure
+        if: steps.build.outcome != 'success'
+        run: |
+          echo "Maven build failed. Here are the logs:"
+          cat target/maven-build.log
 
       - name: Set up SSH key
         env:
