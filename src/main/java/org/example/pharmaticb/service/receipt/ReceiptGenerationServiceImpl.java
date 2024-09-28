@@ -86,6 +86,4 @@ public class ReceiptGenerationServiceImpl implements ReceiptGenerationService {
 
         return Optional.empty();
     }
-
-
 }
