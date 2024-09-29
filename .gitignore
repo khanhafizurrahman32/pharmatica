@@ -16,6 +16,7 @@ serverless/.aws-sam
 hs_err_pid*
 target/
 .mvn
+.env
 .apt_generated
 .classpath
 .factorypath
