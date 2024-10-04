@@ -69,18 +69,15 @@ public class OrderServiceImpl implements OrderService {
     @Loggable
     public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
         long authorizedUserId = authorizedUser.getId();
-        log.info("authorized id: {}", authorizedUserId);
         return Mono.zip(convertDtoToDb(request, Order.builder().build(), authorizedUserId, true), userService.getUserById(authorizedUserId))
                 .flatMap(tuple2 -> {
                     var orderObj = tuple2.getT1();
-                    log.info("orderObj: {}", orderObj.getTotalAmount());
                     var user = tuple2.getT2();
                     if (Boolean.parseBoolean(user.getDeactivated())) {
                         return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is deactivated", ServiceError.DEACTIVATED_USER));
                     }
                     return orderRepository.save(orderObj)
                             .flatMap(order -> {
-                                log.info("after saving order: {}", order.getTransactionId());
                                 return getProducts(order)
                                         .map(product -> {
                                             emailService.sendEmail("pharmatic24@gmail.com", "New order", "A new order has been placed");
@@ -328,7 +325,7 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(orderWithDetails.getCreatedAt())
                 .items(objectMapper.valueToTree(orderWithDetails.getItems()))
                 .prescriptionUrl(orderWithDetails.getPrescriptionUrl())
-                .deliveryOptionsId(orderWithDetails.getDeliveryOptionId())
+                .deliveryOptionsId(orderWithDetails.getDeliveryOptionsId())
                 .receiptUrl(orderWithDetails.getReceiptUrl())
                 .build();
     }
@@ -450,7 +447,6 @@ public class OrderServiceImpl implements OrderService {
     @Loggable
     public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId, String startDate, String endDate) {
         long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
-        log.info("k {}", new Timestamp(effectiveStartDate));
         long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
         return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ? Long.parseLong(userId) : null,
                         StringUtils.hasText(orderId) ? Long.parseLong(orderId) : null,

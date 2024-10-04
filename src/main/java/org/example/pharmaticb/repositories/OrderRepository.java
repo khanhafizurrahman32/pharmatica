@@ -82,7 +82,11 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
         "FROM\n" +
         "    pharmatic_prod.orders o\n" +
         "CROSS JOIN LATERAL\n" +
-        "    jsonb_array_elements(o.items::jsonb) AS items(item)\n" +
+        "jsonb_array_elements(CASE WHEN o.items IS NULL THEN '[]'::jsonb\n" +
+        "WHEN jsonb_typeof(o.items::jsonb) != 'array' THEN jsonb_build_array(o.items::jsonb)\n" +
+        "ELSE o.items::jsonb\n" +
+        "END\n" +
+        ") AS items(item)\n" +
         "JOIN\n" +
         "    pharmatic_prod.users u ON o.user_id = u.id\n" +
         "JOIN\n" +

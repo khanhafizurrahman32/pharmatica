@@ -26,7 +26,7 @@ public class OrderWithDetails implements Serializable {
     private String transactionId;
     private Timestamp createdAt;
     private String items;
-    private Long deliveryOptionId;
+    private Long deliveryOptionsId;
 
     private long userId;
     private String userName;
