@@ -2,6 +2,7 @@ package org.example.pharmaticb.service.order;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -219,11 +221,34 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private List<Item> getItems(Order order) {
+        log.info("order items {}", order.getItems() );
+        if (order == null || order.getItems() == null) {
+            return Collections.emptyList();
+        }
+
+        Object itemsObject = "\"[{\\\"quantity\\\": 2, \\\"productId\\\": 13}]\"";
+
         try {
-            String jsonString = objectMapper.writeValueAsString(order.getItems());
-            return List.of(objectMapper.readValue(jsonString, Item[].class));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            JsonNode itemsNode;
+            if (itemsObject instanceof String) {
+                String itemsString = (String) itemsObject;
+                itemsString = itemsString.replaceAll("^\"|\"$", "").replace("\\", "");
+                itemsNode = objectMapper.readTree(itemsString);
+            } else if (itemsObject instanceof JsonNode) {
+                itemsNode = (JsonNode) itemsObject;
+            } else {
+                throw new IllegalArgumentException("Unexpected type for items: " + itemsObject.getClass());
+            }
+            if (itemsNode.isArray()) {
+                return objectMapper.convertValue(itemsNode, new TypeReference<>() {
+                });
+            } else {
+                // If it's not an array, it might be a single item, so we wrap it in a list
+                Item singleItem = objectMapper.convertValue(itemsNode, Item.class);
+                return Collections.singletonList(singleItem);
+            }
+        } catch (IllegalArgumentException | JsonProcessingException e) {
+            throw new RuntimeException("Error converting JsonNode to Item(s)", e);
         }
     }
 
