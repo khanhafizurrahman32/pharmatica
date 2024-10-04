@@ -11,7 +11,6 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public interface OrderRepository extends R2dbcRepository<Order, Long> {
     @Query("SELECT * FROM orders where created_at >= :startDate AND created_at <= :endDate")
@@ -23,8 +22,8 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
 
     Flux<Order> findByUserId(Long userId);
 
-    @Query("SELECT MAX(id) FROM Orders")
-    Mono<Long> findLastProductId();
+    @Query("SELECT COALESCE(MAX(id), 0) FROM Orders")
+    Mono<Long> findLastOrderId();
 
 
     @Query("WITH RECURSIVE date_range AS (\n" +

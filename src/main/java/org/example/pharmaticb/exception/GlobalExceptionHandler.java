@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WebExchangeBindException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleValidationExceptions(WebExchangeBindException ex) {
         Map<String, Object> response = new HashMap<>();
-        response.put("code", "Invalid Password");
+        response.put("code", "Invalid Request");
 
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()

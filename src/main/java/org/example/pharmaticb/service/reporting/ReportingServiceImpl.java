@@ -7,6 +7,7 @@ import org.example.pharmaticb.Models.Response.WeeklyOrderResponse;
 import org.example.pharmaticb.repositories.OrderRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
 import org.example.pharmaticb.repositories.UserRepository;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -24,6 +25,7 @@ public class ReportingServiceImpl implements ReportingService {
     private final ProductRepository productRepository;
 
     @Override
+    @Loggable
     public Mono<SummaryResponse> getSummaries() {
         return Mono.zip(userRepository.count(), orderRepository.count(), productRepository.count())
                 .map(tuple3 -> SummaryResponse.builder()
@@ -34,6 +36,7 @@ public class ReportingServiceImpl implements ReportingService {
     }
 
     @Override
+    @Loggable
     public Mono<List<WeeklyOrderResponse>> getWeeklySummaries() {
         LocalDate endDate = LocalDateTime.now().toLocalDate();
         LocalDate startDate = endDate.minusDays(6);

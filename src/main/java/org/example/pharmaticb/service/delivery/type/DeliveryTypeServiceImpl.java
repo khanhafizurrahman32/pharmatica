@@ -5,6 +5,7 @@ import org.example.pharmaticb.Models.DB.DeliveryType;
 import org.example.pharmaticb.Models.Request.DeliveryTypeRequest;
 import org.example.pharmaticb.Models.Response.DeliveryTypeResponse;
 import org.example.pharmaticb.repositories.DeliveryTypeRepository;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -17,12 +18,14 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     private final ModelMapper mapper;
 
     @Override
+    @Loggable
     public Mono<DeliveryTypeResponse> createDeliveryChargeType(DeliveryTypeRequest request) {
         return deliveryTypeRepository.save(mapper.map(request, DeliveryType.class))
                 .map(deliveryType -> mapper.map(deliveryType, DeliveryTypeResponse.class));
     }
 
     @Override
+    @Loggable
     public Flux<DeliveryTypeResponse> getAllDeliveryChargeType() {
         return deliveryTypeRepository.findAll()
                 .map(this::convertDbToDto);
@@ -38,12 +41,14 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     }
 
     @Override
+    @Loggable
     public Mono<DeliveryTypeResponse> getDeliveryChargeTypeById(Long id) {
         return deliveryTypeRepository.findById(id)
                 .map(this::convertDbToDto);
     }
 
     @Override
+    @Loggable
     public Mono<DeliveryTypeResponse> updateDeliveryChargeType(Long id, DeliveryTypeRequest request) {
         return deliveryTypeRepository.findById(id)
                 .flatMap(deliveryType -> {
@@ -54,6 +59,7 @@ public class DeliveryTypeServiceImpl implements DeliveryTypeService {
     }
 
     @Override
+    @Loggable
     public Mono<Void> deleteDeliveryChargeType(Long id) {
         return deliveryTypeRepository.deleteById(id);
     }

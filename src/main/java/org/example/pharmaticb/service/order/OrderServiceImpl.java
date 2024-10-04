@@ -29,6 +29,7 @@ import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.example.pharmaticb.utilities.Utility;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,7 @@ public class OrderServiceImpl implements OrderService {
     private final EmailService emailService;
 
     @Override
+    @Loggable
     public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
         long authorizedUserId = authorizedUser.getId();
         log.info("authorized id: {}", authorizedUserId);
@@ -89,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Mono<Order> convertDtoToDb(OrderRequest request, Order order, long userId, boolean isNew) {
-        return Mono.zip(getTotalAmount(request.getItems()), getDeliveryCharge(request, isNew, order), orderRepository.findLastProductId())
+        return Mono.zip(getTotalAmount(request.getItems()), getDeliveryCharge(request, isNew, order), orderRepository.findLastOrderId())
                 .map(tuple3 -> Order.builder()
                         .id(!ObjectUtils.isEmpty(order.getId()) ? order.getId() : null)
                         .userId(userId)
@@ -139,6 +141,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Flux<OrderResponse> getAllOrders() {
         return orderRepository.findAll()
                 .flatMap(order -> getProducts(order)
@@ -228,6 +231,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Mono<OrderResponse> getOrderById(long id, AuthorizedUser authorizedUser) {
         return orderRepository.findById(id)
                 .flatMap(order -> getProducts(order)
@@ -236,6 +240,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Mono<OrderResponse> updateOrder(long id, OrderRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findById(id)
                 .flatMap(order -> convertDtoToDb(request, order, authorizedUser.getId(), false)
@@ -246,6 +251,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Mono<Void> deleteOrder(long id, AuthorizedUser authorizedUser) {
         if ((ROLE_PREFIX + Role.USER.name()).equals(authorizedUser.getRole())) {
             return orderRepository.findById(id)
@@ -258,6 +264,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Mono<OrderResponse> updateOrderStatus(OrderUpdateStatusRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findAllOrdersWithDetails(null, Long.valueOf(request.getOrderId()), null, null, null)
                 .map(orderWithDetails -> updateOrderStatus(orderWithDetails, request.getStatus()))
@@ -275,6 +282,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Mono<OrderResponse> updateOrderDeliveryCharge(OrderUpdateDeliveryChargeRequest request, AuthorizedUser authorizedUser) {
         return orderRepository.findById(Long.valueOf(request.getOrderId()))
                 .flatMap(order -> {
@@ -382,6 +390,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Flux<OrderResponse> getOrdersWithinDate(String startDate, String endDate) {
         long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
         long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
@@ -391,6 +400,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Flux<OrderResponse> getOrdersByStatus(String status) {
         return orderRepository.findByStatus(status)
                 .flatMap(order -> getProducts(order)
@@ -398,6 +408,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Mono<PagedResponse<OrderResponse>> getPageOrders(int page, int size, String sortBy, String sortDirection) {
         if (page < 0 || size <= 0) {
             return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Invalid page or size parameters", ServiceError.INVALID_REQUEST));
@@ -427,6 +438,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Flux<OrderResponse> getOrdersByUserId(long userId) {
         return orderRepository.findByUserId(userId)
                 .flatMap(order -> getProducts(order)
@@ -435,6 +447,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Loggable
     public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId, String startDate, String endDate) {
         long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
         log.info("k {}", new Timestamp(effectiveStartDate));

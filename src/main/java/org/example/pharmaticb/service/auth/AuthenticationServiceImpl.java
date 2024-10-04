@@ -20,6 +20,7 @@ import org.example.pharmaticb.repositories.UserRepository;
 import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.example.pharmaticb.utilities.Utility;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final SmsApiService smsApiService;
 
     @Override
+    @Loggable
     public Mono<LoginResponse> login(LoginRequest request, HttpHeaders httpHeaders) {
         return userService.findByPhoneNumber(request.getPhoneNumber())
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
@@ -57,6 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Loggable
     public Mono<UpdatePasswordResponse> updatePassword(UpdatePasswordRequest request, AuthorizedUser authorizedUser, HttpHeaders httpHeaders) {
         return userRepository.findById(authorizedUser.getId())
                 .flatMap(user -> {
@@ -71,6 +74,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Loggable
     public Mono<ForgetPasswordResponse> forgetPassword(ForgetPasswordRequest request, HttpHeaders httpHeaders) {
         return userService.findByPhoneNumber(request.getPhoneNumber())
                 .flatMap(user -> sendOtp(request.getPhoneNumber(), user)
@@ -79,6 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Loggable
     public Mono<RefreshTokenResponse> refreshToken(RefreshTokenRequest request) {
         DecodedJWT jwt = jwtTokenService.getDecodedJwtToken(request.getRefreshToken());
         String phoneNumber = jwt.getAudience().get(0);

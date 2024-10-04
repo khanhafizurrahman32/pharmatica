@@ -22,6 +22,7 @@ import org.example.pharmaticb.service.country.CountryService;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class ProductServiceImpl implements ProductService {
     private final CountryRepository countryRepository;
 
     @Override
+    @Loggable
     public Mono<ProductResponse> createProduct(ProductRequest request) {
         return productRepository.save(convertDtoToDb(request, Product.builder().build()))
                 .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null, Integer.MAX_VALUE, 0L))
@@ -63,12 +65,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Loggable
     public Flux<ProductResponse> getAllProducts() {
         return productRepository.findAllProductDetails(null, null, null, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
+    @Loggable
     public Mono<ProductResponse> getProductById(long id) {
         return productRepository.findAllProductDetails(id, null, null, null, Integer.MAX_VALUE, 0L)
                 .next()
@@ -76,6 +80,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Loggable
     public Mono<ProductResponse> updateProduct(long id, ProductRequest request) {
         return productRepository.findById(id)
                 .flatMap(product -> {
@@ -88,17 +93,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Loggable
     public Mono<Void> deleteProduct(long id) {
         return productRepository.deleteById(id);
     }
 
     @Override
+    @Loggable
     public Flux<ProductResponse> getProductsByCategoryId(long categoryId) {
         return productRepository.findAllProductDetails(null, null, categoryId, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
+    @Loggable
     public Flux<ProductResponse> getProductsByBrandId(long brandId) {
         return productRepository.findAllProductDetails(null, null, null, brandId, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
@@ -111,6 +119,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Loggable
     public Mono<BulkProductCreateResponse> createBulkProduct(BulkProductCreateRequest request) {
         return fileUploadService.downloadFile(request.getFilePath())
                 .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
@@ -142,6 +151,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Loggable
     public Mono<PagedResponse<ProductResponse>> getPageProducts(int page, int size, String sortBy, String sortDirection) {
         if (page < 0 || size <= 0) {
             return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "Invalid page or size parameters", ServiceError.INVALID_REQUEST));

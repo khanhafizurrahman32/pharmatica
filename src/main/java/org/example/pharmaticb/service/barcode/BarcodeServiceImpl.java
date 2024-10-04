@@ -5,6 +5,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.oned.Code128Writer;
 import lombok.extern.slf4j.Slf4j;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -16,6 +17,7 @@ import java.io.IOException;
 @Slf4j
 public class BarcodeServiceImpl implements BarcodeService {
     @Override
+    @Loggable
     public byte[] generateBarcode(String billNumber) {
         BufferedImage barcodeImage;
         try {

@@ -20,6 +20,7 @@ import org.example.pharmaticb.service.user.UserService;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
 import org.example.pharmaticb.utilities.ProfileConstants;
 import org.example.pharmaticb.utilities.Utility;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -70,6 +71,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Loggable
     public Mono<OtpResponse> sendOtp(OtpRequest request, HttpHeaders httpHeaders) {
         return userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .filter(this::validateOtpRequest)
@@ -100,6 +102,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Loggable
     public Mono<VerifyOtpResponse> verifyOtp(VerifyOtpRequest request, HttpHeaders httpHeaders) {
         return userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .filter(this::validateOtpRequest)
@@ -114,6 +117,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Loggable
     public Mono<UserStatusResponse> getUserStatus(UserStatusRequest request, HttpHeaders httpHeaders) {
         return userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .map(user -> UserStatusResponse.builder().status(user.getRegistrationStatus()).build())
@@ -166,6 +170,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private Mono<Void> sendOtp(OtpRequest request, String smsContent) {
+        if (ProfileConstants.PROFILE_DEV.equals(profile)) {
+            return Mono.empty();
+        }
         return smsApiService.sendSms(SmsRequest.builder()
                         .number(request.getPhoneNumber())
                         .message(smsContent)
@@ -181,6 +188,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private String getOtpCode() {
+        if (ProfileConstants.PROFILE_DEV.equals(profile)) {
+            return "123456";
+        }
         return getOtpCode(6, "0123456789");//todo: cms
     }
 

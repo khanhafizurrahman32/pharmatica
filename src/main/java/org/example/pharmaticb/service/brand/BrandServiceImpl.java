@@ -7,6 +7,7 @@ import org.example.pharmaticb.Models.Request.BrandRequest;
 import org.example.pharmaticb.Models.Response.BrandResponse;
 import org.example.pharmaticb.repositories.BrandRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -21,12 +22,14 @@ public class BrandServiceImpl implements BrandService {
     private final ProductRepository productRepository;
 
     @Override
+    @Loggable
     public Mono<BrandResponse> createBrand(BrandRequest request) {
         return brandRepository.save(modelMapper.map(request, Brand.class))
                 .map(brand -> modelMapper.map(brand, BrandResponse.class));
     }
 
     @Override
+    @Loggable
     public Flux<BrandResponse> getAllBrands() {
         return brandRepository.findAll()
                 .flatMap(brand -> productRepository.countProductsByBrandId(brand.getId())
@@ -34,12 +37,14 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
+    @Loggable
     public Mono<BrandResponse> getBrandById(Long id) {
         return brandRepository.findById(id)
                 .map(brand -> modelMapper.map(brand, BrandResponse.class));
     }
 
     @Override
+    @Loggable
     public Mono<BrandResponse> updateBrand(Long id, BrandRequest request) {
         return brandRepository.findById(id)
                 .flatMap(brand -> {
@@ -50,6 +55,7 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
+    @Loggable
     public Mono<Void> deleteBrand(Long id) {
         return brandRepository.deleteById(id);
     }

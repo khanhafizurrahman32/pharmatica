@@ -6,6 +6,7 @@ import org.example.pharmaticb.Models.Request.CountryRequest;
 import org.example.pharmaticb.Models.Response.CountryResponse;
 import org.example.pharmaticb.repositories.CountryRepository;
 import org.example.pharmaticb.repositories.ProductRepository;
+import org.example.pharmaticb.utilities.log.Loggable;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -19,12 +20,14 @@ public class CountryServiceImpl implements CountryService {
     private final ProductRepository productRepository;
 
     @Override
+    @Loggable
     public Mono<CountryResponse> createCategory(CountryRequest request) {
         return countryRepository.save(mapper.map(request, Country.class))
                 .map(country -> mapper.map(country, CountryResponse.class));
     }
 
     @Override
+    @Loggable
     public Flux<CountryResponse> getAllCategories() {
         return countryRepository.findAll()
                 .flatMap(country -> productRepository.countProductsByCategoryId(country.getId())
@@ -40,12 +43,14 @@ public class CountryServiceImpl implements CountryService {
     }
 
     @Override
+    @Loggable
     public Mono<CountryResponse> getCategoryById(Long id) {
         return countryRepository.findById(id)
                 .map(country -> mapper.map(country, CountryResponse.class));
     }
 
     @Override
+    @Loggable
     public Mono<CountryResponse> updateCategory(long id, CountryRequest request) {
         return countryRepository.findById(id)
                 .flatMap(country -> {
@@ -56,6 +61,7 @@ public class CountryServiceImpl implements CountryService {
     }
 
     @Override
+    @Loggable
     public Mono<Void> deleteCategory(long id) {
         return countryRepository.deleteById(id);
     }
