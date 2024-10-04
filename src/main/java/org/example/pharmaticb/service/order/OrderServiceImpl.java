@@ -67,19 +67,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<OrderResponse> createOrder(OrderRequest request, AuthorizedUser authorizedUser) {
         long authorizedUserId = authorizedUser.getId();
+        log.info("authorized id: {}", authorizedUserId);
         return Mono.zip(convertDtoToDb(request, Order.builder().build(), authorizedUserId, true), userService.getUserById(authorizedUserId))
                 .flatMap(tuple2 -> {
                     var orderObj = tuple2.getT1();
+                    log.info("orderObj: {}", orderObj.getTotalAmount());
                     var user = tuple2.getT2();
                     if (Boolean.parseBoolean(user.getDeactivated())) {
                         return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is deactivated", ServiceError.DEACTIVATED_USER));
                     }
                     return orderRepository.save(orderObj)
-                            .flatMap(order -> getProducts(order)
-                                    .map(product -> {
-                                        emailService.sendEmail("pharmatic24@gmail.com", "New order", "A new order has been placed");
-                                        return convertDbToDto(order, product, user);
-                                    }));
+                            .flatMap(order -> {
+                                log.info("after saving order: {}", order.getTransactionId());
+                                return getProducts(order)
+                                        .map(product -> {
+                                            emailService.sendEmail("pharmatic24@gmail.com", "New order", "A new order has been placed");
+                                            return convertDbToDto(order, product, user);
+                                        });
+                            });
                 });
     }
 
@@ -99,7 +104,8 @@ public class OrderServiceImpl implements OrderService {
                         .prescriptionUrl(request.getPrescriptionUrl())
                         .transactionId(getTransactionId(tuple3.getT3()))
                         .createdAt(new Timestamp(System.currentTimeMillis()))
-                        .build());
+                        .build())
+                .doOnError(error -> log.error("convertDtoToDb error", error));
 
     }
 
@@ -108,15 +114,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Mono<Double> getTotalAmount(List<Item> items) {
+        log.info("inside total amount");
         return Flux.fromIterable(items)
                 .flatMap(this::processOrderItem)
+                .doOnError(error -> log.info("error in get Total Amount", error))
                 .reduce(0.0, Double::sum);
     }
 
     private Mono<String> getDeliveryCharge(OrderRequest request, boolean isNew, Order order) {
+        log.info("inside getDeliveryCharge");
         return isNew ? deliveryTypeService.getDeliveryChargeTypeById(Long.valueOf(request.getDeliveryOptionId()))
                 .map(DeliveryTypeResponse::getRate) : StringUtils.hasText(request.getDeliveryCharge()) ?
-                Mono.just(request.getDeliveryCharge()) : Mono.just(String.valueOf(order.getDeliveryCharge()));
+                Mono.just(request.getDeliveryCharge()) : Mono.just(String.valueOf(order.getDeliveryCharge()))
+                .doOnError(error -> log.error("error in delivery charge", error));
     }
 
     private Mono<Double> processOrderItem(Item item) {
@@ -297,7 +307,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Order buildOrder(OrderWithDetails orderWithDetails, String newStatus) {
-        return  Order.builder()
+        return Order.builder()
                 .id(orderWithDetails.getOrderId())
                 .userId(orderWithDetails.getUserId())
                 .status(newStatus)
@@ -462,7 +472,8 @@ public class OrderServiceImpl implements OrderService {
 
     private List<OrderItemDto> getOrderItems(OrderWithDetails orderWithDetails) {
         try {
-            List<ProductInfos> orderItems = objectMapper.readValue(orderWithDetails.getProductDetails(), new TypeReference<>() {});
+            List<ProductInfos> orderItems = objectMapper.readValue(orderWithDetails.getProductDetails(), new TypeReference<>() {
+            });
             return orderItems
                     .stream()
                     .map(productInfos -> {

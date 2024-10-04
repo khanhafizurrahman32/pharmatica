@@ -1,6 +1,7 @@
 package org.example.pharmaticb.service.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.User;
 import org.example.pharmaticb.Models.Request.UserRequest;
 import org.example.pharmaticb.Models.Response.UserResponse;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import static org.example.pharmaticb.utilities.Utility.ROLE_PREFIX;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -99,8 +101,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserResponse> getUserById(Long id) {
+        log.info("inside getUserById");
         return userRepository.findById(id)
-                .map(this::convertDbToDto);
+                .map(this::convertDbToDto)
+                .doOnError(error -> log.error("getUSerByID:", error));
     }
 
     @Override

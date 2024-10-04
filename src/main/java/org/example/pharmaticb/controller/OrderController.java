@@ -1,12 +1,12 @@
 package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.Request.OrderRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateDeliveryChargeRequest;
 import org.example.pharmaticb.Models.Request.OrderUpdateStatusRequest;
 import org.example.pharmaticb.Models.Response.OrderResponse;
 import org.example.pharmaticb.Models.Response.PagedResponse;
-import org.example.pharmaticb.dto.OrderWithDetails;
 import org.example.pharmaticb.service.order.OrderService;
 import org.example.pharmaticb.utilities.Utility;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.security.Principal;
 
+@Slf4j
 @BaseController
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class OrderController {
 
     @PostMapping("/orders")
     public Mono<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request, Principal principal) {
+        request.getItems().forEach(item -> log.info("item pr id {} | quantity {}", item.productId(), item.quantity()));
         return orderService.createOrder(request, Utility.extractAuthorizedUserFromPrincipal(principal));
     }
 

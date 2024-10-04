@@ -1,30 +1,20 @@
 package org.example.pharmaticb.service.security;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.dto.AuthorizedUser;
-import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.service.auth.JwtTokenService;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.example.pharmaticb.service.auth.JwtTokenServiceImpl.TOKEN_PROVIDER;
 import static org.example.pharmaticb.utilities.SecurityUtil.TOKEN_ROLE;
 import static org.example.pharmaticb.utilities.Utility.ROLE_PREFIX;
 import static org.example.pharmaticb.utilities.Utility.USER_ID;
@@ -38,12 +28,6 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
-        boolean roleAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> {
-                    log.info("Role AM: {}", a.getAuthority());
-                    return a.getAuthority().equals("ROLE_ADMIN");
-                });
-        log.info("isRoleAdmin {}", roleAdmin);
         var authToken = authentication.getCredentials().toString();
         DecodedJWT jwt = jwtTokenService.getDecodedJwtToken(authToken);
         String phoneNumber = jwt.getAudience().get(0);
