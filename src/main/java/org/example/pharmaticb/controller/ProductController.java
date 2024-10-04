@@ -1,6 +1,7 @@
 package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
 import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 
+@Slf4j
 @BaseController
 @RestController
 @RequiredArgsConstructor

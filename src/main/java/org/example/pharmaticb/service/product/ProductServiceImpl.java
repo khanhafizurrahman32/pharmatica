@@ -8,7 +8,10 @@ import org.example.pharmaticb.Models.DB.Country;
 import org.example.pharmaticb.Models.DB.Product;
 import org.example.pharmaticb.Models.Request.BulkProductCreateRequest;
 import org.example.pharmaticb.Models.Request.ProductRequest;
-import org.example.pharmaticb.Models.Response.*;
+import org.example.pharmaticb.Models.Response.BulkProductCreateResponse;
+import org.example.pharmaticb.Models.Response.CountryResponse;
+import org.example.pharmaticb.Models.Response.PagedResponse;
+import org.example.pharmaticb.Models.Response.ProductResponse;
 import org.example.pharmaticb.dto.ProductWithDetails;
 import org.example.pharmaticb.exception.InternalException;
 import org.example.pharmaticb.repositories.BrandRepository;
@@ -19,7 +22,6 @@ import org.example.pharmaticb.service.country.CountryService;
 import org.example.pharmaticb.service.file.FileUploadService;
 import org.example.pharmaticb.utilities.DateUtil;
 import org.example.pharmaticb.utilities.Exception.ServiceError;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -120,16 +122,20 @@ public class ProductServiceImpl implements ProductService {
                 ))
                 .map(this::parseProductFromCsvLine)
                 .flatMap(productMono -> productMono
-                        .doOnNext(product -> log.debug("Product emitted: {}", product))
+                        .doOnNext(product -> log.info("Product parsed: {}", product.toString()))
                         .doOnError(error -> log.error("Error in productMono: ", error))
-                        .switchIfEmpty(Mono.fromRunnable(() -> log.warn("Empty productMono")))
+                        .onErrorResume(e -> {
+                            log.error("Error processing product, skipping {}", e.getMessage());
+                            return Mono.empty();
+                        })
                 )
-                .log("After flatMap")  // This will log all signals at this point in the stream
-                .doOnNext(product -> log.debug("Parsed product: {}", product))
-                .flatMap(product -> {
-                    log.info("product:: {}", product.getId());
-                    return insertProductIntoDatabase(product);
-                })
+                .flatMap(product -> insertProductIntoDatabase(product)
+                        .doOnError(error -> log.error("Error inserting product: ", error))
+                        .onErrorResume(e -> {
+                            log.error("Error inserting product, skipping: ", e);
+                            return Mono.empty();
+                        })
+                )
                 .collectList()
                 .map(ret -> BulkProductCreateResponse.builder().success(true).build())
                 .log("Final result");
@@ -169,6 +175,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Mono<Product> insertProductIntoDatabase(Product product) {
+        log.info("Product to insert: {}", product.getProductName());
         return productRepository.save(product);
     }
 
@@ -217,6 +224,7 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Could not parse date: " + dateString, e);
         }
     }
+
     private String getExpireDate(String expiresDate) {
         try {
             LocalDate date = parseDate(expiresDate);

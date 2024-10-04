@@ -2,18 +2,12 @@ package org.example.pharmaticb.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.pharmaticb.Models.Request.UploadFileRequest;
 import org.example.pharmaticb.Models.Response.FileUploadResponse;
-import org.example.pharmaticb.Models.Response.UploadFileResponse;
 import org.example.pharmaticb.service.file.FileUploadService;
-import org.example.pharmaticb.utilities.Utility;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
-import java.security.Principal;
 
 @BaseController
 @RestController
