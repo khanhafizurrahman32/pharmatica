@@ -14,8 +14,8 @@ import java.io.Serializable;
 public class OrderItemDto implements Serializable {
     private String productId;
     private String productName;
-    private String unitPrice;
-    private String quantity;
-    private String totalPrice;
+    private double unitPrice;
+    private double quantity;
+    private double totalPrice;
     private String remarks;
 }

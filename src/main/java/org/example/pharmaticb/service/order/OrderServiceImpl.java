@@ -196,19 +196,20 @@ public class OrderServiceImpl implements OrderService {
                     return OrderItemDto.builder()
                             .productId(productResponse.getProductId())
                             .productName(productResponse.getProductName())
-                            .unitPrice(String.valueOf(unitPrice))
+                            .unitPrice(unitPrice)
                             .quantity(quantity)
-                            .totalPrice(String.valueOf(unitPrice * Double.parseDouble(quantity)))
+                            .totalPrice(unitPrice * quantity)
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
-    private String getQuantity(List<Item> items, String productId) {
+    private double getQuantity(List<Item> items, String productId) {
         return items.stream()
                 .filter(item -> productId.equals(String.valueOf(item.productId())))
-                .map(item -> String.valueOf(item.quantity()))
-                .collect(Collectors.joining());
+                .findFirst()
+                .map(item -> (double) item.quantity())
+                .orElse(0.0);
     }
 
     private UserDto getUserDetails(UserResponse user) {
@@ -505,9 +506,9 @@ public class OrderServiceImpl implements OrderService {
                         return OrderItemDto.builder()
                                 .productId(productInfos.getProductId())
                                 .productName(productInfos.getProductName())
-                                .unitPrice(String.valueOf(unitPrice))
-                                .quantity(String.valueOf(quantity))
-                                .totalPrice(String.valueOf(unitPrice * quantity))
+                                .unitPrice(unitPrice)
+                                .quantity(quantity)
+                                .totalPrice(unitPrice * quantity)
                                 .build();
                     })
                     .collect(Collectors.toList());
