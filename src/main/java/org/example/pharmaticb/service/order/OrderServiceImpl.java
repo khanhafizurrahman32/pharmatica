@@ -221,34 +221,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private List<Item> getItems(Order order) {
-        log.info("order items {}", order.getItems() );
         if (order == null || order.getItems() == null) {
             return Collections.emptyList();
         }
 
-        Object itemsObject = "\"[{\\\"quantity\\\": 2, \\\"productId\\\": 13}]\"";
-
         try {
-            JsonNode itemsNode;
-            if (itemsObject instanceof String) {
-                String itemsString = (String) itemsObject;
-                itemsString = itemsString.replaceAll("^\"|\"$", "").replace("\\", "");
-                itemsNode = objectMapper.readTree(itemsString);
-            } else if (itemsObject instanceof JsonNode) {
-                itemsNode = (JsonNode) itemsObject;
-            } else {
-                throw new IllegalArgumentException("Unexpected type for items: " + itemsObject.getClass());
-            }
-            if (itemsNode.isArray()) {
-                return objectMapper.convertValue(itemsNode, new TypeReference<>() {
-                });
-            } else {
-                // If it's not an array, it might be a single item, so we wrap it in a list
-                Item singleItem = objectMapper.convertValue(itemsNode, Item.class);
-                return Collections.singletonList(singleItem);
-            }
-        } catch (IllegalArgumentException | JsonProcessingException e) {
-            throw new RuntimeException("Error converting JsonNode to Item(s)", e);
+            String jsonString = objectMapper.writeValueAsString(order.getItems());
+            return List.of(objectMapper.readValue(jsonString, Item[].class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -337,6 +318,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Order buildOrder(OrderWithDetails orderWithDetails, String newStatus) {
+        JsonNode itemsNode;
+        try {
+            itemsNode = objectMapper.readTree(orderWithDetails.getItems());
+        } catch (JsonProcessingException e) {
+            log.error("build order json error {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
         return Order.builder()
                 .id(orderWithDetails.getOrderId())
                 .userId(orderWithDetails.getUserId())
@@ -348,7 +336,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentChannel(orderWithDetails.getPaymentChannel())
                 .transactionId(orderWithDetails.getTransactionId())
                 .createdAt(orderWithDetails.getCreatedAt())
-                .items(objectMapper.valueToTree(orderWithDetails.getItems()))
+                .items(itemsNode)
                 .prescriptionUrl(orderWithDetails.getPrescriptionUrl())
                 .deliveryOptionsId(orderWithDetails.getDeliveryOptionsId())
                 .receiptUrl(orderWithDetails.getReceiptUrl())
