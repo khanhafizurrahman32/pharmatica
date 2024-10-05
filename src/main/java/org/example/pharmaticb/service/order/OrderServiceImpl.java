@@ -403,8 +403,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Loggable
     public Flux<OrderResponse> getOrdersWithinDate(String startDate, String endDate) {
-        long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
-        long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
+        long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate, false);
+        long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate, true) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp(), true);
         return orderRepository.findByCreatedAtBetween(new Timestamp(effectiveStartDate), new Timestamp(effectiveEndDate))
                 .flatMap(order -> getProducts(order)
                         .map(productResponses -> convertDbToDto(order, productResponses)));
@@ -460,8 +460,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Loggable
     public Flux<OrderResponse> getOrderDetails(String userId, String orderId, String productId, String startDate, String endDate) {
-        long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate);
-        long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp());
+        long effectiveStartDate = DateUtil.convertIsoToTimestamp(startDate, false);
+        long effectiveEndDate = StringUtils.hasText(endDate) ? DateUtil.convertIsoToTimestamp(endDate, true) : DateUtil.convertIsoToTimestamp(currentTimeInDBTimeStamp(), true);
+        log.info("start date : {}, end date : {}", effectiveStartDate, effectiveEndDate);
         return orderRepository.findAllOrdersWithDetails(StringUtils.hasText(userId) ? Long.parseLong(userId) : null,
                         StringUtils.hasText(orderId) ? Long.parseLong(orderId) : null,
                         StringUtils.hasText(productId) ? Long.parseLong(productId) : null,

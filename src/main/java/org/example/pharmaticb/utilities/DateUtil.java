@@ -2,6 +2,7 @@ package org.example.pharmaticb.utilities;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 public class DateUtil {
     public static final ZoneId ZONE_ID_DHAKA = ZoneId.of("Asia/Dhaka");
@@ -56,8 +57,15 @@ public class DateUtil {
         return OTP_SMS_HOUR_MINUTE_FORMATTER.format(getZonedDateTime());
     }
 
-    public static long convertIsoToTimestamp(String isoString) {
+    public static long convertIsoToTimestamp(String isoString, boolean isEndDate) {
         ZonedDateTime zdt = ZonedDateTime.parse(isoString, DB_TIME_STAMP_FORMATTER);
-        return zdt.toInstant().toEpochMilli();
+        ZonedDateTime adjustedZdt = zdt.withZoneSameInstant(ZONE_ID_DHAKA)
+                .truncatedTo(ChronoUnit.DAYS);
+
+        if (isEndDate) {
+            adjustedZdt = adjustedZdt.plusDays(1);
+        }
+
+        return adjustedZdt.toInstant().toEpochMilli();
     }
 }
