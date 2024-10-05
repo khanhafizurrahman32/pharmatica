@@ -340,7 +340,7 @@ public class ProductServiceImpl implements ProductService {
                 .price(Double.parseDouble(request.getPrice()))
                 .imageUrl(request.getImageUrl())
                 .categoryId(Long.parseLong(request.getCategoryId()))
-                .discount(Double.parseDouble(request.getDiscount()))
+                .discount(getDiscount(request.getPrice(), request.getDiscount()))
                 .brandId(Long.parseLong(request.getBrandId()))
                 .expires(request.getExpires())
                 .countryId(Long.parseLong(request.getCountryId()))

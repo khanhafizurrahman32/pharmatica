@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Service
@@ -16,7 +17,7 @@ public class GmailServiceImpl implements EmailService {
     private String senderEmail;
 
     @Override
-    public String sendEmail(String recipientEmail, String subject, String body) {
+    public Mono<Void> sendEmail(String recipientEmail, String subject, String body) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -28,6 +29,6 @@ public class GmailServiceImpl implements EmailService {
             throw new RuntimeException(e);
         }
         mailSender.send(message);
-        return "Email sent successfully!";
+        return Mono.empty();
     }
 }

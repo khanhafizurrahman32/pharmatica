@@ -39,7 +39,7 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
             "            FROM\n" +
             "                date_range dr\n" +
             "            LEFT JOIN\n" +
-            "                pharmatic_prod.orders o ON DATE(o.created_at) = dr.date\n" +
+            "                orders o ON DATE(o.created_at) = dr.date\n" +
             "                AND o.created_at >= :startDate\n" +
             "                AND o.created_at < :endDate\n" +
             "            GROUP BY\n" +
@@ -80,7 +80,7 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
         "        )\n" +
         "    ) AS product_details\n" +
         "FROM\n" +
-        "    pharmatic_prod.orders o\n" +
+        "    orders o\n" +
         "CROSS JOIN LATERAL\n" +
         "   jsonb_array_elements(CASE WHEN o.items IS NULL THEN '[]'::jsonb\n" +
         "       WHEN jsonb_typeof(o.items::jsonb) != 'array' THEN jsonb_build_array(o.items::jsonb)\n" +
@@ -88,11 +88,11 @@ public interface OrderRepository extends R2dbcRepository<Order, Long> {
         "       END\n" +
         ") AS items(item)\n" +
         "JOIN\n" +
-        "    pharmatic_prod.users u ON o.user_id = u.id\n" +
+        "    users u ON o.user_id = u.id\n" +
         "JOIN\n" +
-        "    pharmatic_prod.delivery_type d ON o.delivery_options_id = d.id\n" +
+        "    delivery_type d ON o.delivery_options_id = d.id\n" +
         "LEFT JOIN\n" +
-        "    pharmatic_prod.product p ON (items.item->>'productId')::integer = p.id\n" +
+        "    product p ON (items.item->>'productId')::integer = p.id\n" +
         "WHERE \n" +
         "    (:userId IS NULL OR u.id = :userId)\n" +
         "    AND (:productId IS NULL OR (items.item->>'productId')::integer = :productId)\n" +

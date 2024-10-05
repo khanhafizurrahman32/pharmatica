@@ -101,7 +101,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserResponse> getUserById(Long id) {
-        log.info("inside getUserById");
         return userRepository.findById(id)
                 .map(this::convertDbToDto)
                 .doOnError(error -> log.error("getUSerByID:", error));

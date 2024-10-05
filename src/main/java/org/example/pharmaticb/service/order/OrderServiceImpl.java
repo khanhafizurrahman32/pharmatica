@@ -39,6 +39,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -79,13 +80,11 @@ public class OrderServiceImpl implements OrderService {
                         return Mono.error(new InternalException(HttpStatus.BAD_REQUEST, "User is deactivated", ServiceError.DEACTIVATED_USER));
                     }
                     return orderRepository.save(orderObj)
-                            .flatMap(order -> {
-                                return getProducts(order)
-                                        .map(product -> {
-                                            emailService.sendEmail("pharmatic24@gmail.com", "New order", "A new order has been placed");
-                                            return convertDbToDto(order, product, user);
-                                        });
-                            });
+                            .flatMap(order -> getProducts(order)
+                                    .map(product -> {
+                                        Schedulers.boundedElastic().schedule(() -> emailService.sendEmail("pharmatic24@gmail.com", "New order", "A new order has been placed").subscribe());
+                                        return convertDbToDto(order, product, user);
+                                    }));
                 });
     }
 
