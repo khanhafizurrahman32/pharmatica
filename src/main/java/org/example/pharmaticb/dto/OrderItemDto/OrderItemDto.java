@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -14,8 +15,8 @@ import java.io.Serializable;
 public class OrderItemDto implements Serializable {
     private String productId;
     private String productName;
-    private double unitPrice;
-    private double quantity;
-    private double totalPrice;
+    private BigDecimal unitPrice;
+    private BigDecimal quantity;
+    private BigDecimal totalPrice;
     private String remarks;
 }

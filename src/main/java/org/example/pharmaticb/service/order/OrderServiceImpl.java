@@ -42,6 +42,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -190,25 +191,25 @@ public class OrderServiceImpl implements OrderService {
     private List<OrderItemDto> getOrderItems(List<ProductResponse> product, Order order) {
         return product.stream()
                 .map(productResponse -> {
-                    var unitPrice = productResponse.getPrice() - productResponse.getDiscount();
+                    var unitPrice = BigDecimal.valueOf(productResponse.getPrice() - productResponse.getDiscount()).setScale(2, RoundingMode.HALF_UP);
                     var quantity = getQuantity(getItems(order), productResponse.getProductId());
                     return OrderItemDto.builder()
                             .productId(productResponse.getProductId())
                             .productName(productResponse.getProductName())
                             .unitPrice(unitPrice)
                             .quantity(quantity)
-                            .totalPrice(unitPrice * quantity)
+                            .totalPrice(unitPrice.multiply(quantity))
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
-    private double getQuantity(List<Item> items, String productId) {
+    private BigDecimal getQuantity(List<Item> items, String productId) {
         return items.stream()
                 .filter(item -> productId.equals(String.valueOf(item.productId())))
                 .findFirst()
-                .map(item -> (double) item.quantity())
-                .orElse(0.0);
+                .map(item -> BigDecimal.valueOf(item.quantity()))
+                .orElse(BigDecimal.valueOf(0.0));
     }
 
     private UserDto getUserDetails(UserResponse user) {
@@ -395,7 +396,7 @@ public class OrderServiceImpl implements OrderService {
 
     private BigDecimal getTotalPrice(List<OrderItemDto> orderItems) {
         return orderItems.stream()
-                .map(item -> new BigDecimal(item.getTotalPrice()))
+                .map(OrderItemDto::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -499,15 +500,15 @@ public class OrderServiceImpl implements OrderService {
             return orderItems
                     .stream()
                     .map(productInfos -> {
-                        var unitPrice = productInfos.getPrice() - productInfos.getDiscount();
-                        var quantity = productInfos.getQuantity();
+                        var unitPrice = BigDecimal.valueOf(productInfos.getPrice() - productInfos.getDiscount()).setScale(2, RoundingMode.HALF_UP);
+                        var quantity = BigDecimal.valueOf(productInfos.getQuantity());
 
                         return OrderItemDto.builder()
                                 .productId(productInfos.getProductId())
                                 .productName(productInfos.getProductName())
                                 .unitPrice(unitPrice)
                                 .quantity(quantity)
-                                .totalPrice(unitPrice * quantity)
+                                .totalPrice(unitPrice.multiply(quantity))
                                 .build();
                     })
                     .collect(Collectors.toList());
