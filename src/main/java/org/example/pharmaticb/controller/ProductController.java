@@ -36,6 +36,11 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
+    @GetMapping("/products/{id}/similar")
+    public Flux<ProductResponse> getSimilarProductById(@Valid @PathVariable long id) {
+        return productService.getSimilarProductById(id);
+    }
+
     @GetMapping("/products/name/{productName}")
     public Flux<ProductResponse> getProductsByProductName(@Valid @PathVariable String productName) {
         return productService.getProductsByProductName(productName);

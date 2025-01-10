@@ -31,4 +31,6 @@ public interface ProductService {
     Mono<BulkProductCreateResponse> createBulkProduct(@Valid BulkProductCreateRequest request);
 
     Mono<PagedResponse<ProductResponse>> getPageProducts(int page, int size, String sortBy, String sortDirection);
+
+    Flux<ProductResponse> getSimilarProductById(long id);
 }

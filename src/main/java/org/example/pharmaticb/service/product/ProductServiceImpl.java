@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
     @Loggable
     public Mono<ProductResponse> createProduct(ProductRequest request) {
         return productRepository.save(convertDtoToDb(request, Product.builder().build()))
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null, Integer.MAX_VALUE, 0L))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), new Long[0], null, new String[0], null, null, Integer.MAX_VALUE, 0L))
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -67,14 +68,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Loggable
     public Flux<ProductResponse> getAllProducts() {
-        return productRepository.findAllProductDetails(null, null, null, null, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(null, new Long[0],null, new String[0], null, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
     @Loggable
     public Mono<ProductResponse> getProductById(long id) {
-        return productRepository.findAllProductDetails(id, null, null, null, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(id, new Long[0], null, new String[0], null, null, Integer.MAX_VALUE, 0L)
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -87,7 +88,7 @@ public class ProductServiceImpl implements ProductService {
                     var productUpdated = convertDtoToDb(request, product);
                     return productRepository.save(productUpdated);
                 })
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), null, null, null, Integer.MAX_VALUE, 0L))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), new Long[0],null, new String[0], null, null, Integer.MAX_VALUE, 0L))
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -101,20 +102,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Loggable
     public Flux<ProductResponse> getProductsByCategoryId(long categoryId) {
-        return productRepository.findAllProductDetails(null, null, categoryId, null, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(null, new Long[0], null, new String[0], categoryId, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
     @Loggable
     public Flux<ProductResponse> getProductsByBrandId(long brandId) {
-        return productRepository.findAllProductDetails(null, null, null, brandId, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(null, new Long[0],null, new String[0], null, brandId, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
     @Override
     public Flux<ProductResponse> getProductsByProductName(String productName) {
-        return productRepository.findAllProductDetails(null, productName, null, null, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(null, new Long[0], productName, new String[0], null, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
@@ -168,7 +169,7 @@ public class ProductServiceImpl implements ProductService {
         long offset = (long) page * size;
 
         Mono<Long> countMono = productRepository.countProducts(null, null, null, null);
-        Flux<ProductWithDetails> productsFlux = productRepository.findAllProductDetails(null, null, null, null, size, offset);
+        Flux<ProductWithDetails> productsFlux = productRepository.findAllProductDetails(null, new Long[0],null, new String[0], null, null, size, offset);
 
         return Mono.zip(countMono, productsFlux.collectList())
                 .map(tuple -> {
@@ -182,6 +183,21 @@ public class ProductServiceImpl implements ProductService {
                             .size(size)
                             .build();
                 });
+    }
+
+    @Override
+    public Flux<ProductResponse> getSimilarProductById(long id) {
+        return productRepository.findById(id)
+                .map(product ->getSimilarProducts(product.getSimilarProducts()))
+                .flatMapMany(products -> productRepository.findAllProductDetails(null, new Long[0], null, products, null, null, Integer.MAX_VALUE, 0L))
+                .map(this::convertDbToDto);
+    }
+
+    private String[] getSimilarProducts(String similarProducts) {
+        if (ObjectUtils.isEmpty(similarProducts)) {
+            return new String[0];
+        }
+        return similarProducts.split(",");
     }
 
     private Mono<Product> insertProductIntoDatabase(Product product) {
@@ -344,6 +360,7 @@ public class ProductServiceImpl implements ProductService {
                 .brandId(Long.parseLong(request.getBrandId()))
                 .expires(request.getExpires())
                 .countryId(Long.parseLong(request.getCountryId()))
+                .similarProducts(request.getSimilarProducts())
                 .description(request.getDescription())
                 .howToUse(request.getHowToUse())
                 .ingredients(request.getIngredients())

@@ -8,6 +8,8 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface ProductRepository extends R2dbcRepository<Product, Long> {
     Flux<Product> findAllBy(Pageable pageable);
 
@@ -27,11 +29,19 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
             "LEFT JOIN brand b ON p.brand_id = b.id " +
             "LEFT JOIN country co ON p.country_id = co.id " +
             "WHERE (:id IS NULL OR p.id = :id) " +
-            "AND (:productName IS NULL OR p.product_name LIKE CONCAT('%', :productName, '%')) " +
+            "AND (CASE WHEN array_length(:ids, 1) IS NULL THEN true ELSE p.id = ANY(:ids) END) " +
+            "AND (" +
+            "(:productName IS NULL OR LOWER(p.product_name) LIKE LOWER(CONCAT('%', :productName, '%'))) " +
+            "OR " +
+            "(CASE WHEN array_length(:productNames, 1) IS NULL THEN false " +
+            "ELSE EXISTS (SELECT 1 FROM unnest(:productNames) name " +
+            "WHERE LOWER(p.product_name) LIKE LOWER(CONCAT('%', name, '%'))) END)" +
+            ") " +
             "AND (:categoryId IS NULL OR p.category_id = :categoryId) " +
-            "AND (:brandId IS NULL OR p.brand_id = :brandId)" +
+            "AND (:brandId IS NULL OR p.brand_id = :brandId) " +
             "LIMIT :limit OFFSET :offset")
-    Flux<ProductWithDetails> findAllProductDetails(Long id, String productName, Long categoryId, Long brandId, int limit, Long offset);
+    Flux<ProductWithDetails> findAllProductDetails(Long id, Long[] ids, String productName, String[] productNames,
+                                                   Long categoryId, Long brandId, int limit, Long offset);
 
     @Query("SELECT COUNT(*) " +
             "FROM product p " +

@@ -28,6 +28,7 @@ public class ProductRequest implements Serializable {
     private String expires;
     @NotBlank(message = ServiceError.INVALID_REQUEST)
     private String countryId;
+    private String similarProducts;
     private String description;
     private String howToUse;
     private String ingredients;

@@ -27,6 +27,7 @@ public class Product implements Serializable {
     private String expires;
 //    FK
     private long countryId;
+    private String similarProducts;
     private String description;
     private String howToUse;
     private String ingredients;
