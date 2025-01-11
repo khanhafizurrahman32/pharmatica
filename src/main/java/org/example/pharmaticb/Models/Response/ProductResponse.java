@@ -26,6 +26,7 @@ public class ProductResponse implements Serializable {
     private String expires;
     private Country country;
     private String description;
+    private String similarProducts;
     private String howToUse;
     private String ingredients;
     private double stock;

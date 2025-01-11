@@ -18,6 +18,7 @@ public class ProductWithDetails {
     private double discount;
     private String expires;
     private String description;
+    private String similarProducts;
     private String howToUse;
     private String ingredients;
     private double stock;

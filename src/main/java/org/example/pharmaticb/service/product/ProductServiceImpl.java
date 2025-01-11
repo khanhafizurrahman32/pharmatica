@@ -1,5 +1,6 @@
 package org.example.pharmaticb.service.product;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.pharmaticb.Models.DB.Brand;
@@ -39,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Loggable
     public Flux<ProductResponse> getAllProducts() {
-        return productRepository.findAllProductDetails(null, new Long[0],null, new String[0], null, null, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(null, new Long[0], null, new String[0], null, null, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
@@ -88,7 +88,7 @@ public class ProductServiceImpl implements ProductService {
                     var productUpdated = convertDtoToDb(request, product);
                     return productRepository.save(productUpdated);
                 })
-                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), new Long[0],null, new String[0], null, null, Integer.MAX_VALUE, 0L))
+                .flatMapMany(product -> productRepository.findAllProductDetails(product.getId(), new Long[0], null, new String[0], null, null, Integer.MAX_VALUE, 0L))
                 .next()
                 .map(this::convertDbToDto);
     }
@@ -109,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Loggable
     public Flux<ProductResponse> getProductsByBrandId(long brandId) {
-        return productRepository.findAllProductDetails(null, new Long[0],null, new String[0], null, brandId, Integer.MAX_VALUE, 0L)
+        return productRepository.findAllProductDetails(null, new Long[0], null, new String[0], null, brandId, Integer.MAX_VALUE, 0L)
                 .map(this::convertDbToDto);
     }
 
@@ -169,7 +169,7 @@ public class ProductServiceImpl implements ProductService {
         long offset = (long) page * size;
 
         Mono<Long> countMono = productRepository.countProducts(null, null, null, null);
-        Flux<ProductWithDetails> productsFlux = productRepository.findAllProductDetails(null, new Long[0],null, new String[0], null, null, size, offset);
+        Flux<ProductWithDetails> productsFlux = productRepository.findAllProductDetails(null, new Long[0], null, new String[0], null, null, size, offset);
 
         return Mono.zip(countMono, productsFlux.collectList())
                 .map(tuple -> {
@@ -185,11 +185,27 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
+    @PostConstruct
+    private void test() {
+        String[] haveSimiliars = getSimilarProducts("Napa");
+        productRepository.findAllProductDetails(null, new Long[0], null, haveSimiliars, null, null, Integer.MAX_VALUE, 0L)
+                .map(productWithDetails -> {
+                    System.out.println("Product name: " + productWithDetails.getProductName());
+                    return productWithDetails;
+                })
+                .subscribe();
+    }
+
     @Override
     public Flux<ProductResponse> getSimilarProductById(long id) {
         return productRepository.findById(id)
-                .map(product ->getSimilarProducts(product.getSimilarProducts()))
-                .flatMapMany(products -> productRepository.findAllProductDetails(null, new Long[0], null, products, null, null, Integer.MAX_VALUE, 0L))
+                .map(product -> getSimilarProducts(product.getSimilarProducts()))
+                .flatMapMany(products -> {
+                    if (products.length == 0) {
+                        return Flux.empty();
+                    }
+                    return productRepository.findAllProductDetails(null, new Long[0], null, products, null, null, Integer.MAX_VALUE, 0L);
+                })
                 .map(this::convertDbToDto);
     }
 
@@ -340,6 +356,7 @@ public class ProductServiceImpl implements ProductService {
                         .countryName(product.getCountryName())
                         .build())
                 .description(product.getDescription())
+                .similarProducts(product.getSimilarProducts())
                 .howToUse(product.getHowToUse())
                 .ingredients(product.getIngredients())
                 .stock(product.getStock())

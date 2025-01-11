@@ -30,13 +30,19 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
             "LEFT JOIN country co ON p.country_id = co.id " +
             "WHERE (:id IS NULL OR p.id = :id) " +
             "AND (CASE WHEN array_length(:ids, 1) IS NULL THEN true ELSE p.id = ANY(:ids) END) " +
-            "AND (" +
-            "(:productName IS NULL OR LOWER(p.product_name) LIKE LOWER(CONCAT('%', :productName, '%'))) " +
-            "OR " +
-            "(CASE WHEN array_length(:productNames, 1) IS NULL THEN false " +
-            "ELSE EXISTS (SELECT 1 FROM unnest(:productNames) name " +
-            "WHERE LOWER(p.product_name) LIKE LOWER(CONCAT('%', name, '%'))) END)" +
-            ") " +
+            "AND (\n" +
+            "        CASE\n" +
+            "            WHEN array_length(:productNames, 1) IS NOT NULL THEN \n" +
+            "                EXISTS (\n" +
+            "                    SELECT 1 \n" +
+            "                    FROM unnest(:productNames) name \n" +
+            "                    WHERE LOWER(p.product_name) LIKE LOWER(CONCAT('%', name, '%'))\n" +
+            "                )\n" +
+            "            WHEN :productName IS NOT NULL THEN \n" +
+            "                LOWER(p.product_name) LIKE LOWER(CONCAT('%', :productName, '%'))\n" +
+            "            ELSE true\n" +
+            "        END\n" +
+            "    )" +
             "AND (:categoryId IS NULL OR p.category_id = :categoryId) " +
             "AND (:brandId IS NULL OR p.brand_id = :brandId) " +
             "LIMIT :limit OFFSET :offset")
