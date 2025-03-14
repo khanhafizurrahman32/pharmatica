@@ -87,6 +87,6 @@ jobs:
               apt-get update && apt-get install -y maven
               mvn -N io.takari:maven:wrapper
             fi
-            docker compose down
-            docker compose up -d --build
+            docker-compose down
+            docker-compose up -d --build
           EOF
