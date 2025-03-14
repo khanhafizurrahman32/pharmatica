@@ -22,6 +22,7 @@ public class FileServiceImpl implements FileService {
     @Value("${do.spaces.bucket}")
     private String doSpacesBucket;
 
+
     private final DigitalOceanStorageService digitalOceanStorageService;
 
     @Override
@@ -54,7 +55,7 @@ public class FileServiceImpl implements FileService {
                 doSpacesBucket,
                 doSpacesCDNEndpoint
         );
-        
+
     }
 
     @Override
